@@ -1,0 +1,154 @@
+/* General Header Styles */
+.header {
+  font-family: "Arial", sans-serif;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 헤더에 그림자 효과 추가 */
+}
+
+/* Top Header Styles */
+.header-top {
+  background-color: #f8f8f8;
+  padding: 12px 20px;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Logo Styles */
+.header-logo {
+  font-size: 26px;
+  font-weight: bold;
+  color: #333;
+  text-decoration: none;
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
+}
+
+.header-logo:hover {
+  color: #000;
+}
+
+/* Primary Navigation Styles */
+.header-nav {
+  display: flex;
+  gap: 20px;
+}
+
+.header-nav-item {
+  font-size: 16px;
+  color: #555;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.header-nav-item:hover {
+  color: #00796b; /* 색상 변경 */
+  transform: scale(1.05);
+}
+
+/* Logout Button */
+.header-logout-button {
+  background-color: #ff4081; /* 핑크색 배경 */
+  color: #fff;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.header-logout-button:hover {
+  background-color: #e91e63;
+  transform: scale(1.05);
+}
+
+/* Bottom Header Styles */
+.header-bottom {
+  background-color: #333;
+  padding: 10px 20px;
+}
+
+.header-secondary-nav {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.header-secondary-item {
+  font-size: 14px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.header-secondary-item:hover {
+  color: #00796b;
+}
+
+/* 알림 박스 디자인 */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #f44336; /* 빨간색 배경 */
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 500;
+  z-index: 9999;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+  opacity: 0;
+  visibility: hidden;
+  animation: slideIn 0.5s ease-out forwards,
+    fadeOut 2.5s 2.5s ease-in-out forwards;
+}
+
+/* 애니메이션: 알림이 화면에 나타날 때 */
+@keyframes slideIn {
+  0% {
+    top: -50px;
+    opacity: 0;
+    visibility: visible;
+  }
+  100% {
+    top: 20px;
+    opacity: 1;
+  }
+}
+
+/* 애니메이션: 알림이 사라질 때 */
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+    top: -50px;
+  }
+}
+
+/* 알림이 화면 상단에 고정되도록 설정 */
+.toast-container.show {
+  visibility: visible;
+  opacity: 1;
+  animation: slideIn 0.5s ease-out forwards;
+}
+
+.toast-container.hide {
+  animation: fadeOut 2.5s ease-in-out forwards;
+}

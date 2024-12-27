@@ -1,0 +1,163 @@
+/* 전체 컨테이너 */
+.home-container {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  color: #333;
+}
+
+/* 헤더 섹션 */
+.home-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.home-title {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.home-subtitle {
+  font-size: 18px;
+  color: #555;
+}
+
+/* 메인 배너 */
+.main-banner {
+  position: relative;
+  margin-bottom: 40px;
+}
+
+.banner-image {
+  width: 100%;
+  height: auto;
+}
+
+.banner-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #fff;
+}
+
+.banner-text {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.banner-button {
+  background-color: #ff6347;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.banner-button:hover {
+  background-color: #ff2e1a;
+}
+
+/* 하단 배너 */
+.sub-banners {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.sub-banner {
+  flex: 1;
+  position: relative;
+}
+
+.sub-banner-image {
+  width: 100%;
+  height: auto;
+}
+
+.sub-banner-overlay {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  color: #fff;
+}
+
+.sub-banner-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.sub-banner-text {
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+.sub-banner-link {
+  color: #ff6347;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.sub-banner-link:hover {
+  text-decoration: underline;
+}
+
+/* 상품 섹션 */
+.products-section {
+  text-align: center;
+}
+
+.section-title {
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.loading,
+.error,
+.no-products {
+  font-size: 16px;
+  color: #555;
+}
+
+.products {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.product {
+  width: 200px;
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+}
+
+.product-image {
+  width: 100%;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.product-name {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.product-price {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.product-details {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.product-details:hover {
+  text-decoration: underline;
+}
