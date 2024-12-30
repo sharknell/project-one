@@ -1,30 +1,27 @@
+// src/components/Signup.js
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "./Signup.css"; // 스타일 파일
+import { handleSignup } from "../controllers/AuthController";
+import "../styles/Signup.css";
 
 function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSignup = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    axios
-      .post("http://localhost:5001/auth/signup", { email, password, username })
-      .then(() => {
-        alert("Signup successful!");
-        navigate("/login");
-      })
-      .catch((error) => alert("Signup failed"));
+    handleSignup(email, password, username, navigate, setError);
   };
 
   return (
     <div className="signup-container">
       <div className="signup-box">
         <h1>Signup</h1>
-        <form onSubmit={handleSignup}>
+        {error && <p className="error-message">{error}</p>}
+        <form onSubmit={handleSubmit}>
           <input
             type="text"
             placeholder="Username"

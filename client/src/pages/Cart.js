@@ -1,7 +1,15 @@
+// src/components/Cart.js
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
-import "./Cart.css";
+import {
+  loadCartItems,
+  handleRemoveItem,
+  handleQuantityChange,
+  handleCheckout,
+  calculateTotalAmount,
+} from "../controllers/CartController";
+import "../styles/Cart.css";
 
 function Cart() {
   const { isAuthenticated } = useAuth(); // 로그인 상태 확인
@@ -15,9 +23,7 @@ function Cart() {
       setTimeout(() => navigate("/login"), 1000); // alert 후 1초 뒤에 로그인 페이지로 리디렉션
       return;
     }
-    const savedCart = JSON.parse(localStorage.getItem("cartItems")) || [];
-    console.log(savedCart);
-
+    const savedCart = loadCartItems();
     // 중복된 상품의 quantity 합산
     const updatedCart = savedCart.reduce((acc, item) => {
       const existingItem = acc.find((cartItem) => cartItem.id === item.id);
@@ -32,31 +38,18 @@ function Cart() {
     setCartItems(updatedCart);
   }, [isAuthenticated, navigate]);
 
-  const handleRemoveItem = (productId) => {
-    const updatedCart = cartItems.filter((item) => item.id !== productId);
+  const handleRemove = (productId) => {
+    const updatedCart = handleRemoveItem(cartItems, productId);
     setCartItems(updatedCart);
-    localStorage.setItem("cartItems", JSON.stringify(updatedCart)); // 변경된 장바구니 저장
   };
 
-  const handleQuantityChange = (productId, newQuantity) => {
-    const updatedCart = cartItems.map((item) =>
-      item.id === productId ? { ...item, quantity: newQuantity } : item
-    );
+  const handleQuantityChangeHandler = (productId, newQuantity) => {
+    const updatedCart = handleQuantityChange(cartItems, productId, newQuantity);
     setCartItems(updatedCart);
-    localStorage.setItem("cartItems", JSON.stringify(updatedCart)); // 변경된 장바구니 저장
   };
 
-  const handleCheckout = () => {
-    if (!isAuthenticated) {
-      alert("로그인 후 결제 가능합니다.");
-      setTimeout(() => navigate("/login"), 1000); // alert 후 1초 뒤에 로그인 페이지로 리디렉션
-      return;
-    }
-
-    alert("결제가 완료되었습니다.");
-    setCartItems([]); // 장바구니 비우기
-    localStorage.removeItem("cartItems"); // 로컬 스토리지에서 장바구니 데이터 삭제
-    navigate("/"); // 홈 페이지로 리디렉션
+  const handleCheckoutHandler = () => {
+    handleCheckout(isAuthenticated, navigate, setCartItems);
   };
 
   if (cartItems.length === 0) {
@@ -86,7 +79,7 @@ function Cart() {
                 <div className="cart-item-quantity">
                   <button
                     onClick={() =>
-                      handleQuantityChange(
+                      handleQuantityChangeHandler(
                         item.id,
                         Math.max(1, item.quantity - 1)
                       )
@@ -97,7 +90,7 @@ function Cart() {
                   <span>{item.quantity}</span>
                   <button
                     onClick={() =>
-                      handleQuantityChange(item.id, item.quantity + 1)
+                      handleQuantityChangeHandler(item.id, item.quantity + 1)
                     }
                   >
                     +
@@ -106,7 +99,7 @@ function Cart() {
               </div>
             </div>
             <button
-              onClick={() => handleRemoveItem(item.id)}
+              onClick={() => handleRemove(item.id)}
               className="remove-item-button"
             >
               삭제
@@ -115,13 +108,8 @@ function Cart() {
         ))}
       </div>
       <div className="cart-summary">
-        <p>
-          총 금액: ₩{" "}
-          {cartItems
-            .reduce((total, item) => total + item.price * item.quantity, 0)
-            .toLocaleString()}
-        </p>
-        <button onClick={handleCheckout} className="checkout-button">
+        <p>총 금액: ₩ {calculateTotalAmount(cartItems).toLocaleString()}</p>
+        <button onClick={handleCheckoutHandler} className="checkout-button">
           결제하기
         </button>
       </div>

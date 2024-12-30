@@ -1,38 +1,20 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../AuthContext";
-import "./ProductDetail.css";
+import React from "react";
+import { useParams } from "react-router-dom";
+import { useProductController } from "../controllers/ProductController";
+import "../styles/ProductDetail.css";
 
 function ProductDetail() {
   const { id } = useParams();
-  const [product, setProduct] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [mainImage, setMainImage] = useState(null);
-  const { isAuthenticated } = useAuth(); // 로그인 상태 확인
-  const navigate = useNavigate(); // 페이지 이동 함수
-  const location = useLocation(); // 현재 위치 정보
-  const [openDropdown, setOpenDropdown] = useState(null); // 열린 드롭다운을 추적하는 상태
-
-  useEffect(() => {
-    setIsLoading(true);
-    setError(null);
-
-    axios
-      .get(`http://localhost:5001/shop/product/${id}`)
-      .then((response) => {
-        console.log(response.data);
-        setProduct(response.data);
-        setMainImage(response.data.images && response.data.images[0]);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("제품 정보 조회 오류:", error);
-        setError("제품 정보를 불러오는 데 오류가 발생했습니다.");
-        setIsLoading(false);
-      });
-  }, [id]);
+  const {
+    product,
+    isLoading,
+    error,
+    mainImage,
+    openDropdown,
+    handleThumbnailClick,
+    handleButtonClick,
+    toggleDropdown,
+  } = useProductController(id);
 
   if (isLoading) {
     return <div>로딩 중...</div>;
@@ -45,40 +27,6 @@ function ProductDetail() {
   if (!product) {
     return <div>해당 제품을 찾을 수 없습니다.</div>;
   }
-
-  const handleThumbnailClick = (image) => {
-    setMainImage(image);
-  };
-
-  const handleButtonClick = (action) => {
-    if (!isAuthenticated) {
-      alert("로그인 후 이용 가능합니다.");
-      navigate("/login", { state: { from: location } }); // 로그인 페이지로 리디렉션하면서 현재 페이지 정보를 전달
-      return;
-    }
-    if (action === "buy") {
-      // 장바구니에 제품을 추가하고, Cart.js로 이동
-      const cartItem = {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.images ? product.images[0] : "",
-        quantity: 1,
-        size: product.size || "없음", // size 정보 추가
-      };
-      // 로컬 스토리지에 장바구니 추가
-      const savedCart = JSON.parse(localStorage.getItem("cartItems")) || [];
-      savedCart.push(cartItem);
-      localStorage.setItem("cartItems", JSON.stringify(savedCart));
-      navigate("/cart"); // Cart.js로 이동
-    } else if (action === "wishlist") {
-      console.log("찜하기 클릭");
-    }
-  };
-
-  const toggleDropdown = (index) => {
-    setOpenDropdown(openDropdown === index ? null : index); // 같은 드롭다운을 다시 클릭하면 닫히도록
-  };
 
   return (
     <div className="product-detail-container">

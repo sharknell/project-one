@@ -1,32 +1,13 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React from "react";
 import { Link } from "react-router-dom";
-import "./Home.css";
+import { useProducts } from "../controllers/ProductController";
+import "../styles/Home.css";
 import bpicture1 from "../banner/shoppingmallbanner.jpg";
 import bpicture2 from "../banner/shoppingmallbannerSub.jpg";
 import bpicture3 from "../banner/shoppingmallbannerSub2.jpg";
 
 function Home() {
-  const [products, setProducts] = useState([]); // 기본값을 빈 배열로 설정
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:5001/shop") // 서버에서 전체 상품 조회
-      .then((response) => {
-        if (response.data && Array.isArray(response.data.data)) {
-          setProducts(response.data.data); // 서버 응답에서 data 속성 안의 상품 목록 사용
-        } else {
-          setProducts([]); // 데이터 형식이 이상한 경우 빈 배열로 설정
-        }
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        setError("상품 목록을 가져오는 데 실패했습니다.");
-        setIsLoading(false);
-      });
-  }, []);
+  const { products, isLoading, error } = useProducts();
 
   return (
     <div className="home-container">

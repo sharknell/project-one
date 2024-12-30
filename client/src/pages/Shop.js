@@ -1,9 +1,9 @@
+// src/components/Shop.js
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useParams, Link } from "react-router-dom";
 import { CircularProgress, Typography } from "@mui/material";
-import "./Shop.css";
-
+import { loadProducts } from "../controllers/ProductController";
+import "../styles/Shop.css";
 function Shop() {
   const { category } = useParams();
   const [products, setProducts] = useState([]);
@@ -11,39 +11,7 @@ function Shop() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!category) {
-      setError("카테고리 정보가 없습니다.");
-      setIsLoading(false);
-      return;
-    }
-
-    const fetchProducts = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await axios.get(
-          `http://localhost:5001/shop/category/${category}`
-        );
-        console.log("서버 응답:", response.data);
-
-        if (
-          response.data.message === "상품 목록 조회 성공" &&
-          Array.isArray(response.data.data)
-        ) {
-          setProducts(response.data.data);
-        } else {
-          setError("서버에서 잘못된 데이터 형식을 반환했습니다.");
-        }
-      } catch (error) {
-        console.error("상품 목록 조회 오류:", error);
-        setError("상품 목록을 불러오는 데 오류가 발생했습니다.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchProducts();
+    loadProducts(category, setProducts, setError, setIsLoading);
   }, [category]);
 
   return (
