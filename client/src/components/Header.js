@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
-import "./Header.css";
+import "../styles/Header.css";
 
 function Header() {
   const { isAuthenticated, logout } = useAuth();
@@ -36,12 +36,17 @@ function Header() {
               Cart
             </Link>
             {isAuthenticated ? (
-              <button
-                onClick={logout}
-                className="header-nav-item header-logout-button"
-              >
-                Logout
-              </button>
+              <>
+                <Link to="/mypage" className="header-nav-item">
+                  Mypage
+                </Link>
+                <button
+                  onClick={logout}
+                  className="header-nav-item header-logout-button"
+                >
+                  Logout
+                </button>
+              </>
             ) : (
               <>
                 <Link to="/login" className="header-nav-item">
@@ -70,13 +75,6 @@ function Header() {
           </nav>
         </div>
       </div>
-
-      {/* 알림 */}
-      {showToast && (
-        <div className="toast-container show">
-          장바구니를 확인하려면 로그인을 해야 합니다.
-        </div>
-      )}
     </header>
   );
 }
