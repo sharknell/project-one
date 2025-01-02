@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+require("dotenv").config();
+console.log(process.env); // 환경 변수들이 제대로 로드되는지 확인
 
 // 미들웨어 설정
 app.use(cors());
@@ -12,9 +14,11 @@ const { dbPromise } = require("./config/db"); // db.js 임포트
 // 라우터 가져오기
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/products");
+const profileRoutes = require("./routes/profile");
 
 // 라우터 설정
 app.use("/auth", authRoutes);
+app.use("/profile", profileRoutes);
 app.use("/shop", productRoutes);
 
 // 서버 시작 전에 DB 연결 확인

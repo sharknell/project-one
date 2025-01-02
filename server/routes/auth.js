@@ -1,11 +1,30 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const axios = require("axios");
 const { dbPromise } = require("../config/db");
 
 const router = express.Router();
 
-// 로그인 라우트 추가
+// JWT 비밀 키 (환경 변수로 관리)
+const JWT_SECRET = "your-jwt-secret";
+
+// JWT 검증 함수
+const verifyToken = (token) => {
+  return jwt.verify(token, JWT_SECRET);
+};
+
+// JWT 토큰 생성 함수
+const generateToken = (user) => {
+  const payload = {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+  };
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" }); // 1시간 유효한 토큰
+};
+
+// 로그인 라우트
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -33,8 +52,8 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials." });
     }
 
-    // 로그인 성공 시 토큰 생성 (예: JWT 사용)
-    const token = "some-generated-token"; // JWT 생성 로직 필요
+    // 로그인 성공 시 토큰 생성
+    const token = generateToken(user[0]);
 
     res.status(200).json({ message: "Login successful!", token });
   } catch (err) {

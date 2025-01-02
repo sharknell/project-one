@@ -4,18 +4,23 @@ import { useAuth } from "../AuthContext";
 import "../styles/Header.css";
 
 function Header() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, loading } = useAuth();
   const navigate = useNavigate();
   const [showToast, setShowToast] = useState(false);
 
   const handleCartClick = (e) => {
     if (!isAuthenticated) {
-      e.preventDefault(); // 기본 Link 동작을 막고
-      setShowToast(true); // 알림을 표시
-      setTimeout(() => setShowToast(false), 3000); // 3초 후 알림 숨김
-      navigate("/login"); // 로그인 페이지로 이동
+      e.preventDefault();
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      navigate("/login");
     }
   };
+
+  if (loading) {
+    // 로딩 중일 때 빈 상태로 표시하거나 로딩 스피너를 추가할 수 있습니다.
+    return null;
+  }
 
   return (
     <header className="header">
@@ -37,7 +42,7 @@ function Header() {
             </Link>
             {isAuthenticated ? (
               <>
-                <Link to="/mypage" className="header-nav-item">
+                <Link to="/profile" className="header-nav-item">
                   Mypage
                 </Link>
                 <button
@@ -75,6 +80,11 @@ function Header() {
           </nav>
         </div>
       </div>
+      {showToast && (
+        <div className="toast">
+          로그인이 필요합니다. 로그인 페이지로 이동합니다.
+        </div>
+      )}
     </header>
   );
 }

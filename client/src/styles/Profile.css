@@ -1,0 +1,140 @@
+/* 프로필 페이지 컨테이너 */
+.profile-container {
+  display: flex;
+  height: 100vh;
+  background-color: #f4f6f9;
+}
+
+/* 레이아웃 설정 */
+.profile-layout {
+  display: flex;
+  width: 100%;
+}
+
+/* 프로필 콘텐츠 영역 */
+.profile-content {
+  flex: 1;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  margin-left: 20px;
+  height: auto;
+  overflow-y: auto;
+}
+
+/* 탭 내용 */
+.tab-content {
+  margin-top: 20px;
+}
+
+/* 로딩 및 에러 메시지 */
+.loading,
+.error {
+  font-size: 18px;
+  color: #e74c3c;
+  text-align: center;
+  margin-top: 50px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* 기본 정보 헤더 */
+.tab-content h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+/* 배송지 목록 스타일 */
+.addresses-section ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.addresses-section li {
+  padding: 10px;
+  margin-bottom: 15px;
+  background-color: #ecf0f1;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.addresses-section li button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.addresses-section li button:hover {
+  background-color: #2980b9;
+}
+
+.addresses-section h2 {
+  font-size: 24px;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.addresses-section button {
+  margin-bottom: 20px;
+  background-color: #2ecc71;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.addresses-section button:hover {
+  background-color: #27ae60;
+}
+
+/* 배송지 폼 스타일 */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+form div {
+  display: flex;
+  flex-direction: column;
+}
+
+form input {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+}
+
+form input:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+form button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-top: 20px;
+}
+
+form button:hover {
+  background-color: #27ae60;
+}

@@ -2,12 +2,11 @@ import axios from "axios";
 
 // 사용자 프로필 가져오기
 export const getUserProfile = async (userId) => {
-  try {
-    const response = await axios.get(`http://localhost:5001/user/${userId}`);
-    return response.data;
-  } catch (error) {
-    throw new Error("사용자 정보를 가져오는 데 실패했습니다.");
+  const response = await fetch(`/api/users/${userId}`);
+  if (!response.ok) {
+    throw new Error("User profile fetch failed");
   }
+  return response.json();
 };
 
 // 사용자 프로필 업데이트

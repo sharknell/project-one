@@ -9,8 +9,8 @@ import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import QnA from "./pages/QnA";
+import Profile from "./pages/Profile";
 import { AuthProvider } from "./AuthContext";
-import Mypage from "./pages/MyPage";
 
 function App() {
   return (
@@ -22,10 +22,10 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/shop/:category" element={<Shop />} />
             <Route path="/shop/product/:id" element={<ProductDetail />} />
-            <Route path="/mypage" element={<Mypage />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/qna" element={<QnA />} />
           </Routes>
         </main>

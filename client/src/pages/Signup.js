@@ -1,4 +1,3 @@
-// src/components/Signup.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { handleSignup } from "../controllers/AuthController";
@@ -9,10 +8,15 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
+  const [isAgreed, setIsAgreed] = useState(false); // 개인정보 보호 동의 상태 추가
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!isAgreed) {
+      setError("개인정보 보호 동의가 필요합니다.");
+      return;
+    }
     handleSignup(email, password, username, navigate, setError);
   };
 
@@ -43,7 +47,19 @@ function Signup() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button type="submit">Signup</button>
+          <div className="agreement-section">
+            <label>
+              <input
+                type="checkbox"
+                checked={isAgreed}
+                onChange={() => setIsAgreed(!isAgreed)}
+              />
+              개인정보 보호 정책에 동의합니다.
+            </label>
+          </div>
+          <button type="submit" disabled={!isAgreed}>
+            Signup
+          </button>
         </form>
       </div>
     </div>

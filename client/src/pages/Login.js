@@ -1,17 +1,24 @@
 import React, { useState } from "react";
-import KakaoLogin from "react-kakao-login";
-import { useLoginController } from "../controllers/AuthController";
+import { useNavigate } from "react-router-dom";
+import { loginWithCredentials } from "../models/AuthModel";
 import "../styles/Login.css";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { handleLogin, handleKakaoLogin, handleKakaoFailure } =
-    useLoginController();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    handleLogin(email, password);
+    try {
+      const data = await loginWithCredentials(email, password);
+      alert("Login successful!");
+      localStorage.setItem("token", data.token); // 토큰 저장
+      navigate("/"); // 마이페이지로 이동
+    } catch (error) {
+      console.error("Login Error:", error);
+      alert("Invalid credentials");
+    }
   };
 
   return (
@@ -35,27 +42,6 @@ function Login() {
           />
           <button type="submit">Login</button>
         </form>
-        <div className="kakao-login">
-          <KakaoLogin
-            token="7626e58296e58b69c6e7c27170cf415f" // 카카오 REST API 키
-            onSuccess={handleKakaoLogin}
-            onFail={handleKakaoFailure}
-            scope="profile_nickname,account_email"
-            redirectUri="http://localhost:3000/oauth" // Redirect URI 등록
-            style={{
-              padding: "10px 20px",
-              backgroundColor: "#FEE500",
-              color: "#000",
-              border: "none",
-              borderRadius: "5px",
-              fontWeight: "bold",
-              cursor: "pointer",
-              marginTop: "20px",
-            }}
-          >
-            카카오톡 간편 로그인
-          </KakaoLogin>
-        </div>
       </div>
     </div>
   );
