@@ -26,7 +26,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
           onClick={() => setActiveTab("payment")}
           className={activeTab === "payment" ? "active" : ""}
         >
-          결제 관리
+          카드 간편 결제 관리
         </li>
       </ul>
     </div>

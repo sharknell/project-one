@@ -4,6 +4,7 @@ import Sidebar from "../components/SideBar";
 import BasicInfo from "../components/BasicInfo";
 import AddressList from "../components/AddressList";
 import AddressForm from "../components/AddressForm";
+import PaymentForm from "../components/PaymentForm"; // 결제 카드 등록 폼 추가
 import "../styles/Profile.css";
 
 const Profile = () => {
@@ -15,6 +16,10 @@ const Profile = () => {
   const [editData, setEditData] = useState({});
   const [addresses, setAddresses] = useState([]);
   const [addressToEdit, setAddressToEdit] = useState(null);
+  const [cards, setCards] = useState([
+    { cardNumber: "1234 5678 9876 5432", expiryDate: "12/25" },
+    { cardNumber: "2345 6789 8765 4321", expiryDate: "11/24" },
+  ]); // 하드코딩된 카드 정보
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -41,6 +46,15 @@ const Profile = () => {
           }
         );
         setAddresses(addressResponse.data.addresses);
+
+        // 카드 정보 가져오기
+        const cardResponse = await axios.get(
+          "http://localhost:5001/profile/cards", // 카드 정보 API
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setCards(cardResponse.data.cards);
       } catch (err) {
         setError("프로필 데이터를 가져오는 중 오류가 발생했습니다.");
         console.error(err);
@@ -52,93 +66,22 @@ const Profile = () => {
     fetchProfileData();
   }, []);
 
-  const handleEditToggle = () => {
-    setIsEditing((prev) => !prev);
-    setEditData(user);
-  };
-
-  const handleSave = async () => {
+  const handleCardSave = async (card) => {
     const token = localStorage.getItem("token");
     try {
-      await axios.put("http://localhost:5001/profile/update", editData, {
+      // 새 카드 저장
+      await axios.post("http://localhost:5001/profile/cards", card, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUser(editData);
-      setIsEditing(false);
+
+      // 카드 목록 업데이트
+      const response = await axios.get("http://localhost:5001/profile/cards", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCards(response.data.cards);
     } catch (err) {
-      setError("프로필 정보를 업데이트하는 중 오류가 발생했습니다.");
+      setError("카드를 저장하는 중 오류가 발생했습니다.");
     }
-  };
-
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setEditData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleAddressSave = async (address) => {
-    const token = localStorage.getItem("token");
-    try {
-      if (addressToEdit && addressToEdit.id) {
-        await axios.put(
-          `http://localhost:5001/profile/addresses/${addressToEdit.id}`,
-          address,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-      } else {
-        await axios.post("http://localhost:5001/profile/addresses", address, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      }
-
-      const response = await axios.get(
-        "http://localhost:5001/profile/addresses",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setAddresses(response.data.addresses);
-      setAddressToEdit(null); // 폼 제출 후 주소 편집 모드 해제
-    } catch (err) {
-      setError("배송지를 저장하는 중 오류가 발생했습니다.");
-    }
-  };
-
-  const handleAddressDelete = async (address) => {
-    const token = localStorage.getItem("token");
-    try {
-      await axios.delete(
-        `http://localhost:5001/profile/addresses/${address.id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      const response = await axios.get(
-        "http://localhost:5001/profile/addresses",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setAddresses(response.data.addresses);
-    } catch (err) {
-      setError("배송지를 삭제하는 중 오류가 발생했습니다.");
-    }
-  };
-
-  const handleAddNewAddress = () => {
-    // 새 배송지 추가를 위한 빈 객체 할당
-    setAddressToEdit({
-      street: "",
-      city: "",
-      state: "",
-      zip: "",
-      is_default: false,
-    });
   };
 
   if (loading) {
@@ -167,7 +110,6 @@ const Profile = () => {
 
           {activeTab === "shipping" && (
             <>
-              {/* 배송지 추가 버튼은 한 번만 렌더링 */}
               <button
                 className="add-address-button"
                 onClick={handleAddNewAddress}
@@ -179,7 +121,6 @@ const Profile = () => {
                 setAddressToEdit={setAddressToEdit}
                 handleAddressDelete={handleAddressDelete}
               />
-              {/* 배송지 추가 폼은 addressToEdit가 있을 때만 표시 */}
               {addressToEdit && (
                 <AddressForm
                   address={addressToEdit}
@@ -188,6 +129,13 @@ const Profile = () => {
                 />
               )}
             </>
+          )}
+
+          {activeTab === "payment" && (
+            <PaymentForm
+              onSave={handleCardSave}
+              cards={cards} // 카드 목록 전달
+            />
           )}
         </div>
       </div>
