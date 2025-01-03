@@ -1,140 +1,180 @@
-/* 프로필 페이지 컨테이너 */
+/* Profile.css */
+
+/* 프로필 페이지 기본 스타일 */
 .profile-container {
   display: flex;
-  height: 100vh;
-  background-color: #f4f6f9;
+  flex-direction: row;
 }
 
-/* 레이아웃 설정 */
 .profile-layout {
   display: flex;
-  width: 100%;
-}
-
-/* 프로필 콘텐츠 영역 */
-.profile-content {
   flex: 1;
-  padding: 30px;
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  margin-left: 20px;
-  height: auto;
-  overflow-y: auto;
 }
 
-/* 탭 내용 */
-.tab-content {
-  margin-top: 20px;
+.profile-content {
+  flex: 3;
+  padding: 20px;
 }
 
-/* 로딩 및 에러 메시지 */
-.loading,
-.error {
-  font-size: 18px;
-  color: #e74c3c;
-  text-align: center;
-  margin-top: 50px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+/* 주소 관련 섹션 스타일 */
+.shipping-section {
+  margin-top: 30px;
 }
 
-/* 기본 정보 헤더 */
-.tab-content h2 {
+.shipping-section h2 {
   font-size: 24px;
-  font-weight: 600;
-  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.add-address-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
   margin-bottom: 20px;
 }
 
-/* 배송지 목록 스타일 */
-.addresses-section ul {
+.add-address-button:hover {
+  background-color: #45a049;
+}
+
+ul {
   list-style-type: none;
   padding: 0;
 }
 
-.addresses-section li {
-  padding: 10px;
-  margin-bottom: 15px;
-  background-color: #ecf0f1;
-  border-radius: 5px;
+ul li {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 10px;
 }
 
-.addresses-section li button {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  padding: 5px 10px;
+ul li div {
+  flex: 1;
+}
+
+ul li span {
   font-size: 14px;
-  cursor: pointer;
-  border-radius: 5px;
+  color: #888;
 }
 
-.addresses-section li button:hover {
-  background-color: #2980b9;
-}
-
-.addresses-section h2 {
-  font-size: 24px;
-  color: #2c3e50;
-  margin-bottom: 20px;
-}
-
-.addresses-section button {
-  margin-bottom: 20px;
-  background-color: #2ecc71;
-  color: white;
-  padding: 10px 20px;
+button {
+  padding: 8px 16px;
+  font-size: 14px;
   border: none;
   cursor: pointer;
-  border-radius: 5px;
 }
 
-.addresses-section button:hover {
-  background-color: #27ae60;
+button:hover {
+  opacity: 0.8;
 }
 
-/* 배송지 폼 스타일 */
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-form div {
-  display: flex;
-  flex-direction: column;
-}
-
-form input {
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  background-color: #f9f9f9;
-}
-
-form input:focus {
-  border-color: #3498db;
+button:focus {
   outline: none;
 }
 
-form button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #2ecc71;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  margin-top: 20px;
+/* 주소 폼 스타일 */
+.address-form .form-group {
+  margin-bottom: 15px;
 }
 
-form button:hover {
-  background-color: #27ae60;
+.address-form label {
+  font-size: 16px;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.address-form input {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.address-form input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.address-form .form-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.address-form button {
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.address-form button:hover {
+  background-color: #45a049;
+}
+
+.address-form .form-group input::placeholder {
+  color: #aaa;
+}
+/* 주소 검색 모달 스타일 */
+.postcode-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7); /* 배경을 어둡게 처리 */
+  display: flex;
+  justify-content: center;
+  align-items: center; /* 화면 중앙 정렬 */
+  z-index: 9999; /* 모달이 다른 UI 요소 위로 표시되게 */
+  padding: 20px;
+}
+
+/* 주소 검색 모달 스타일 */
+.postcode-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7); /* 배경을 어둡게 처리 */
+  display: flex;
+  justify-content: center;
+  align-items: center; /* 화면 중앙 정렬 */
+  z-index: 9999; /* 모달이 다른 UI 요소 위로 표시되게 */
+  padding: 20px;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px;
+  position: relative; /* 부모 요소가 relative로 설정되어야 "X" 버튼이 제대로 위치 */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 999; /* 모달 내부 요소가 겹치지 않도록 */
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  z-index: 1000; /* X 버튼이 최상위에 오도록 설정 */
+}
+
+.modal-close:hover {
+  color: red; /* X 버튼 호버 시 빨간색 */
 }

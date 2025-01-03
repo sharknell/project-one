@@ -41,12 +41,14 @@ router.post("/login", async (req, res) => {
       [email]
     );
 
+    // 사용자 정보가 없으면 404 반환
     if (user.length === 0) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    // 비밀번호 비교
-    const match = await bcrypt.compare(password, user[0].password);
+    // 비밀번호 해시 비교
+    console.log("Retrieved user:", user); // 로그로 사용자 정보 확인
+    const match = await bcrypt.compare(password, user[0].password); // user[0].password
 
     if (!match) {
       return res.status(401).json({ message: "Invalid credentials." });

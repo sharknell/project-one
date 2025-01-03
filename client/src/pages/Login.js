@@ -1,23 +1,25 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../AuthContext";
 import { loginWithCredentials } from "../models/AuthModel";
 import "../styles/Login.css";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const data = await loginWithCredentials(email, password);
-      alert("Login successful!");
-      localStorage.setItem("token", data.token); // 토큰 저장
-      navigate("/"); // 마이페이지로 이동
+      alert("환영합니다!");
+      login(data.token); // AuthContext 상태 업데이트
+      navigate("/"); // 홈으로 이동
     } catch (error) {
       console.error("Login Error:", error);
-      alert("Invalid credentials");
+      alert("계정 오류");
     }
   };
 

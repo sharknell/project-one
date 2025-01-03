@@ -1,36 +1,40 @@
 import React from "react";
+import "../styles/AddressList.css";
 
-const AddressList = ({ addresses, onEdit, onDelete }) => {
-  console.log("주소 목록:", addresses); // 전달되는 주소 목록 확인
-
+const AddressList = ({ addresses, setAddressToEdit, handleAddressDelete }) => {
   return (
-    <div className="address-list">
-      <h2>배송지 목록</h2>
-      {addresses.length === 0 ? (
-        <p>등록된 배송지가 없습니다.</p>
-      ) : (
-        <ul>
-          {addresses.map((address, index) => (
-            <li key={index} className="address-item">
-              <p>
-                <strong>주소 :</strong> {address.street}, {address.city},{" "}
-                {address.state}, {address.zip}
-              </p>
-              <div className="address-actions">
-                <button onClick={() => onEdit(address)} className="edit-btn">
-                  편집하기
-                </button>
-                <button
-                  onClick={() => onDelete(address)}
-                  className="delete-btn"
-                >
-                  삭제하기
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="address-list-container">
+      <h2 className="address-list-title">배송지 관리</h2>
+      <ul className="address-list">
+        {addresses.map((address) => (
+          <li key={address.id} className="address-item">
+            <div className="address-info">
+              <p className="address-recipient">{`받는 사람: ${address.recipient}`}</p>
+              <p className="address-phone">{`전화번호: ${address.phone}`}</p>
+              <p className="address-zipcode">{`우편번호: ${address.zipcode}`}</p>
+              <p className="address-road">{`도로명 주소: ${address.roadAddress}`}</p>
+              <p className="address-detail">{`상세 주소: ${address.detailAddress}`}</p>
+              {address.isDefault && (
+                <span className="default-tag">(기본 배송지)</span>
+              )}
+            </div>
+            <div className="address-actions">
+              <button
+                className="address-edit-button"
+                onClick={() => setAddressToEdit(address)}
+              >
+                수정
+              </button>
+              <button
+                className="address-delete-button"
+                onClick={() => handleAddressDelete(address)}
+              >
+                삭제
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

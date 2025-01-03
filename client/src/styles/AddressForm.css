@@ -1,0 +1,135 @@
+/* 전체 폼 스타일 */
+.address-form {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: "Roboto", sans-serif;
+}
+
+/* 각 입력 필드 그룹 */
+.address-form .form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+/* 라벨 스타일 */
+.address-form label {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* 텍스트 입력 스타일 */
+.address-form input[type="text"] {
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  background-color: #f9f9f9;
+  box-sizing: border-box;
+  transition: border 0.3s ease;
+}
+
+.address-form input[type="text"]:focus {
+  border-color: #2196f3;
+  background-color: #fff;
+}
+
+/* 버튼 스타일 */
+.address-form button {
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.address-form button[type="submit"] {
+  background-color: #4caf50;
+}
+
+.address-form button[type="button"] {
+  background-color: #f44336;
+}
+
+.address-form button:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+}
+
+.address-form button[type="button"]:hover {
+  background-color: #e53935;
+  transform: translateY(-2px);
+}
+
+/* 우편번호 찾기 버튼 */
+.address-form .form-group button {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #2196f3;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  font-size: 14px;
+}
+
+.address-form .form-group button:hover {
+  background-color: #1976d2;
+}
+
+/* 체크박스 스타일 */
+.address-form input[type="checkbox"] {
+  margin-right: 10px;
+  transform: scale(1.2);
+  vertical-align: middle;
+}
+
+/* 폼 버튼 그룹 스타일 */
+.address-form .form-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+/* 주소 검색 모달 */
+.postcode-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.postcode-modal .modal-content {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+/* 모달 내 DaumPostcode 스타일 */
+.postcode-modal .modal-content .daum-postcode {
+  width: 100%;
+  height: 400px;
+  border-radius: 8px;
+}

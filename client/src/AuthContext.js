@@ -1,28 +1,45 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 
-const AuthContext = createContext();
+const AuthContext = createContext({
+  isAuthenticated: false,
+  login: () => {},
+  logout: () => {},
+  logoutMessage: "", // 로그아웃 메시지 상태 추가
+  setLogoutMessage: () => {}, // 로그아웃 메시지 상태를 업데이트하는 함수 추가
+});
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [logoutMessage, setLogoutMessage] = useState(""); // 상태 추가
 
   useEffect(() => {
-    // 컴포넌트 마운트 시 로컬 스토리지에서 인증 상태 확인
     const token = localStorage.getItem("token");
-    setIsAuthenticated(!!token);
+    if (token) {
+      setIsAuthenticated(true);
+    }
   }, []);
 
   const login = (token) => {
-    localStorage.setItem("token", token); // 토큰 저장
-    setIsAuthenticated(true); // 인증 상태 설정
+    localStorage.setItem("token", token);
+    setIsAuthenticated(true);
   };
 
   const logout = () => {
-    localStorage.removeItem("token"); // 토큰 삭제
-    setIsAuthenticated(false); // 인증 상태 해제
+    localStorage.removeItem("token");
+    setIsAuthenticated(false);
+    setLogoutMessage("로그아웃 하였습니다!"); // 로그아웃 시 메시지 설정
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        login,
+        logout,
+        logoutMessage, // 상태 제공
+        setLogoutMessage, // 상태 업데이트 함수 제공
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

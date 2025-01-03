@@ -1,49 +1,42 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import "../styles/Header.css";
 
 function Header() {
-  const { isAuthenticated, logout, loading } = useAuth();
-  const navigate = useNavigate();
-  const [showToast, setShowToast] = useState(false);
+  const { isAuthenticated, logout, logoutMessage, setLogoutMessage } =
+    useAuth();
 
-  const handleCartClick = (e) => {
-    if (!isAuthenticated) {
-      e.preventDefault();
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
-      navigate("/login");
+  // 로그아웃 메시지 상태가 있으면 알림을 띄운 후 메시지를 초기화
+  useEffect(() => {
+    if (logoutMessage) {
+      alert(logoutMessage); // 로그아웃 메시지 알림
+      setLogoutMessage(""); // 메시지 초기화
     }
-  };
-
-  if (loading) {
-    // 로딩 중일 때 빈 상태로 표시하거나 로딩 스피너를 추가할 수 있습니다.
-    return null;
-  }
+  }, [logoutMessage, setLogoutMessage]);
 
   return (
     <header className="header">
+      {/* 헤더 상단 바 */}
       <div className="header-top">
         <div className="header-container">
+          {/* 로고 */}
           <Link to="/" className="header-logo">
             PerfumeShop
           </Link>
+
+          {/* 네비게이션 메뉴 */}
           <nav className="header-nav">
             <Link to="/shop" className="header-nav-item">
               Shop
             </Link>
-            <Link
-              to="/cart"
-              onClick={handleCartClick}
-              className="header-nav-item"
-            >
+            <Link to="/cart" className="header-nav-item">
               Cart
             </Link>
             {isAuthenticated ? (
               <>
                 <Link to="/profile" className="header-nav-item">
-                  Mypage
+                  Profile
                 </Link>
                 <button
                   onClick={logout}
@@ -65,26 +58,20 @@ function Header() {
           </nav>
         </div>
       </div>
+
+      {/* 헤더 하단 바 (서비스와 연락처 항목) */}
       <div className="header-bottom">
         <div className="header-container">
-          <nav className="header-secondary-nav">
-            <Link to="/about" className="header-secondary-item">
-              About Us
+          <nav className="header-bottom-nav">
+            <Link to="/service" className="header-bottom-nav-item">
+              Service
             </Link>
-            <Link to="/services" className="header-secondary-item">
-              Services
-            </Link>
-            <Link to="/contact" className="header-secondary-item">
+            <Link to="/contact" className="header-bottom-nav-item">
               Contact
             </Link>
           </nav>
         </div>
       </div>
-      {showToast && (
-        <div className="toast">
-          로그인이 필요합니다. 로그인 페이지로 이동합니다.
-        </div>
-      )}
     </header>
   );
 }

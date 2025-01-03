@@ -87,8 +87,9 @@ router.get("/addresses", async (req, res) => {
     const decoded = await verifyToken(token);
     const userId = decoded.id;
 
+    // 배송지 목록 조회 (수정된 필드들 포함)
     const [addresses] = await dbPromise.query(
-      "SELECT id, street, city, state, zip FROM addresses WHERE user_id = ?",
+      "SELECT id, recipient, phone, zipcode, roadAddress, detailAddress, isDefault FROM addresses WHERE user_id = ?",
       [userId]
     );
 
@@ -98,10 +99,10 @@ router.get("/addresses", async (req, res) => {
     res.status(500).json({ message: "Error fetching addresses." });
   }
 });
-
 // 배송지 추가
 router.post("/addresses", async (req, res) => {
-  const { street, city, state, zip } = req.body;
+  const { recipient, phone, zipcode, roadAddress, detailAddress, isDefault } =
+    req.body;
   const token = req.headers.authorization?.split(" ")[1]; // Bearer 토큰
 
   if (!token) {
@@ -112,9 +113,10 @@ router.post("/addresses", async (req, res) => {
     const decoded = await verifyToken(token);
     const userId = decoded.id;
 
+    // 새로운 주소 추가 (수정된 필드들 포함)
     await dbPromise.query(
-      "INSERT INTO addresses (user_id, street, city, state, zip) VALUES (?, ?, ?, ?, ?)",
-      [userId, street, city, state, zip]
+      "INSERT INTO addresses (user_id, recipient, phone, zipcode, roadAddress, detailAddress, isDefault) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [userId, recipient, phone, zipcode, roadAddress, detailAddress, isDefault]
     );
 
     res.status(201).json({ message: "Address added successfully" });
@@ -126,7 +128,8 @@ router.post("/addresses", async (req, res) => {
 
 // 배송지 업데이트
 router.put("/addresses/:id", async (req, res) => {
-  const { street, city, state, zip } = req.body;
+  const { recipient, phone, zipcode, roadAddress, detailAddress, isDefault } =
+    req.body;
   const { id } = req.params;
   const token = req.headers.authorization?.split(" ")[1]; // Bearer 토큰
 
@@ -150,9 +153,19 @@ router.put("/addresses/:id", async (req, res) => {
         .json({ message: "Address not found or unauthorized." });
     }
 
+    // 배송지 업데이트
     await dbPromise.query(
-      "UPDATE addresses SET street = ?, city = ?, state = ?, zip = ? WHERE id = ? AND user_id = ?",
-      [street, city, state, zip, id, userId]
+      "UPDATE addresses SET recipient = ?, phone = ?, zipcode = ?, roadAddress = ?, detailAddress = ?, isDefault = ? WHERE id = ? AND user_id = ?",
+      [
+        recipient,
+        phone,
+        zipcode,
+        roadAddress,
+        detailAddress,
+        isDefault,
+        id,
+        userId,
+      ]
     );
 
     res.status(200).json({ message: "Address updated successfully" });
@@ -187,6 +200,7 @@ router.delete("/addresses/:id", async (req, res) => {
         .json({ message: "Address not found or unauthorized." });
     }
 
+    // 배송지 삭제
     await dbPromise.query(
       "DELETE FROM addresses WHERE id = ? AND user_id = ?",
       [id, userId]

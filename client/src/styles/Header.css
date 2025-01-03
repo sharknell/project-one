@@ -1,134 +1,132 @@
-/* General Header Styles */
+/* 기본 스타일 */
 .header {
-  font-family: "Arial", sans-serif;
-  background-color: #fff;
-  border-bottom: 1px solid #ddd;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  width: 100%;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 헤더에 그림자 효과 추가 */
+  background-color: #1f2b38; /* 어두운 배경 */
+  color: #ffffff;
 }
 
-/* Top Header Styles */
+/* 헤더 상단 */
 .header-top {
-  background-color: #f8f8f8;
-  padding: 12px 20px;
+  background-color: #2a3b47; /* 어두운 톤 */
+  padding: 10px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
-/* Logo Styles */
 .header-logo {
-  font-size: 26px;
+  font-size: 36px;
   font-weight: bold;
-  color: #333;
   text-decoration: none;
-  letter-spacing: 1px;
-  transition: color 0.3s ease;
+  color: #f39c12;
 }
 
-.header-logo:hover {
-  color: #000;
-}
-
-/* Primary Navigation Styles */
 .header-nav {
   display: flex;
   gap: 20px;
 }
 
 .header-nav-item {
+  text-decoration: none;
   font-size: 16px;
-  color: #555;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s ease, transform 0.3s ease;
+  color: #ffffff;
+  padding: 8px 15px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
 }
 
+/* 네비게이션 항목 호버 */
 .header-nav-item:hover {
-  color: #00796b; /* 색상 변경 */
-  transform: scale(1.05);
+  background-color: #3e4a67;
 }
 
-/* Logout Button */
+/* 로그아웃 버튼 */
 .header-logout-button {
-  background-color: #ff4081; /* 핑크색 배경 */
-  color: #fff;
-  padding: 8px 18px;
+  background: none;
   border: none;
-  border-radius: 30px;
+  color: #ffffff;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.header-logout-button:hover {
-  background-color: #e91e63;
-  transform: scale(1.05);
-}
-
-/* Bottom Header Styles */
+/* 헤더 하단 (서비스와 연락처) */
 .header-bottom {
-  background-color: #333;
-  padding: 10px 20px;
+  background-color: #8a8a8a; /* 어두운 톤 */
+  padding: 10px 0;
 }
 
-.header-secondary-nav {
+.header-bottom-nav {
   display: flex;
-  gap: 20px;
   justify-content: center;
+  gap: 20px;
 }
 
-.header-secondary-item {
-  font-size: 14px;
-  color: #fff;
+.header-bottom-nav-item {
   text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s ease;
+  font-size: 14px;
+  color: #ffffff;
+  padding: 5px 15px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
 }
 
-.header-secondary-item:hover {
-  color: #00796b;
+.header-bottom-nav-item:hover {
+  background-color: #3e4a67;
 }
 
-/* 애니메이션: 알림이 화면에 나타날 때 */
-@keyframes slideIn {
-  0% {
-    top: -50px;
-    opacity: 0;
-    visibility: visible;
+/* 검색창 스타일 */
+.header-search {
+  display: flex;
+  align-items: center;
+}
+
+.header-search-input {
+  padding: 5px 10px;
+  font-size: 16px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+}
+
+.header-search-button {
+  background-color: #f39c12;
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 16px;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    align-items: flex-start;
   }
-  100% {
-    top: 20px;
-    opacity: 1;
-  }
-}
 
-/* 애니메이션: 알림이 사라질 때 */
-@keyframes fadeOut {
-  0% {
-    opacity: 1;
+  .header-logo {
+    font-size: 20px;
   }
-  100% {
-    opacity: 0;
-    visibility: hidden;
-    top: -50px;
+
+  .header-nav {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
   }
-}
 
-/* 알림이 화면 상단에 고정되도록 설정 */
-.toast-container.show {
-  visibility: visible;
-  opacity: 1;
-  animation: slideIn 0.5s ease-out forwards;
-}
+  .header-bottom-nav {
+    flex-direction: column;
+    gap: 10px;
+  }
 
-.toast-container.hide {
-  animation: fadeOut 2.5s ease-in-out forwards;
+  .header-search {
+    width: 100%;
+    justify-content: space-between;
+  }
 }

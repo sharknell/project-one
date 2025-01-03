@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Sidebar from "../components/SideBar";
 import BasicInfo from "../components/BasicInfo";
+import AddressList from "../components/AddressList";
+import AddressForm from "../components/AddressForm";
 import "../styles/Profile.css";
 
 const Profile = () => {
@@ -11,8 +13,8 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("basicInfo");
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({});
-  const [addresses, setAddresses] = useState([]); // 배송지 목록 상태 추가
-  const [addressToEdit, setAddressToEdit] = useState(null); // 편집할 배송지 상태
+  const [addresses, setAddresses] = useState([]);
+  const [addressToEdit, setAddressToEdit] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -32,14 +34,12 @@ const Profile = () => {
         );
         setUser(userResponse.data.user);
 
-        // 배송지 목록도 가져오기
         const addressResponse = await axios.get(
           "http://localhost:5001/profile/addresses",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        console.log("주소 목록 데이터:", addressResponse.data.addresses); // 주소 목록 데이터 확인
         setAddresses(addressResponse.data.addresses);
       } catch (err) {
         setError("프로필 데이터를 가져오는 중 오류가 발생했습니다.");
@@ -54,7 +54,7 @@ const Profile = () => {
 
   const handleEditToggle = () => {
     setIsEditing((prev) => !prev);
-    setEditData(user); // 기존 데이터를 편집 상태에 복사
+    setEditData(user);
   };
 
   const handleSave = async () => {
@@ -63,10 +63,9 @@ const Profile = () => {
       await axios.put("http://localhost:5001/profile/update", editData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUser(editData); // 저장 후 사용자 데이터 업데이트
-      setIsEditing(false); // 편집 모드 종료
+      setUser(editData);
+      setIsEditing(false);
     } catch (err) {
-      console.error("Profile Update Error:", err);
       setError("프로필 정보를 업데이트하는 중 오류가 발생했습니다.");
     }
   };
@@ -79,12 +78,10 @@ const Profile = () => {
     }));
   };
 
-  // 배송지 추가/편집
   const handleAddressSave = async (address) => {
     const token = localStorage.getItem("token");
     try {
-      if (addressToEdit) {
-        // 편집 모드
+      if (addressToEdit && addressToEdit.id) {
         await axios.put(
           `http://localhost:5001/profile/addresses/${addressToEdit.id}`,
           address,
@@ -93,13 +90,11 @@ const Profile = () => {
           }
         );
       } else {
-        // 새 배송지 추가
         await axios.post("http://localhost:5001/profile/addresses", address, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
 
-      // 배송지 목록 갱신
       const response = await axios.get(
         "http://localhost:5001/profile/addresses",
         {
@@ -107,14 +102,12 @@ const Profile = () => {
         }
       );
       setAddresses(response.data.addresses);
-      setAddressToEdit(null); // 편집 종료
+      setAddressToEdit(null); // 폼 제출 후 주소 편집 모드 해제
     } catch (err) {
-      console.error("Address Save Error:", err);
       setError("배송지를 저장하는 중 오류가 발생했습니다.");
     }
   };
 
-  // 배송지 삭제
   const handleAddressDelete = async (address) => {
     const token = localStorage.getItem("token");
     try {
@@ -125,7 +118,6 @@ const Profile = () => {
         }
       );
 
-      // 삭제 후 배송지 목록 갱신
       const response = await axios.get(
         "http://localhost:5001/profile/addresses",
         {
@@ -134,9 +126,19 @@ const Profile = () => {
       );
       setAddresses(response.data.addresses);
     } catch (err) {
-      console.error("Address Delete Error:", err);
       setError("배송지를 삭제하는 중 오류가 발생했습니다.");
     }
+  };
+
+  const handleAddNewAddress = () => {
+    // 새 배송지 추가를 위한 빈 객체 할당
+    setAddressToEdit({
+      street: "",
+      city: "",
+      state: "",
+      zip: "",
+      is_default: false,
+    });
   };
 
   if (loading) {
@@ -163,28 +165,21 @@ const Profile = () => {
             />
           )}
 
-          {activeTab === "addresses" && (
-            <div className="addresses-section">
-              <h2>배송지 관리</h2>
-              <button onClick={() => setAddressToEdit(null)}>
+          {activeTab === "shipping" && (
+            <>
+              {/* 배송지 추가 버튼은 한 번만 렌더링 */}
+              <button
+                className="add-address-button"
+                onClick={handleAddNewAddress}
+              >
                 새 배송지 추가
               </button>
-              <ul>
-                {addresses.map((address) => (
-                  <li key={address.id}>
-                    <div>
-                      <p>{`${address.street}, ${address.city}, ${address.state}, ${address.zip}`}</p>
-                      {address.is_default && <span>(기본 배송지)</span>}
-                    </div>
-                    <button onClick={() => setAddressToEdit(address)}>
-                      수정
-                    </button>
-                    <button onClick={() => handleAddressDelete(address)}>
-                      삭제
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <AddressList
+                addresses={addresses}
+                setAddressToEdit={setAddressToEdit}
+                handleAddressDelete={handleAddressDelete}
+              />
+              {/* 배송지 추가 폼은 addressToEdit가 있을 때만 표시 */}
               {addressToEdit && (
                 <AddressForm
                   address={addressToEdit}
@@ -192,81 +187,11 @@ const Profile = () => {
                   onCancel={() => setAddressToEdit(null)}
                 />
               )}
-            </div>
+            </>
           )}
         </div>
       </div>
     </div>
-  );
-};
-
-const AddressForm = ({ address, onSave, onCancel }) => {
-  const [street, setStreet] = useState(address ? address.street : "");
-  const [city, setCity] = useState(address ? address.city : "");
-  const [state, setState] = useState(address ? address.state : "");
-  const [zip, setZip] = useState(address ? address.zip : "");
-  const [isDefault, setIsDefault] = useState(
-    address ? address.is_default : false
-  );
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave({ street, city, state, zip, is_default: isDefault });
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label>거리:</label>
-        <input
-          type="text"
-          value={street}
-          onChange={(e) => setStreet(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label>도시:</label>
-        <input
-          type="text"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label>주/도:</label>
-        <input
-          type="text"
-          value={state}
-          onChange={(e) => setState(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label>우편번호:</label>
-        <input
-          type="text"
-          value={zip}
-          onChange={(e) => setZip(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label>
-          기본 배송지로 설정
-          <input
-            type="checkbox"
-            checked={isDefault}
-            onChange={() => setIsDefault((prev) => !prev)}
-          />
-        </label>
-      </div>
-      <button type="submit">저장</button>
-      <button type="button" onClick={onCancel}>
-        취소
-      </button>
-    </form>
   );
 };
 
