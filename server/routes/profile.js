@@ -212,5 +212,93 @@ router.delete("/addresses/:id", async (req, res) => {
     res.status(500).json({ message: "Error deleting address." });
   }
 });
+// 카드 정보 추가
+router.post("/cards", async (req, res) => {
+  const { cardNumber, expiryDate, cvv } = req.body;
+  const token = req.headers.authorization?.split(" ")[1]; // Bearer 토큰
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided." });
+  }
+
+  try {
+    const decoded = await verifyToken(token);
+    const userId = decoded.id;
+
+    // 카드 정보를 데이터베이스에 저장
+    await dbPromise.query(
+      "INSERT INTO cards (user_id, cardNumber, expiryDate, cvv) VALUES (?, ?, ?, ?)",
+      [userId, cardNumber, expiryDate, cvv]
+    );
+
+    res.status(201).json({ message: "Card added successfully" });
+  } catch (err) {
+    console.error("Add Card Error:", err);
+    res.status(500).json({ message: "Error adding card." });
+  }
+});
+
+// 카드 목록 조회
+router.get("/cards", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1]; // Bearer 토큰
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided." });
+  }
+
+  try {
+    const decoded = await verifyToken(token);
+    const userId = decoded.id;
+
+    // 사용자가 등록한 카드 정보 조회
+    const [cards] = await dbPromise.query(
+      "SELECT id, cardNumber, expiryDate FROM cards WHERE user_id = ?",
+      [userId]
+    );
+
+    res.status(200).json({ cards });
+  } catch (err) {
+    console.error("Fetch Cards Error:", err);
+    res.status(500).json({ message: "Error fetching cards." });
+  }
+});
+
+// 카드 삭제
+router.delete("/cards/:id", async (req, res) => {
+  const { id } = req.params;
+  const token = req.headers.authorization?.split(" ")[1]; // Bearer 토큰
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided." });
+  }
+
+  try {
+    const decoded = await verifyToken(token);
+    const userId = decoded.id;
+
+    // 카드가 사용자의 것인지 확인
+    const [existingCard] = await dbPromise.query(
+      "SELECT id FROM cards WHERE id = ? AND user_id = ?",
+      [id, userId]
+    );
+
+    if (existingCard.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Card not found or unauthorized." });
+    }
+
+    // 카드 삭제
+    await dbPromise.query("DELETE FROM cards WHERE id = ? AND user_id = ?", [
+      id,
+      userId,
+    ]);
+
+    res.status(200).json({ message: "Card deleted successfully" });
+  } catch (err) {
+    console.error("Delete Card Error:", err);
+    res.status(500).json({ message: "Error deleting card." });
+  }
+});
 
 module.exports = router;
