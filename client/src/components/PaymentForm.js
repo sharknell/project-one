@@ -1,8 +1,23 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
-import "../styles/PaymentForm.css"; // 스타일 파일 추가
+import "../styles/PaymentForm.css";
+import tossLogo from "../asset/toss.png";
 
-const PaymentForm = ({ onSave, cards }) => {
+// 카드사 목록
+const cardBrands = [
+  { value: "toss", name: "토스뱅크", logo: tossLogo },
+  // { value: "shinhan", name: "신한카드", logo: shinhanLogo },
+  // { value: "kb", name: "국민카드", logo: kbLogo },
+  // { value: "hana", name: "하나카드", logo: hanaLogo },
+  // { value: "lotte", name: "롯데카드", logo: lotteLogo },
+  // { value: "nh", name: "농협카드", logo: nhLogo },
+  // { value: "samsung", name: "삼성카드", logo: samsungLogo },
+  // { value: "hyundai", name: "현대카드", logo: hyundaiLogo },
+  // { value: "bc", name: "BC카드", logo: bcLogo },
+  // { value: "woori", name: "우리카드", logo: wooriLogo },
+];
+
+const PaymentForm = ({ onSave }) => {
   const {
     control,
     handleSubmit,
@@ -10,47 +25,126 @@ const PaymentForm = ({ onSave, cards }) => {
     reset,
   } = useForm({
     defaultValues: {
-      cardNumber: ["", "", "", ""], // 카드 번호는 처음에 4개의 빈 배열로 설정
-      expiryDate: "",
+      cardBrand: "",
+      cardNumber: ["", "", "", ""],
+      expiryDate: ["", ""],
       cvv: "",
       cardHolder: "",
     },
   });
 
-  // 폼 제출 시 카드 번호를 하나의 문자열로 결합
-  const onSubmitHandler = (data) => {
-    // 카드 번호를 하나로 합쳐서 저장
-    const fullCardNumber = data.cardNumber.join("");
+  const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
 
-    // 카드 번호가 유효한지 체크
+  const onSubmitHandler = (data) => {
+    const fullCardNumber = data.cardNumber.join(""); // 배열을 문자열로 변환
     if (!/^\d{16}$/.test(fullCardNumber)) {
       alert("유효한 카드 번호를 입력해주세요.");
       return;
     }
 
-    // 콘솔에 전체 카드 정보 출력
-    console.log("카드 정보:", { ...data, cardNumber: fullCardNumber });
+    const requestData = {
+      cardBrand: data.cardBrand,
+      cardNumber: fullCardNumber, // 카드 번호는 배열이 아닌 문자열로 전송
+      expiryMonth: data.expiryDate[0],
+      expiryYear: data.expiryDate[1],
+      cvv: data.cvv,
+      cardHolder: data.cardHolder,
+    };
 
-    // 저장 함수 호출
-    onSave({ ...data, cardNumber: fullCardNumber });
+    fetch("http://localhost:5001/profile/cards", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`, // 인증 토큰 필요
+      },
+      body: JSON.stringify(requestData), // 데이터는 JSON 형식으로 전송
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message === "카드가 등록되었습니다.") {
+          alert("카드 등록이 완료되었습니다.");
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch((error) => console.error("Error:", error));
+  };
 
-    // 폼 초기화
-    reset({
-      cardNumber: ["", "", "", ""],
-      expiryDate: "",
-      cvv: "",
-      cardHolder: "",
-    });
+  const handleCardNumberChange = (value, index) => {
+    const cardNumber = [...inputRefs.map((ref) => ref.current.value)];
+    cardNumber[index] = value;
+
+    if (value.length === 4 && index < 3) {
+      inputRefs[index + 1].current.focus();
+    }
+
+    return cardNumber;
+  };
+
+  const handleExpiryChange = (value, index) => {
+    const expiryDate = [...inputRefs.map((ref) => ref.current.value)];
+    expiryDate[index] = value;
+
+    if (index === 0 && value.length === 2) {
+      // 월을 입력하면 연도 필드로 포커스를 이동
+      inputRefs[5].current.focus();
+    }
+
+    return expiryDate;
   };
 
   return (
-    <div>
-      <h2>결제 카드 등록</h2>
+    <div className="payment-form-container">
+      <h2 className="form-title">💳 카드 등록</h2>
       <form onSubmit={handleSubmit(onSubmitHandler)} className="payment-form">
+        {/* 카드사 선택 */}
+        <div className="input-group">
+          <label>카드사 선택</label>
+          <Controller
+            name="cardBrand"
+            control={control}
+            render={({ field }) => (
+              <div className="custom-select">
+                <select {...field} className="input-field">
+                  <option value="" disabled>
+                    카드사를 선택하세요
+                  </option>
+                  {cardBrands.map((brand) => (
+                    <option key={brand.value} value={brand.value}>
+                      {brand.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="logo-container">
+                  {cardBrands.map((brand) => (
+                    <div
+                      key={brand.value}
+                      className={`logo ${
+                        field.value === brand.value ? "selected" : ""
+                      }`}
+                    >
+                      <img
+                        src={brand.logo}
+                        alt={brand.name}
+                        width={30}
+                        height={30}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            rules={{ required: "카드사를 선택하세요." }}
+          />
+          {errors.cardBrand && (
+            <span className="error-text">{errors.cardBrand.message}</span>
+          )}
+        </div>
+
+        {/* 카드 번호 입력 */}
         <div className="input-group">
           <label>카드 번호</label>
           <div className="card-number-group">
-            {/* cardNumber 배열을 react-hook-form을 통해 관리 */}
             {Array.from({ length: 4 }).map((_, index) => (
               <Controller
                 key={index}
@@ -59,12 +153,16 @@ const PaymentForm = ({ onSave, cards }) => {
                 render={({ field }) => (
                   <input
                     {...field}
+                    ref={inputRefs[index]}
                     type="text"
                     className="input-field"
                     placeholder="0000"
                     maxLength="4"
                     value={field.value}
-                    onChange={(e) => field.onChange(e.target.value)} // 카드 번호 각 자리 수정
+                    onChange={(e) => {
+                      field.onChange(e);
+                      handleCardNumberChange(e.target.value, index);
+                    }}
                   />
                 )}
                 rules={{
@@ -77,30 +175,75 @@ const PaymentForm = ({ onSave, cards }) => {
               />
             ))}
           </div>
-          {errors.cardNumber && <span>{errors.cardNumber.message}</span>}
+          {errors.cardNumber && (
+            <span className="error-text">{errors.cardNumber.message}</span>
+          )}
         </div>
 
+        {/* 만료일 입력 */}
         <div className="input-group">
           <label>만료일</label>
-          <Controller
-            name="expiryDate"
-            control={control}
-            render={({ field }) => (
-              <input
-                {...field}
-                type="text"
-                className="input-field"
-                placeholder="MM/YY"
-                maxLength="5"
-              />
-            )}
-            rules={{
-              required: "만료일을 입력하세요.",
-            }}
-          />
-          {errors.expiryDate && <span>{errors.expiryDate.message}</span>}
+          <div className="expiry-date-group">
+            <Controller
+              name="expiryDate[0]"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  ref={inputRefs[4]}
+                  type="text"
+                  className="input-field"
+                  placeholder="MM"
+                  maxLength="2"
+                  value={field.value}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleExpiryChange(e.target.value, 0);
+                  }}
+                />
+              )}
+              rules={{
+                required: "만료일을 입력하세요.",
+                pattern: {
+                  value: /^(0[1-9]|1[0-2])$/,
+                  message: "MM 형식으로 입력하세요.",
+                },
+              }}
+            />
+            /
+            <Controller
+              name="expiryDate[1]"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  ref={inputRefs[5]}
+                  type="text"
+                  className="input-field"
+                  placeholder="YY"
+                  maxLength="2"
+                  value={field.value}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleExpiryChange(e.target.value, 1);
+                  }}
+                />
+              )}
+              rules={{
+                required: "만료일을 입력하세요.",
+                pattern: {
+                  value: /^\d{2}$/,
+                  message: "YY 형식으로 입력하세요.",
+                },
+              }}
+            />
+          </div>
+          {errors.expiryDate && (
+            <span className="error-text">{errors.expiryDate.message}</span>
+          )}
         </div>
 
+        {/* CVV 입력 */}
         <div className="input-group">
           <label>CVV</label>
           <Controller
@@ -117,11 +260,18 @@ const PaymentForm = ({ onSave, cards }) => {
             )}
             rules={{
               required: "CVV를 입력하세요.",
+              pattern: {
+                value: /^[0-9]{3,4}$/,
+                message: "CVV는 3자리 또는 4자리 숫자여야 합니다.",
+              },
             }}
           />
-          {errors.cvv && <span>{errors.cvv.message}</span>}
+          {errors.cvv && (
+            <span className="error-text">{errors.cvv.message}</span>
+          )}
         </div>
 
+        {/* 카드 소유자 입력 */}
         <div className="input-group">
           <label>카드 소유자</label>
           <Controller
@@ -139,20 +289,15 @@ const PaymentForm = ({ onSave, cards }) => {
               required: "카드 소유자를 입력하세요.",
             }}
           />
-          {errors.cardHolder && <span>{errors.cardHolder.message}</span>}
+          {errors.cardHolder && (
+            <span className="error-text">{errors.cardHolder.message}</span>
+          )}
         </div>
 
-        <button type="submit">카드 등록</button>
+        <button type="submit" className="submit-button">
+          카드 등록
+        </button>
       </form>
-
-      <h3>등록된 카드</h3>
-      <ul>
-        {cards.map((card, index) => (
-          <li key={index}>
-            {card.cardNumber} - {card.expiryDate}
-          </li>
-        ))}
-      </ul>
     </div>
   );
 };
