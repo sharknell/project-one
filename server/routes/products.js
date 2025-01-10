@@ -8,7 +8,6 @@ const validateId = (id) => !isNaN(id) && id > 0;
 // 카테고리별 상품 조회
 router.get("/category/:category", async (req, res) => {
   const { category } = req.params;
-
   try {
     const [results] = await dbPromise.query(
       "SELECT * FROM products WHERE category = ?",
@@ -41,9 +40,12 @@ router.get("/", async (req, res) => {
   }
 });
 
+// 상품 ID별 조회
 router.get("/product/:id", async (req, res) => {
   const { id } = req.params;
+  console.log(`Fetching product with ID: ${id}`);
 
+  // 유효성 검사
   if (isNaN(id) || id <= 0) {
     return res.status(400).json({ message: "유효하지 않은 상품 ID입니다." });
   }
@@ -53,6 +55,7 @@ router.get("/product/:id", async (req, res) => {
       "SELECT * FROM products WHERE id = ?",
       [id]
     );
+
     if (productResult.length === 0) {
       return res.status(404).json({ message: "해당 상품을 찾을 수 없습니다." });
     }
@@ -65,6 +68,7 @@ router.get("/product/:id", async (req, res) => {
     const product = productResult[0];
     product.images = imageResult.map((image) => image.image_url);
 
+    console.log("상품 조회 성공:", product);
     res.json(product);
   } catch (err) {
     console.error("상품 조회 오류:", err);

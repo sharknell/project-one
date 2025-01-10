@@ -8,7 +8,11 @@ const api = axios.create({
 // 로그인 함수
 export const loginWithCredentials = async (email, password) => {
   const response = await api.post("/auth/login", { email, password });
-  return response.data;
+  // 로그인 성공 시 토큰과 사용자 이름을 함께 반환
+  return {
+    token: response.data.token,
+    userName: response.data.userName, // 사용자 이름 추가
+  };
 };
 
 // 카카오 로그인 함수

@@ -1,113 +1,53 @@
+/* 제품 상세 페이지 기본 스타일 */
 .product-detail-container {
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  padding: 20px;
+  font-family: "Apple SD Gothic Neo", sans-serif;
+  color: #333;
 }
 
 .product-detail-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
 }
 
 .product-detail-header h1 {
-  font-size: 2.5rem;
-  color: #333;
+  font-size: 32px;
+  font-weight: bold;
+  color: #111;
 }
 
 .product-detail-header p {
-  font-size: 1.2rem;
-  color: #777;
+  font-size: 18px;
+  color: #666;
   margin-top: 10px;
 }
 
 .product-detail-content {
   display: flex;
-  gap: 30px;
-  justify-content: space-between;
   flex-wrap: wrap;
-  margin-bottom: 30px;
+  gap: 20px;
 }
 
 .product-detail-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  max-width: 600px; /* 최대 너비 설정 */
 }
 
-.product-detail-main-image {
+.product-detail-main-image img {
   width: 100%;
-  max-width: 600px;
-  height: auto;
+  max-height: 600px;
+  object-fit: cover;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
 }
 
-.product-detail-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  max-width: 600px;
-}
-
-.product-detail-info h2 {
-  font-size: 1.8rem;
-  margin-bottom: 20px;
-}
-
-.product-detail-info p {
-  font-size: 1.1rem;
-  margin-bottom: 10px;
-}
-
-.product-detail-price {
-  font-size: 1.5rem;
-  color: #00796b;
-  font-weight: bold;
-}
-
-.product-detail-buttons {
-  display: flex;
-  gap: 20px; /* 버튼 간 여백 추가 */
-  margin-top: 20px; /* 버튼 그룹과 정보 사이 여백 */
-}
-
-.product-detail-buttons button {
-  background-color: #00796b;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  width: 100%;
-  max-width: 180px; /* 버튼 크기 제한 */
-  white-space: nowrap; /* 텍스트 줄넘침 방지 */
-}
-
-.product-detail-buttons button:hover {
-  background-color: #004d40;
-}
-
-.secondary-button {
-  background-color: #555;
-}
-
-.secondary-button:hover {
-  background-color: #333;
-}
-
-/* 서브 이미지 썸네일 스타일링 */
 .product-detail-thumbnails {
   display: flex;
-  justify-content: center;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
 .thumbnail-image {
@@ -116,45 +56,181 @@
   object-fit: cover;
   border-radius: 8px;
   cursor: pointer;
-  transition: transform 0.2s ease-in-out;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
 }
 
 .thumbnail-image:hover {
   transform: scale(1.1);
 }
 
-/* 드롭다운 스타일 */
+.product-detail-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.product-detail-info h1 {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.product-detail-info .product-detail-price {
+  font-size: 24px;
+  font-weight: bold;
+  color: #0079ff;
+}
+
+.product-detail-info .product-detail-category,
+.product-detail-info .product-detail-size,
+.product-detail-info .product-detail-stock {
+  font-size: 16px;
+  color: #777;
+}
+
+.product-detail-buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 15px;
+}
+
+.product-detail-buttons button {
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.product-detail-buttons button:hover {
+  background-color: #0079ff;
+  color: white;
+}
+
+.secondary-button {
+  background-color: #f2f2f2;
+  color: #333;
+}
+
+.product-detail-extra-info {
+  margin-top: 40px;
+}
+
+.product-detail-extra-info h2 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
 .dropdown {
-  margin-top: 15px;
+  margin-bottom: 10px;
 }
 
 .dropdown-toggle {
-  background-color: #00796b;
-  color: white;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+  background: #f2f2f2;
+  border: 1px solid #ddd;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
   width: 100%;
   text-align: left;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 .dropdown-toggle:hover {
-  background-color: #004d40;
+  background-color: #e6e6e6;
 }
 
 .dropdown-content {
-  padding: 10px;
-  background-color: #f4f4f4;
-  border-radius: 5px;
-  margin-top: 5px;
-  font-size: 1.1rem;
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 10px;
 }
-hr {
+
+.qna-register-button {
+  padding: 12px 20px;
+  background-color: #0079ff;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
   border: none;
-  height: 10px;
-  background-color: #000 !important; /* 검정색 선 */
-  margin: 10px 0 !important; /* 위아래 여백 */
-  width: 100%; /* 전체 너비를 설정 */
+  border-radius: 8px;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 30px;
+}
+
+.qna-register-button:hover {
+  background-color: #005cbf;
+}
+
+.success-message {
+  color: #4caf50;
+  margin-top: 15px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.close-popup-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #777;
+  cursor: pointer;
+}
+
+.close-popup-button:hover {
+  color: #333;
+}
+/* Iframe 스타일 */
+.qna-modal iframe {
+  border: none;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+/* 모달 오버레이 */
+.qna-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* QnA 모달 */
+.qna-modal {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 600px;
+  position: relative;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.close-modal-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #777;
+  cursor: pointer;
 }

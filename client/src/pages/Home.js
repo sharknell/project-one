@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useProducts } from "../controllers/ProductController";
 import "../styles/Home.css";
@@ -8,6 +8,24 @@ import bpicture3 from "../banner/shoppingmallbannerSub2.jpg";
 
 function Home() {
   const { products, isLoading, error } = useProducts();
+  const scrollWrapperRef = useRef(null);
+
+  // 무한 스크롤을 위한 애니메이션 설정
+  useEffect(() => {
+    const scrollWrapper = scrollWrapperRef.current;
+
+    if (scrollWrapper) {
+      const scrollSpeed = 1; // 스크롤 속도
+      const scrollInterval = setInterval(() => {
+        scrollWrapper.scrollLeft += scrollSpeed;
+        if (scrollWrapper.scrollLeft >= scrollWrapper.scrollWidth / 2) {
+          scrollWrapper.scrollLeft = 0;
+        }
+      }, 16); // 60fps에 맞춰서 애니메이션 진행
+
+      return () => clearInterval(scrollInterval); // 컴포넌트 언마운트 시 애니메이션 정지
+    }
+  }, []);
 
   return (
     <div className="home-container">
@@ -73,30 +91,33 @@ function Home() {
         {isLoading && <div className="loading">로딩 중...</div>}
         {error && <div className="error">{error}</div>}
         <div className="products">
-          {!isLoading && !error && products.length === 0 && (
-            <p className="no-products">현재 판매 중인 상품이 없습니다.</p>
-          )}
-          {products.map((product) => (
-            <div key={product.id} className="product">
-              <img
-                src={product.image_url || "/default-image.jpg"} // 기본 이미지 사용
-                alt={product.name || "상품명 없음"} // 기본 텍스트 사용
-                className="product-image"
-              />
-              <h3 className="product-name">{product.name || "상품명 없음"}</h3>
-              <p className="product-price">
-                {product.price
-                  ? `₩${product.price.toLocaleString()}`
-                  : "가격 정보 없음"}
-              </p>
-              <Link
-                to={`/shop/product/${product.id}`}
-                className="product-details"
-              >
-                View Details
-              </Link>
-            </div>
-          ))}
+          <div className="products-wrapper" ref={scrollWrapperRef}>
+            {/* 상품 목록을 두 번 반복하여 무한 스크롤 효과 생성 */}
+            {products &&
+              [...products, ...products].map((product, index) => (
+                <div key={`${product.id}-${index}`} className="product">
+                  <img
+                    src={product.image_url || "/default-image.jpg"}
+                    alt={product.name || "상품명 없음"}
+                    className="product-image"
+                  />
+                  <h3 className="product-name">
+                    {product.name || "상품명 없음"}
+                  </h3>
+                  <p className="product-price">
+                    {product.price
+                      ? `₩${product.price.toLocaleString()}`
+                      : "가격 정보 없음"}
+                  </p>
+                  <Link
+                    to={`/shop/product/${product.id}`}
+                    className="product-details"
+                  >
+                    View Details
+                  </Link>
+                </div>
+              ))}
+          </div>
         </div>
       </section>
     </div>

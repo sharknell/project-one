@@ -1,84 +1,94 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import api from "../utils/api";
+import BasicInfo from "../components/BasicInfo";
+import AddressList from "../components/AddressList";
+import AddressForm from "../components/AddressForm";
+import PaymentForm from "../components/PaymentForm";
+import OrderList from "../components/OrderList";
+import "../styles/Profile.css";
 
-const ProfileInfo = ({
-  user,
-  isEditing,
-  formData,
-  handleInputChange,
-  successMessage,
-  setIsEditing,
-  updateProfile,
-}) => {
+const Profile = () => {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("basicInfo");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({});
+  const [addressToEdit, setAddressToEdit] = useState(null);
+
+  // 로그인된 사용자의 정보를 가져오기 위한 함수
+  const fetchProfileData = async () => {
+    const token = localStorage.getItem("token"); // 토큰이 localStorage에 있다고 가정
+    if (!token) {
+      setError("로그인 정보가 없습니다.");
+      return;
+    }
+
+    try {
+      // Authorization 헤더에 토큰을 포함시켜 요청
+      const { data } = await api.get("/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setProfile(data.user);
+      setLoading(false);
+    } catch (err) {
+      setError(err.response?.data?.message || "프로필 로드 실패");
+    }
+  };
+
+  useEffect(() => {
+    fetchProfileData();
+  }, []);
+
+  const handleEditToggle = () => {
+    setIsEditing((prev) => !prev);
+    setEditData(profile);
+  };
+
+  const handleSave = async () => {
+    try {
+      await api.put("/profile/update", editData);
+      setProfile(editData);
+      setIsEditing(false);
+    } catch (err) {
+      setError("프로필 업데이트 중 오류 발생");
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditData((prevData) => ({ ...prevData, [name]: value }));
+  };
+
+  const handleAddressSave = async (address) => {
+    try {
+      await api.post("/profile/addresses", address);
+      fetchProfileData();
+    } catch (err) {
+      setError("배송지 저장 중 오류 발생");
+    }
+  };
+
+  if (loading) return <div>로딩 중...</div>;
+  if (error) return <div>{error}</div>;
+
   return (
-    <div className="profile-section">
-      <h2 className="profile-title">프로필</h2>
-      <div className="profile-info">
-        <strong>이름:</strong>{" "}
-        {isEditing ? (
-          <input
-            type="text"
-            name="username"
-            value={formData.username}
-            onChange={handleInputChange}
-          />
-        ) : (
-          user.username
-        )}
+    <div className="profile-container">
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <div className="profile-content">
+        <BasicInfo
+          user={profile}
+          isEditing={isEditing}
+          handleEditToggle={handleEditToggle}
+          handleInputChange={handleInputChange}
+          handleSave={handleSave}
+          editData={editData}
+        />
       </div>
-      <div className="profile-info">
-        <strong>이메일:</strong>{" "}
-        {isEditing ? (
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-          />
-        ) : (
-          user.email
-        )}
-      </div>
-      <div className="profile-info">
-        <strong>전화번호:</strong>{" "}
-        {isEditing ? (
-          <input
-            type="text"
-            name="phone"
-            value={formData.phone}
-            onChange={handleInputChange}
-          />
-        ) : (
-          user.phone
-        )}
-      </div>
-      <div className="profile-info">
-        <strong>비밀번호:</strong>{" "}
-        {isEditing ? (
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleInputChange}
-            placeholder="새 비밀번호"
-          />
-        ) : (
-          "**********"
-        )}
-      </div>
-
-      {successMessage && <p className="success-message">{successMessage}</p>}
-
-      {isEditing ? (
-        <button className="save-btn" onClick={updateProfile}>
-          변경 사항 저장
-        </button>
-      ) : (
-        <button className="edit-btn" onClick={() => setIsEditing(true)}>
-          프로필 수정
-        </button>
-      )}
     </div>
   );
 };
 
-export default ProfileInfo;
+export default Profile;

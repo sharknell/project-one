@@ -1,229 +1,107 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../utils/api";
 import Sidebar from "../components/SideBar";
 import BasicInfo from "../components/BasicInfo";
 import AddressList from "../components/AddressList";
-import AddressForm from "../components/AddressForm";
-import PaymentForm from "../components/PaymentForm"; // PaymentForm 추가
+import PaymentForm from "../components/PaymentForm";
+import OrderList from "../components/OrderList";
 import "../styles/Profile.css";
 
 const Profile = () => {
-  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("basicInfo");
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({});
-  const [addresses, setAddresses] = useState([]);
-  const [addressToEdit, setAddressToEdit] = useState(null);
-  const [cards, setCards] = useState([]); // 카드 목록 상태 추가
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("토큰이 제공되지 않았습니다.");
+  const fetchProfileData = async () => {
+    try {
+      const { data } = await api.get("/profile");
+      setProfile(data.user);
+      setEditData(data.user); // 처음 로딩 시 editData 상태 설정
+    } catch (err) {
+      if (
+        err.response?.status === 401 &&
+        err.response?.data?.refreshTokenRequired
+      ) {
+        try {
+          await refreshAccessToken();
+          fetchProfileData(); // 새 토큰으로 다시 시도
+        } catch (refreshErr) {
+          setError("세션이 만료되었습니다. 다시 로그인해주세요.");
+        }
+      } else {
+        setError(err.response?.data?.message || "프로필 로드 실패");
+      }
+    } finally {
       setLoading(false);
-      return;
+    }
+  };
+
+  const refreshAccessToken = async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (!refreshToken) {
+      throw new Error("리프레시 토큰이 없습니다.");
     }
 
-    const fetchProfileData = async () => {
-      try {
-        const userResponse = await axios.get(
-          "http://localhost:5001/profile/profile",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setUser(userResponse.data.user);
+    const { data } = await api.post("/profile/refresh", { refreshToken });
+    localStorage.setItem("token", data.accessToken);
+  };
 
-        const addressResponse = await axios.get(
-          "http://localhost:5001/profile/addresses",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setAddresses(addressResponse.data.addresses);
-
-        const cardResponse = await axios.get(
-          "http://localhost:5001/profile/cards", // 카드 데이터 가져오기
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setCards(cardResponse.data.cards); // 카드 목록 상태 업데이트
-      } catch (err) {
-        setError("프로필 데이터를 가져오는 중 오류가 발생했습니다.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
+  useEffect(() => {
     fetchProfileData();
   }, []);
 
   const handleEditToggle = () => {
     setIsEditing((prev) => !prev);
-    setEditData(user);
+    setEditData(profile); // 편집 시작 시 현재 프로필 데이터로 초기화
   };
 
-  const handleSave = async () => {
-    const token = localStorage.getItem("token");
-    try {
-      await axios.put("http://localhost:5001/profile/update", editData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUser(editData);
-      setIsEditing(false);
-    } catch (err) {
-      setError("프로필 정보를 업데이트하는 중 오류가 발생했습니다.");
-    }
-  };
-
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
     setEditData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
 
-  const handleAddressSave = async (address) => {
-    const token = localStorage.getItem("token");
+  const handleSave = async () => {
     try {
-      if (addressToEdit && addressToEdit.id) {
-        await axios.put(
-          `http://localhost:5001/profile/addresses/${addressToEdit.id}`,
-          address,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-      } else {
-        await axios.post("http://localhost:5001/profile/addresses", address, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      }
-
-      const response = await axios.get(
-        "http://localhost:5001/profile/addresses",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setAddresses(response.data.addresses);
-      setAddressToEdit(null); // 폼 제출 후 주소 편집 모드 해제
-    } catch (err) {
-      setError("배송지를 저장하는 중 오류가 발생했습니다.");
-    }
-  };
-
-  const handleAddressDelete = async (address) => {
-    const token = localStorage.getItem("token");
-    try {
-      await axios.delete(
-        `http://localhost:5001/profile/addresses/${address.id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      const response = await axios.get(
-        "http://localhost:5001/profile/addresses",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setAddresses(response.data.addresses);
-    } catch (err) {
-      setError("배송지를 삭제하는 중 오류가 발생했습니다.");
-    }
-  };
-
-  const handleAddNewAddress = () => {
-    // 새 배송지 추가를 위한 빈 객체 할당
-    setAddressToEdit({
-      street: "",
-      city: "",
-      state: "",
-      zip: "",
-      is_default: false,
-    });
-  };
-
-  const handleCardSave = async (cardData) => {
-    const token = localStorage.getItem("token");
-    try {
-      await axios.post("http://localhost:5001/profile/cards", cardData, {
-        headers: { Authorization: `Bearer ${token}` },
+      await api.put("/update", editData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
-      const cardResponse = await axios.get(
-        "http://localhost:5001/profile/cards",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setCards(cardResponse.data.cards);
+      setProfile(editData);
+      setIsEditing(false);
     } catch (err) {
-      setError("카드를 추가하는 중 오류가 발생했습니다.");
+      setError("프로필 업데이트 중 오류 발생");
     }
   };
 
-  if (loading) {
-    return <div className="loading">로딩 중...</div>;
-  }
-
-  if (error) {
-    return <div className="error">{error}</div>;
-  }
+  if (loading) return <div>로딩 중...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <div className="profile-container">
-      <div className="profile-layout">
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-        <div className="profile-content">
-          {activeTab === "basicInfo" && (
-            <BasicInfo
-              user={user}
-              isEditing={isEditing}
-              handleEditToggle={handleEditToggle}
-              handleInputChange={handleInputChange}
-              handleSave={handleSave}
-              editData={editData}
-            />
-          )}
-
-          {activeTab === "shipping" && (
-            <>
-              {/* 배송지 추가 버튼은 한 번만 렌더링 */}
-              <button
-                className="add-address-button"
-                onClick={handleAddNewAddress}
-              >
-                새 배송지 추가
-              </button>
-              <AddressList
-                addresses={addresses}
-                setAddressToEdit={setAddressToEdit}
-                handleAddressDelete={handleAddressDelete}
-              />
-              {/* 배송지 추가 폼은 addressToEdit가 있을 때만 표시 */}
-              {addressToEdit && (
-                <AddressForm
-                  address={addressToEdit}
-                  onSave={handleAddressSave}
-                  onCancel={() => setAddressToEdit(null)}
-                />
-              )}
-            </>
-          )}
-
-          {activeTab === "payment" && (
-            <>
-              <PaymentForm onSave={handleCardSave} cards={cards} />
-            </>
-          )}
-        </div>
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <div className="profile-content">
+        {activeTab === "basicInfo" && (
+          <BasicInfo
+            user={profile}
+            isEditing={isEditing}
+            handleEditToggle={handleEditToggle}
+            handleInputChange={handleInputChange} // input 변경 처리 함수 전달
+            handleSave={handleSave}
+            editData={editData}
+          />
+        )}
+        {activeTab === "shipping" && (
+          <AddressList addresses={profile?.addresses} />
+        )}
+        {activeTab === "payment" && <PaymentForm cards={profile?.cards} />}
+        {activeTab === "orders" && <OrderList />}
       </div>
     </div>
   );

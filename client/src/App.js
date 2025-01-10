@@ -8,8 +8,11 @@ import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import QnA from "./pages/QnA";
 import Profile from "./pages/Profile";
+import PaymentCancel from "./components/PaymentCancel";
+import PaymentFail from "./components/PaymentFail";
+import PaymentSuccess from "./components/PaymentSuccess";
+import QnAForm from "./components/QnAForm";
 import { AuthProvider } from "./AuthContext";
 
 function App() {
@@ -26,7 +29,10 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/qna" element={<QnA />} />
+            <Route path="/QnAForm" element={<QnAForm />} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/payment-fail" element={<PaymentFail />} />
+            <Route path="/payment-cancel" element={<PaymentCancel />} />
           </Routes>
         </main>
         <Footer />
