@@ -1,27 +1,42 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useProductController } from "../controllers/ProductController";
-import QnAForm from "../components/QnAForm";
 import { useAuth } from "../AuthContext";
 import axios from "axios";
+import { useProductController } from "../controllers/ProductController";
+import QnAForm from "../components/QnAForm";
 import "../styles/ProductDetail.css";
 
 function ProductDetail() {
   const { id } = useParams(); // URL에서 제품 ID 추출
   const navigate = useNavigate(); // 페이지 이동을 위한 navigate 훅 사용
-  const { isAuthenticated, userName } = useAuth(); // 로그인 상태와 사용자 이름 가져오기
+  const { isAuthenticated, userId, userName } = useAuth(); // 로그인 상태와 사용자 ID 가져오기
   const [isQnAModalOpen, setIsQnAModalOpen] = useState(false);
   const [newQuestion, setNewQuestion] = useState(""); // 새로운 질문 상태
+  const [product, setProduct] = useState(null); // 제품 상태 추가
+  const [error, setError] = useState(null); // 오류 상태 추가
   const {
-    product,
-    isLoading,
-    error,
     mainImage,
     openDropdown,
     handleThumbnailClick,
     handleButtonClick,
     toggleDropdown,
   } = useProductController(id);
+
+  // 제품 정보 가져오기
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:5001/shop/product/${id}`
+        );
+        setProduct(response.data); // 제품 정보 업데이트
+      } catch (err) {
+        console.error("제품 정보를 가져오는 데 실패했습니다.", err);
+        setError("제품 정보를 가져오는 데 실패했습니다."); // 오류 메시지 설정
+      }
+    };
+    fetchProduct();
+  }, [id]);
 
   // QnA 버튼 클릭 핸들러
   const handleQnAClick = () => {
@@ -69,17 +84,62 @@ function ProductDetail() {
     setIsQnAModalOpen(false);
   };
 
+  const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      const confirmLogin = window.confirm(
+        "로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?"
+      );
+      if (confirmLogin) {
+        navigate("/login", { state: { from: window.location.pathname } });
+      }
+    } else {
+      try {
+        if (!userId) {
+          alert("사용자 정보가 유효하지 않습니다.");
+          return;
+        }
+
+        // 이미 장바구니에 해당 상품이 있는지 확인
+        const response = await axios.get(
+          `http://localhost:5001/cart?userId=${userId}`
+        );
+        const cartItems = response.data;
+        const existingItem = cartItems.find((item) => item.product_id === id);
+
+        if (existingItem) {
+          // 이미 있으면 수량을 1 증가시킴
+          const updatedQuantity = existingItem.quantity + 1;
+
+          await axios.put(`http://localhost:5001/cart/${existingItem.id}`, {
+            quantity: updatedQuantity,
+          });
+
+          alert("장바구니에 품목의 수량이 추가되었습니다.");
+        } else {
+          // 없으면 새로 추가
+          const quantity = 1;
+
+          await axios.post("http://localhost:5001/cart/add", {
+            productId: id,
+            quantity,
+            userId: userId,
+          });
+
+          alert("장바구니에 추가되었습니다.");
+        }
+      } catch (err) {
+        console.error("장바구니 추가 실패:", err);
+        alert("장바구니에 추가하는 데 실패했습니다.");
+      }
+    }
+  };
+
   // 로딩, 오류, 제품 없는 상태 처리
-  if (isLoading) {
-    return <div>로딩 중...</div>;
-  }
-
-  if (error) {
-    return <div>{error}</div>;
-  }
-
   if (!product) {
-    return <div>해당 제품을 찾을 수 없습니다.</div>;
+    if (error) {
+      return <div>{error}</div>; // 오류 메시지 출력
+    }
+    return <div>로딩 중...</div>;
   }
 
   return (
@@ -130,13 +190,7 @@ function ProductDetail() {
             {product.stock > 0 ? `${product.stock}개 남음` : "품절"}
           </p>
           <div className="product-detail-buttons">
-            <button onClick={() => handleButtonClick("buy")}>구매하기</button>
-            <button
-              onClick={() => handleButtonClick("wishlist")}
-              className="secondary-button"
-            >
-              찜하기
-            </button>
+            <button onClick={handleAddToCart}>장바구니 담기</button>
           </div>
         </div>
       </div>

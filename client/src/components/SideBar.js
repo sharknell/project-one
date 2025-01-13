@@ -23,16 +23,10 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
           주문 내역
         </li>
         <li
-          onClick={() => setActiveTab("question")}
-          className={activeTab === "question" ? "active" : ""}
+          onClick={() => setActiveTab("qna")}
+          className={activeTab === "qna" ? "active" : ""}
         >
           문의 내역
-        </li>
-        <li
-          onClick={() => setActiveTab("payment")}
-          className={activeTab === "payment" ? "active" : ""}
-        >
-          카드 간편 결제 관리
         </li>
       </ul>
     </div>

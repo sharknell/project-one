@@ -7,9 +7,10 @@ const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
-console.log("JWT_SECRET:", process.env.JWT_SECRET);
-console.log("JWT_REFRESH_SECRET:", process.env.JWT_REFRESH_SECRET);
+console.log("JWT_SECRET:", JWT_SECRET);
+console.log("JWT_REFRESH_SECRET:", JWT_REFRESH_SECRET);
 
+// JWT 검증 미들웨어
 const verifyToken = (token, secret) => {
   return new Promise((resolve, reject) => {
     jwt.verify(token, secret, (err, decoded) => {
@@ -21,6 +22,7 @@ const verifyToken = (token, secret) => {
   });
 };
 
+// 프로필 조회
 router.get("/profile", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
@@ -42,22 +44,20 @@ router.get("/profile", async (req, res) => {
 
     res.status(200).json({ user: user[0] });
   } catch (err) {
+    console.error("프로필 오류:", err);
     if (err.name === "TokenExpiredError") {
-      console.error("만료된 토큰 감지:", err);
-
       return res.status(401).json({
         message: "토큰이 만료되었습니다.",
         refreshTokenRequired: true, // 리프레시 토큰 사용을 유도
       });
     }
-
-    console.error("프로필 오류:", err);
     res
       .status(500)
       .json({ message: "프로필을 가져오는 중 오류가 발생했습니다." });
   }
 });
 
+// 리프레시 토큰으로 액세스 토큰 재발급
 router.post("/refresh", async (req, res) => {
   const { refreshToken } = req.body;
 
@@ -116,4 +116,138 @@ router.put("/update", async (req, res) => {
     res.status(500).json({ message: "Error updating profile" });
   }
 });
+
+// 배송지 목록 조회
+router.get("/addresses", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1]; // Bearer 토큰
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided." });
+  }
+
+  try {
+    const decoded = await verifyToken(token, JWT_SECRET);
+    const userId = decoded.id;
+
+    const [addresses] = await dbPromise.query(
+      "SELECT id, recipient, phone, zipcode, roadAddress, detailAddress, isDefault FROM addresses WHERE user_id = ?",
+      [userId]
+    );
+
+    res.status(200).json({ addresses });
+  } catch (err) {
+    console.error("Addresses Error:", err);
+    res.status(500).json({ message: "Error fetching addresses." });
+  }
+});
+
+// 배송지 추가
+router.post("/addresses", async (req, res) => {
+  const { recipient, phone, zipcode, roadAddress, detailAddress, isDefault } =
+    req.body;
+  const token = req.headers.authorization?.split(" ")[1]; // Bearer 토큰
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided." });
+  }
+
+  try {
+    const decoded = await verifyToken(token, JWT_SECRET);
+    const userId = decoded.id;
+
+    await dbPromise.query(
+      "INSERT INTO addresses (user_id, recipient, phone, zipcode, roadAddress, detailAddress, isDefault) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [userId, recipient, phone, zipcode, roadAddress, detailAddress, isDefault]
+    );
+
+    res.status(201).json({ message: "Address added successfully" });
+  } catch (err) {
+    console.error("Add Address Error:", err);
+    res.status(500).json({ message: "Error adding address." });
+  }
+});
+
+// 배송지 업데이트
+router.put("/addresses/:id", async (req, res) => {
+  const { recipient, phone, zipcode, roadAddress, detailAddress, isDefault } =
+    req.body;
+  const { id } = req.params;
+  const token = req.headers.authorization?.split(" ")[1]; // Bearer 토큰
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided." });
+  }
+
+  try {
+    const decoded = await verifyToken(token, JWT_SECRET);
+    const userId = decoded.id;
+
+    const [existingAddress] = await dbPromise.query(
+      "SELECT id FROM addresses WHERE id = ? AND user_id = ?",
+      [id, userId]
+    );
+
+    if (existingAddress.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Address not found or unauthorized." });
+    }
+
+    await dbPromise.query(
+      "UPDATE addresses SET recipient = ?, phone = ?, zipcode = ?, roadAddress = ?, detailAddress = ?, isDefault = ? WHERE id = ? AND user_id = ?",
+      [
+        recipient,
+        phone,
+        zipcode,
+        roadAddress,
+        detailAddress,
+        isDefault,
+        id,
+        userId,
+      ]
+    );
+
+    res.status(200).json({ message: "Address updated successfully" });
+  } catch (err) {
+    console.error("Update Address Error:", err);
+    res.status(500).json({ message: "Error updating address." });
+  }
+});
+
+// 배송지 삭제
+router.delete("/addresses/:id", async (req, res) => {
+  const { id } = req.params;
+  const token = req.headers.authorization?.split(" ")[1]; // Bearer 토큰
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided." });
+  }
+
+  try {
+    const decoded = await verifyToken(token, JWT_SECRET);
+    const userId = decoded.id;
+
+    const [existingAddress] = await dbPromise.query(
+      "SELECT id FROM addresses WHERE id = ? AND user_id = ?",
+      [id, userId]
+    );
+
+    if (existingAddress.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Address not found or unauthorized." });
+    }
+
+    await dbPromise.query(
+      "DELETE FROM addresses WHERE id = ? AND user_id = ?",
+      [id, userId]
+    );
+
+    res.status(200).json({ message: "Address deleted successfully" });
+  } catch (err) {
+    console.error("Delete Address Error:", err);
+    res.status(500).json({ message: "Error deleting address." });
+  }
+});
+
 module.exports = router;

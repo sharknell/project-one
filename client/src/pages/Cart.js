@@ -1,93 +1,154 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
-import {
-  loadCartItems,
-  calculateTotalAmount,
-} from "../controllers/CartController";
+import { calculateTotalAmount } from "../controllers/CartController";
 import "../styles/Cart.css";
 import axios from "axios";
 import { loadTossPayments } from "@tosspayments/payment-sdk";
+import { jwtDecode } from "jwt-decode"; // JWT 디코딩을 위한 라이브러리 추가
 
 function Cart() {
-  const { isAuthenticated, isLoading } = useAuth(); // 인증 상태와 로딩 상태 받아오기
-  const [cartItems, setCartItems] = useState([]);
+  const { isAuthenticated, isLoading, authToken } = useAuth();
+  const [cartItems, setCartItems] = useState([]); // 기본값을 빈 배열로 설정
   const [totalAmount, setTotalAmount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [addresses, setAddresses] = useState([]);
   const navigate = useNavigate();
 
-  // 인증 상태와 장바구니 아이템 로딩 처리
   useEffect(() => {
-    if (isLoading) {
-      return; // 인증 상태가 아직 로딩 중이면 아무것도 하지 않음
-    }
-
-    console.log("isAuthenticated: ", isAuthenticated); // 인증 상태 확인
+    if (isLoading) return;
 
     if (!isAuthenticated) {
       alert("로그인 후 장바구니를 확인할 수 있습니다.");
-      setTimeout(() => navigate("/login"), 1000); // 로그인 페이지로 이동
+      setTimeout(() => navigate("/login"), 1000);
       return;
     }
 
-    if (cartItems.length === 0) {
-      const savedCart = loadCartItems(); // 장바구니 아이템 로딩
-      console.log("savedCart: ", savedCart); // 로컬스토리지에서 장바구니 아이템 확인
-
-      if (savedCart && savedCart.length > 0) {
-        const updatedCart = savedCart.reduce((acc, item) => {
-          const existingItem = acc.find((cartItem) => cartItem.id === item.id);
-          if (existingItem) {
-            existingItem.quantity += item.quantity;
-          } else {
-            acc.push(item);
-          }
-          return acc;
-        }, []);
-        console.log("updatedCart: ", updatedCart); // 업데이트된 카트 내용 확인
-
-        setCartItems(updatedCart);
-        setTotalAmount(calculateTotalAmount(updatedCart)); // 총 금액 계산
-      } else {
-        console.log("장바구니가 비어 있습니다.");
-      }
+    const token = localStorage.getItem("authToken");
+    console.log("JWT 토큰:", token);
+    if (!token) {
+      alert("토큰이 존재하지 않습니다. 로그인 상태를 확인해주세요.");
+      setTimeout(() => navigate("/login"), 1000);
+      return;
     }
-  }, [isAuthenticated, isLoading, navigate, cartItems.length]); // cartItems.length 의존성 추가
 
-  // 로컬스토리지에 장바구니 아이템 저장
-  const saveCartItems = (updatedCart) => {
-    console.log("saveCartItems called with: ", updatedCart); // saveCartItems 호출 시 확인
-    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
+    // JWT 토큰에서 userId 추출
+    let userId = null;
+    try {
+      const decodedToken = jwtDecode(token); // 토큰 디코딩
+      userId = decodedToken.id; // userId 추출
+    } catch (error) {
+      console.error("토큰 디코딩 실패:", error);
+      alert("토큰에서 userId를 추출하는데 실패했습니다.");
+      setTimeout(() => navigate("/login"), 1000);
+      return;
+    }
+
+    const fetchCartItems = async () => {
+      try {
+        const { data } = await axios.get(
+          `http://localhost:5001/cart?userId=${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("Response data:", data); // 전체 응답 데이터를 출력하여 구조를 확인하세요.
+
+        if (data.message) {
+          alert(data.message);
+        } else {
+          const items = data || []; // 예상되는 데이터 형식에 맞게 수정
+          setCartItems(items);
+          setTotalAmount(calculateTotalAmount(items)); // 총 금액 계산
+        }
+      } catch (error) {
+        console.error("장바구니 데이터를 불러오는데 실패했습니다.", error);
+        alert(`장바구니 데이터를 불러오는데 실패했습니다. ${error.message}`);
+      }
+    };
+
+    fetchCartItems();
+  }, [isAuthenticated, isLoading, navigate]);
+
+  useEffect(() => {
+    console.log("Cart Items:", cartItems); // 상태 업데이트 후 console.log로 확인
+  }, [cartItems]);
+
+  const handleQuantityChangeHandler = async (itemId, newQuantity) => {
+    if (newQuantity < 1) return; // 수량이 1보다 적게 변경되지 않도록
+
+    try {
+      const { data } = await axios.put(
+        `http://localhost:5001/cart/updateQuantity/${itemId}`,
+        { quantity: newQuantity }
+      );
+
+      if (data.message === "장바구니 수량이 업데이트되었습니다.") {
+        const updatedCartItems = cartItems.map((item) =>
+          item.id === itemId ? { ...item, quantity: newQuantity } : item
+        );
+        setCartItems(updatedCartItems);
+        setTotalAmount(calculateTotalAmount(updatedCartItems)); // 수량 변경 후 총 금액 업데이트
+      }
+    } catch (error) {
+      console.error("장바구니 수량 변경 실패:", error);
+      alert("장바구니 수량 변경에 실패했습니다.");
+    }
   };
 
-  // 수량 변경 핸들러
-  const handleQuantityChangeHandler = (itemId, newQuantity) => {
-    if (newQuantity < 1) return; // 수량이 1보다 작으면 변경 안 함
-    const updatedCart = cartItems.map((item) =>
-      item.id === itemId ? { ...item, quantity: newQuantity } : item
-    );
-    setCartItems(updatedCart);
-    setTotalAmount(calculateTotalAmount(updatedCart));
-    saveCartItems(updatedCart); // 로컬 스토리지에 저장
+  // 장바구니에서 아이템 삭제
+  const handleRemove = async (itemId) => {
+    try {
+      const { data } = await axios.delete(
+        `http://localhost:5001/cart/remove/${itemId}` // 수정된 URL
+      );
+      if (data.message === "장바구니에서 삭제되었습니다.") {
+        const updatedCartItems = cartItems.filter((item) => item.id !== itemId);
+        setCartItems(updatedCartItems);
+        setTotalAmount(calculateTotalAmount(updatedCartItems));
+      }
+    } catch (error) {
+      console.error("장바구니 삭제 실패:", error);
+      alert("장바구니 아이템 삭제에 실패했습니다.");
+    }
   };
 
-  // 아이템 삭제 핸들러
-  const handleRemove = (itemId) => {
-    const updatedCart = cartItems.filter((item) => item.id !== itemId);
-    setCartItems(updatedCart);
-    setTotalAmount(calculateTotalAmount(updatedCart));
-    saveCartItems(updatedCart); // 로컬 스토리지에 저장
+  // 장바구니에 항목 추가
+  const handleAddItem = async (item) => {
+    try {
+      const { data } = await axios.post("http://localhost:5001/api/cart", {
+        itemId: item.id,
+        quantity: 1, // 기본 수량 1
+      });
+
+      if (data.message === "장바구니에 아이템이 추가되었습니다.") {
+        setCartItems((prevItems) => [...prevItems, { ...item, quantity: 1 }]);
+        setTotalAmount((prevAmount) => prevAmount + item.price); // 추가된 아이템의 가격만큼 총 금액 업데이트
+      }
+    } catch (error) {
+      console.error("장바구니 추가 실패:", error);
+      alert("장바구니에 아이템 추가에 실패했습니다.");
+    }
   };
 
-  // 결제 처리 핸들러
+  // 결제 처리
   const handleCheckoutHandler = async () => {
     if (totalAmount <= 0) {
       alert("결제 금액이 올바르지 않습니다.");
       return;
     }
 
+    if (!selectedAddress) {
+      alert("배송지를 선택해주세요.");
+      return;
+    }
+
     try {
-      setLoading(true); // 로딩 시작
+      setLoading(true);
 
       const tossPayments = await loadTossPayments(
         "test_ck_pP2YxJ4K87RqyvqEbgjLrRGZwXLO"
@@ -96,43 +157,43 @@ function Cart() {
       const { data } = await axios.post("http://localhost:5001/api/payment", {
         amount: totalAmount,
         orderName: "장바구니 상품",
+        address: selectedAddress,
       });
 
-      tossPayments.requestPayment("카드", {
-        amount: data.amount,
-        orderId: data.orderId,
-        orderName: data.orderName,
-        successUrl: "http://localhost:5001/api/payment/success", // 결제 성공 시 URL
-        failUrl: "http://localhost:5001/api/payment/fail", // 결제 실패 시 URL
-        cancelUrl: "http://localhost:5001/api/payment/cancel", // 결제 취소 시 URL
-      });
+      tossPayments
+        .requestPayment("카드", {
+          amount: data.amount,
+          orderId: data.orderId,
+          orderName: data.orderName,
+          successUrl: "http://localhost:5001/api/payment/success",
+          failUrl: "http://localhost:5001/api/payment/fail",
+          cancelUrl: "http://localhost:5001/api/payment/cancel",
+        })
+        .then(() => {
+          // 결제 성공 처리
+        })
+        .catch((error) => {
+          console.error("결제 오류:", error);
+          alert(
+            `결제 취소되었습니다. ${
+              error.message || "잠시 후 다시 시도해주세요."
+            }`
+          );
+        });
     } catch (error) {
       console.error("결제 오류:", error);
       alert(
         `결제에 실패했습니다. ${error.message || "잠시 후 다시 시도해주세요."}`
       );
     } finally {
-      setLoading(false); // 로딩 종료
+      setLoading(false);
     }
   };
 
-  // 결제 성공 시 처리
-  useEffect(() => {
-    if (window.location.pathname.includes("success")) {
-      setCartItems([]);
-      setTotalAmount(0);
-      alert("결제가 완료되었습니다. 카트가 비워졌습니다.");
-      localStorage.removeItem("cartItems"); // 로컬 스토리지에서 카트 삭제
-      navigate("/"); // 홈 페이지로 리디렉션
-    }
-  }, [navigate]);
-
-  // 로딩 중 처리
   if (isLoading || loading) {
     return <div>로딩 중...</div>;
   }
 
-  // 장바구니가 비어있는 경우
   if (cartItems.length === 0) {
     return (
       <div className="cart-container">
@@ -141,62 +202,73 @@ function Cart() {
     );
   }
 
-  // 장바구니 내용 표시
   return (
     <div className="cart-container">
       <h1>장바구니</h1>
+
+      {/* 장바구니 아이템 표시 */}
       <div className="cart-items">
-        {cartItems.map((item) => (
-          <div key={item.id} className="cart-item">
-            <div className="cart-item-details">
-              <img
-                src={item.image}
-                alt={item.name}
-                className="cart-item-image"
-              />
-              <div className="cart-item-info">
-                <p>{item.name}</p>
-                <p>₩{item.price.toLocaleString()}</p>
-                <p>용량: {item.size}</p>
-                <div className="cart-item-quantity">
-                  <button
-                    onClick={() =>
-                      handleQuantityChangeHandler(
-                        item.id,
-                        Math.max(1, item.quantity - 1)
-                      )
-                    }
-                  >
-                    -
-                  </button>
-                  <span>{item.quantity}</span>
-                  <button
-                    onClick={() =>
-                      handleQuantityChangeHandler(item.id, item.quantity + 1)
-                    }
-                  >
-                    +
-                  </button>
+        {cartItems.length === 0 ? (
+          <p>장바구니에 아이템이 없습니다.</p>
+        ) : (
+          cartItems.map((item) => (
+            <div key={item.id} className="cart-item">
+              <div className="cart-item-details">
+                <img
+                  src={item.image || "default_image_url"} // 이미지가 없으면 기본 이미지 사용
+                  alt={item.name}
+                  className="cart-item-image"
+                />
+                <div className="cart-item-info">
+                  <p>{item.name}</p>
+                  <p>
+                    ₩
+                    {item.price
+                      ? item.price.toLocaleString()
+                      : "가격 정보 없음"}
+                  </p>
+                  <p>용량: {item.size}</p>
+                  <div className="cart-item-quantity">
+                    <button
+                      onClick={() =>
+                        handleQuantityChangeHandler(
+                          item.id,
+                          Math.max(1, item.quantity - 1)
+                        )
+                      }
+                    >
+                      -
+                    </button>
+                    <span>{item.quantity}</span>
+                    <button
+                      onClick={() =>
+                        handleQuantityChangeHandler(item.id, item.quantity + 1)
+                      }
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
               </div>
+              <button
+                onClick={() => handleRemove(item.id)}
+                className="remove-item-button"
+              >
+                삭제
+              </button>
             </div>
-            <button
-              onClick={() => handleRemove(item.id)}
-              className="remove-item-button"
-            >
-              삭제
-            </button>
-          </div>
-        ))}
+          ))
+        )}
       </div>
+
       <div className="cart-summary">
-        <p>총 금액: ₩ {totalAmount.toLocaleString()}</p>
+        <p>총 금액: ₩ {totalAmount ? totalAmount.toLocaleString() : "0"}</p>
         <button
           onClick={handleCheckoutHandler}
           className="checkout-button"
           disabled={loading}
         >
-          결제하기
+          {loading ? "결제 중..." : "결제하기"}
         </button>
       </div>
     </div>

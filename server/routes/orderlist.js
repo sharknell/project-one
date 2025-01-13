@@ -1,23 +1,16 @@
 const express = require("express");
-const router = express.Router();
-const { dbPromise } = require("../config/db"); // DB 연결 가져오기
-const authenticateToken = require("../middleware/authenticateToken"); // 인증 미들웨어
+const { authenticateUser } = require("../middleware/authenticateToken");
 
-// 주문 내역 조회 API
-router.get("/", authenticateToken, async (req, res) => {
+const router = express.Router();
+
+router.get("/orderlist", authenticateUser, async (req, res) => {
   try {
-    const connection = await dbPromise.getConnection();
-    const [orders] = await connection.query(
-      "SELECT * FROM orders WHERE user_id = ?",
-      [req.user.id] // 인증된 사용자 ID 기반으로 주문 내역 조회
-    );
-    connection.release();
-    res.json({ orders });
+    // 주문 목록 데이터베이스 조회 로직
+    const orders = []; // 예제 데이터
+    res.status(200).json({ data: orders });
   } catch (error) {
-    console.error("Error fetching orders:", error);
-    res
-      .status(500)
-      .json({ message: "주문 내역을 가져오는 중 오류가 발생했습니다." });
+    console.error("주문 목록 조회 실패:", error);
+    res.status(500).json({ message: "주문 목록 조회 실패" });
   }
 });
 

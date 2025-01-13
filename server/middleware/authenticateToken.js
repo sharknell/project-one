@@ -1,18 +1,19 @@
 const jwt = require("jsonwebtoken");
 
-const authenticateToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
+const authenticateUser = (req, res, next) => {
+  const token = req.headers["authorization"]?.split(" ")[1]; // Bearer token 확인
   if (!token) {
-    return res.status(401).json({ message: "토큰이 제공되지 않았습니다." });
+    return res.status(403).json({ message: "Token is required" });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ message: "유효하지 않은 토큰입니다." });
-    }
-    req.user = user; // 사용자 정보를 요청 객체에 추가
-    next();
-  });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // 비밀 키로 토큰 디코딩
+    console.log("Authenticated User:", decoded); // 디코딩된 토큰 정보 로그 출력
+    req.user = decoded; // 디코딩한 값을 req.user에 저장
+    next(); // 다음 미들웨어로 진행
+  } catch (error) {
+    return res.status(403).json({ message: "Invalid or expired token" });
+  }
 };
 
-module.exports = authenticateToken;
+module.exports = { authenticateUser };

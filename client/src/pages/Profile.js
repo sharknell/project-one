@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import api from "../utils/api";
+import api, { getProfile, getAddresses } from "../utils/api";
 import Sidebar from "../components/SideBar";
 import BasicInfo from "../components/BasicInfo";
 import AddressList from "../components/AddressList";
-import PaymentForm from "../components/PaymentForm";
+import AddressForm from "../components/AddressForm";
 import OrderList from "../components/OrderList";
+import QnaList from "../components/QnAList"; // QnA 목록을 표시하는 컴포넌트
 import "../styles/Profile.css";
 
 const Profile = () => {
@@ -12,71 +13,85 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("basicInfo");
-  const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState({});
-
-  const fetchProfileData = async () => {
-    try {
-      const { data } = await api.get("/profile");
-      setProfile(data.user);
-      setEditData(data.user); // 처음 로딩 시 editData 상태 설정
-    } catch (err) {
-      if (
-        err.response?.status === 401 &&
-        err.response?.data?.refreshTokenRequired
-      ) {
-        try {
-          await refreshAccessToken();
-          fetchProfileData(); // 새 토큰으로 다시 시도
-        } catch (refreshErr) {
-          setError("세션이 만료되었습니다. 다시 로그인해주세요.");
-        }
-      } else {
-        setError(err.response?.data?.message || "프로필 로드 실패");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const refreshAccessToken = async () => {
-    const refreshToken = localStorage.getItem("refreshToken");
-    if (!refreshToken) {
-      throw new Error("리프레시 토큰이 없습니다.");
-    }
-
-    const { data } = await api.post("/profile/refresh", { refreshToken });
-    localStorage.setItem("token", data.accessToken);
-  };
+  const [addressToEdit, setAddressToEdit] = useState(null);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [qnaData, setQnaData] = useState([]); // QnA 데이터를 상태로 관리
 
   useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const profileData = await getProfile(token);
+        setProfile(profileData.user);
+        const addressesData = await getAddresses(token);
+        setProfile((prev) => ({ ...prev, addresses: addressesData.addresses }));
+
+        // QnA 데이터 가져오기
+        const qnaResponse = await api.get("/qna/user/qna", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // 받은 QnA 데이터 확인 (배열인지 체크)
+        console.log("QnA 데이터:", qnaResponse.data);
+
+        // qnaResponse.data.data 배열이므로 해당 데이터로 설정
+        if (Array.isArray(qnaResponse.data.data)) {
+          setQnaData(qnaResponse.data.data);
+        } else {
+          setQnaData([]); // 배열이 아니면 빈 배열로 처리
+        }
+      } catch (err) {
+        setError("프로필 로드 실패");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchProfileData();
-  }, []);
+  }, [selectedProductId]); // `selectedProductId`에 의존하여 QnA 데이터를 다시 가져옵니다.
 
-  const handleEditToggle = () => {
-    setIsEditing((prev) => !prev);
-    setEditData(profile); // 편집 시작 시 현재 프로필 데이터로 초기화
+  const handleAddressSave = async (address) => {
+    const token = localStorage.getItem("authToken");
+
+    if (addressToEdit) {
+      try {
+        await updateAddress(token, addressToEdit.id, address);
+        setProfile((prev) => ({
+          ...prev,
+          addresses: prev.addresses.map((a) =>
+            a.id === addressToEdit.id ? address : a
+          ),
+        }));
+        setAddressToEdit(null);
+      } catch (err) {
+        setError("배송지 수정 실패");
+      }
+    } else {
+      try {
+        await addAddress(token, address);
+        setProfile((prev) => ({
+          ...prev,
+          addresses: [...prev.addresses, { ...address, id: Date.now() }],
+        }));
+      } catch (err) {
+        setError("배송지 추가 실패");
+      }
+    }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setEditData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+  const handleAddressDelete = async (address) => {
+    const token = localStorage.getItem("authToken");
 
-  const handleSave = async () => {
     try {
-      await api.put("/update", editData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      setProfile(editData);
-      setIsEditing(false);
+      await deleteAddress(token, address.id);
+      setProfile((prev) => ({
+        ...prev,
+        addresses: prev.addresses.filter((a) => a.id !== address.id),
+      }));
     } catch (err) {
-      setError("프로필 업데이트 중 오류 발생");
+      setError("배송지 삭제 실패");
     }
   };
 
@@ -87,21 +102,30 @@ const Profile = () => {
     <div className="profile-container">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="profile-content">
-        {activeTab === "basicInfo" && (
-          <BasicInfo
-            user={profile}
-            isEditing={isEditing}
-            handleEditToggle={handleEditToggle}
-            handleInputChange={handleInputChange} // input 변경 처리 함수 전달
-            handleSave={handleSave}
-            editData={editData}
-          />
-        )}
+        {activeTab === "basicInfo" && <BasicInfo user={profile} />}
         {activeTab === "shipping" && (
-          <AddressList addresses={profile?.addresses} />
+          <>
+            <AddressList
+              addresses={profile.addresses}
+              setAddressToEdit={setAddressToEdit}
+              handleAddressDelete={handleAddressDelete}
+            />
+            {addressToEdit && (
+              <AddressForm
+                address={addressToEdit}
+                onSave={handleAddressSave}
+                onCancel={() => setAddressToEdit(null)}
+              />
+            )}
+          </>
         )}
-        {activeTab === "payment" && <PaymentForm cards={profile?.cards} />}
         {activeTab === "orders" && <OrderList />}
+        {activeTab === "qna" && (
+          <div className="qna-section">
+            <h2>내가 작성한 질문</h2>
+            <QnaList qnaData={qnaData} />
+          </div>
+        )}
       </div>
     </div>
   );

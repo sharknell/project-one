@@ -1,123 +1,109 @@
 import React, { useState, useEffect } from "react";
-import DaumPostcode from "react-daum-postcode"; // react-daum-postcode import
-import "../styles/AddressForm.css"; // CSS 파일 import
+import DaumPostcode from "react-daum-postcode";
+import "../styles/AddressForm.css";
 
 const AddressForm = ({ address, onSave, onCancel }) => {
-  const [recipient, setRecipient] = useState(address ? address.recipient : "");
-  const [phone, setPhone] = useState(address ? address.phone : "");
-  const [zipcode, setZipcode] = useState(address ? address.zipcode : "");
-  const [roadAddress, setRoadAddress] = useState(
-    address ? address.roadAddress : ""
-  );
-  const [detailAddress, setDetailAddress] = useState(
-    address ? address.detailAddress : ""
-  );
-  const [isDefault, setIsDefault] = useState(
-    address ? address.isDefault : false
-  );
+  const [formData, setFormData] = useState({
+    recipient: "",
+    phone: "",
+    zipcode: "",
+    roadAddress: "",
+    detailAddress: "",
+    isDefault: false,
+  });
   const [isPostcodeVisible, setPostcodeVisible] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave({
-      recipient,
-      phone,
-      zipcode,
-      roadAddress,
-      detailAddress,
-      isDefault,
-    });
-  };
-
-  const openAddressSearch = () => {
-    setPostcodeVisible(true); // 주소 검색 창 열기
-  };
-
-  const handlePostcodeComplete = (data) => {
-    setZipcode(data.zonecode); // 우편번호
-    setRoadAddress(data.roadAddress); // 도로명 주소
-    setPostcodeVisible(false); // 주소 검색 창 닫기
-  };
 
   useEffect(() => {
     if (address) {
-      setRecipient(address.recipient);
-      setPhone(address.phone);
-      setZipcode(address.zipcode);
-      setRoadAddress(address.roadAddress);
-      setDetailAddress(address.detailAddress);
-      setIsDefault(address.isDefault);
+      setFormData(address);
     }
   }, [address]);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handlePostcodeComplete = (data) => {
+    setFormData((prev) => ({
+      ...prev,
+      zipcode: data.zonecode,
+      roadAddress: data.roadAddress,
+    }));
+    setPostcodeVisible(false);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(formData);
+  };
 
   return (
     <form onSubmit={handleSubmit} className="address-form">
       <div className="form-group">
-        <label htmlFor="recipient">받는 사람:</label>
+        <label>받는 사람:</label>
         <input
           type="text"
-          id="recipient"
-          value={recipient}
-          onChange={(e) => setRecipient(e.target.value)}
+          name="recipient"
+          value={formData.recipient}
+          onChange={handleChange}
           required
-          placeholder="받는 사람 이름을 입력하세요"
         />
       </div>
       <div className="form-group">
-        <label htmlFor="phone">전화번호:</label>
+        <label>전화번호:</label>
         <input
           type="text"
-          id="phone"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          name="phone"
+          value={formData.phone}
+          onChange={handleChange}
           required
-          placeholder="전화번호를 입력하세요 (예: 010-1234-5678)"
         />
       </div>
       <div className="form-group">
-        <label htmlFor="zipcode">우편번호:</label>
+        <label>우편번호:</label>
         <input
           type="text"
-          id="zipcode"
-          value={zipcode}
-          onChange={(e) => setZipcode(e.target.value)}
+          name="zipcode"
+          value={formData.zipcode}
+          onChange={handleChange}
           required
-          placeholder="우편번호를 입력하세요"
         />
-        <button type="button" onClick={openAddressSearch}>
+        <button type="button" onClick={() => setPostcodeVisible(true)}>
           우편번호 찾기
         </button>
       </div>
       <div className="form-group">
-        <label htmlFor="roadAddress">도로명 주소:</label>
+        <label>도로명 주소:</label>
         <input
           type="text"
-          id="roadAddress"
-          value={roadAddress}
-          onChange={(e) => setRoadAddress(e.target.value)}
+          name="roadAddress"
+          value={formData.roadAddress}
+          onChange={handleChange}
           required
-          placeholder="도로명 주소를 입력하세요"
         />
       </div>
       <div className="form-group">
-        <label htmlFor="detailAddress">상세 주소:</label>
+        <label>상세 주소:</label>
         <input
           type="text"
-          id="detailAddress"
-          value={detailAddress}
-          onChange={(e) => setDetailAddress(e.target.value)}
+          name="detailAddress"
+          value={formData.detailAddress}
+          onChange={handleChange}
           required
-          placeholder="상세 주소를 입력하세요 (예: 101동 102호)"
         />
       </div>
       <div className="form-group">
-        <label htmlFor="isDefault">
+        <label>
           기본 배송지로 설정
           <input
             type="checkbox"
-            id="isDefault"
-            checked={isDefault}
-            onChange={() => setIsDefault((prev) => !prev)}
+            name="isDefault"
+            checked={formData.isDefault}
+            onChange={handleChange}
           />
         </label>
       </div>
@@ -128,12 +114,9 @@ const AddressForm = ({ address, onSave, onCancel }) => {
         </button>
       </div>
 
-      {/* Daum 주소 검색 모달 */}
       {isPostcodeVisible && (
         <div className="postcode-modal">
-          <div className="modal-content">
-            <DaumPostcode onComplete={handlePostcodeComplete} />
-          </div>
+          <DaumPostcode onComplete={handlePostcodeComplete} />
         </div>
       )}
     </form>

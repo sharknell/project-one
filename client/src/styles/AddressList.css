@@ -1,105 +1,65 @@
-/* 전체 컨테이너 스타일 */
+/* AddressList.css */
 .address-list-container {
-  max-width: 800px;
+  background-color: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
   margin: 20px auto;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .address-list-title {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
   color: #333;
   margin-bottom: 20px;
-  text-align: center;
 }
 
-/* 주소 목록 스타일 */
-.address-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-/* 각 주소 항목 카드 디자인 */
-.address-item {
+.address-list .address-item {
   display: flex;
   justify-content: space-between;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  margin-bottom: 15px;
-  transition: transform 0.3s ease;
-}
-
-.address-item:hover {
-  transform: translateY(-5px); /* Hover 시 살짝 올라가는 효과 */
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: center;
 }
 
 .address-info {
-  flex: 1;
+  max-width: 80%;
 }
 
-/* 각 주소 항목 정보 스타일 */
-.address-recipient,
-.address-phone,
-.address-zipcode,
-.address-road,
-.address-detail {
+.address-info p {
   font-size: 14px;
+  margin-bottom: 4px;
   color: #555;
-  margin: 5px 0;
 }
 
-/* 기본 배송지 표시 */
-.default-tag {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 5px 10px;
-  background-color: #4caf50;
+.address-info .default-tag {
+  background-color: #007aff;
   color: #fff;
-  border-radius: 20px;
+  padding: 4px 8px;
+  border-radius: 8px;
   font-size: 12px;
+  margin-top: 8px;
 }
 
-/* 버튼 스타일 */
-.address-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: space-between;
-}
-
-.address-edit-button,
-.address-delete-button {
-  background-color: #007bff;
-  color: #fff;
-  padding: 8px 15px;
-  border: none;
-  border-radius: 4px;
+.address-actions button {
+  padding: 8px 16px;
   font-size: 14px;
+  color: #fff;
+  background-color: #007aff;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
+  margin-left: 8px;
   transition: background-color 0.3s ease;
-  margin-bottom: 10px;
 }
 
-.address-edit-button:hover,
-.address-delete-button:hover {
-  background-color: #0056b3;
+.address-actions button:hover {
+  background-color: #005f99;
 }
 
-.address-delete-button {
-  background-color: #e74c3c;
-}
-
-.address-delete-button:hover {
-  background-color: #c0392b;
-}
-
-.address-edit-button:focus,
-.address-delete-button:focus {
-  outline: none;
+.no-address-message {
+  text-align: center;
+  font-size: 14px;
+  color: #888;
 }

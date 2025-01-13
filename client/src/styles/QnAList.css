@@ -1,0 +1,119 @@
+/* QnaList.css */
+
+/* 기본 스타일 */
+.qna-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.qna-list li {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border-radius: 12px;
+  background-color: #f7f8f9;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.qna-list li:hover {
+  transform: translateY(-4px); /* 마우스를 올렸을 때 부드러운 업 애니메이션 */
+}
+
+.product-image {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  align-self: center;
+}
+
+.qna-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.question {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.productId {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.qna-footer {
+  font-size: 12px;
+  color: #ccc;
+  margin-top: 8px;
+}
+
+.qna-footer .createdAt {
+  color: #bbb;
+}
+
+.answers {
+  width: 100%;
+  margin-top: 20px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.answer {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.answer-user {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.answer-text {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.answer-date {
+  font-size: 12px;
+  color: #bbb;
+  margin-top: 6px;
+}
+
+.no-answer {
+  font-style: italic;
+  color: #bbb;
+  margin-top: 16px;
+  text-align: center;
+}
+
+/* 버튼 스타일 */
+button {
+  background-color: #4c68f5;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #3a56d7;
+}
