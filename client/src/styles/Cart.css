@@ -1,32 +1,83 @@
+/* 공통 스타일 */
+body {
+  font-family: "Noto Sans", "Roboto", sans-serif;
+  background-color: #f9fafb;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  color: #333;
+}
+
 .cart-container {
-  width: 90%;
-  max-width: 1200px;
+  max-width: 768px;
   margin: 0 auto;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
 }
 
+/* 헤더 스타일 */
 .cart-container h1 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 24px;
   text-align: center;
-  font-size: 2rem;
-  margin-bottom: 20px;
+  color: #0077ff;
 }
 
+/* 배송지 섹션 */
+.address-selection {
+  margin-bottom: 24px;
+}
+
+.address-selection h2 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.address-selection select {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background-color: #ffffff;
+  color: #333;
+}
+
+.add-address-button {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  background-color: #0077ff;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-address-button:hover {
+  background-color: #005bb5;
+}
+
+/* 장바구니 아이템 */
 .cart-items {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .cart-item {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 15px;
-  margin-bottom: 10px;
-  border: 1px solid #f2f2f2;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #ffffff;
+  margin-bottom: 12px;
 }
 
 .cart-item-details {
@@ -35,72 +86,83 @@
 }
 
 .cart-item-image {
-  width: 70px;
-  height: 70px;
+  width: 80px;
+  height: 80px;
   object-fit: cover;
-  margin-right: 15px;
   border-radius: 8px;
+  margin-right: 12px;
 }
 
 .cart-item-info {
-  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .cart-item-info p {
-  margin: 5px 0;
+  margin: 4px 0;
 }
 
 .cart-item-quantity {
   display: flex;
   align-items: center;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .cart-item-quantity button {
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
-  padding: 5px 10px;
-  margin: 0 5px;
-  border-radius: 5px;
+  padding: 6px 12px;
+  background-color: #f1f3f5;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
 }
 
+.cart-item-quantity button:hover {
+  background-color: #e2e6ea;
+}
+
 .remove-item-button {
-  background-color: #ff4747;
+  background-color: #ff4d4f;
+  color: #ffffff;
   border: none;
-  color: white;
-  padding: 8px 15px;
-  border-radius: 5px;
+  padding: 8px 12px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
 .remove-item-button:hover {
-  background-color: #e43e3e;
+  background-color: #d9363e;
 }
 
+/* 결제 섹션 */
 .cart-summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 20px;
-  font-size: 1.25rem;
+  margin-top: 24px;
+  text-align: center;
+}
+
+.cart-summary p {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
 }
 
 .checkout-button {
-  background-color: #1b8eff;
-  color: white;
-  padding: 15px 30px;
-  border-radius: 30px;
-  font-size: 1.2rem;
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  background-color: #0077ff;
+  color: #ffffff;
   border: none;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.checkout-button:hover {
-  background-color: #1379d5;
+  transition: background-color 0.3s ease;
 }
 
 .checkout-button:disabled {
-  background-color: #a0a0a0;
+  background-color: #ccc;
   cursor: not-allowed;
+}
+
+.checkout-button:hover:not(:disabled) {
+  background-color: #005bb5;
 }

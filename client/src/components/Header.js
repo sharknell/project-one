@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import "../styles/Header.css";
@@ -6,6 +6,7 @@ import "../styles/Header.css";
 function Header() {
   const { isAuthenticated, logout, logoutMessage, setLogoutMessage } =
     useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // 로그아웃 메시지 상태가 있으면 알림을 띄운 후 메시지를 초기화
   useEffect(() => {
@@ -14,6 +15,8 @@ function Header() {
       setLogoutMessage(""); // 메시지 초기화
     }
   }, [logoutMessage, setLogoutMessage]);
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
     <header className="header">
@@ -25,8 +28,13 @@ function Header() {
             PerfumeShop
           </Link>
 
+          {/* 모바일 메뉴 버튼 */}
+          <button className="menu-toggle" onClick={toggleMenu}>
+            ☰
+          </button>
+
           {/* 네비게이션 메뉴 */}
-          <nav className="header-nav">
+          <nav className={`header-nav ${isMenuOpen ? "active" : ""}`}>
             <Link to="/shop" className="header-nav-item">
               Shop
             </Link>

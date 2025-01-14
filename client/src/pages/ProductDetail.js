@@ -83,7 +83,6 @@ function ProductDetail() {
   const closeModal = () => {
     setIsQnAModalOpen(false);
   };
-
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
       const confirmLogin = window.confirm(
@@ -118,11 +117,16 @@ function ProductDetail() {
         } else {
           // 없으면 새로 추가
           const quantity = 1;
+          const productName = product.name;
+          const productSize = product.size || "없음"; // 사이즈가 없을 경우 기본값 설정
 
           await axios.post("http://localhost:5001/cart/add", {
             productId: id,
             quantity,
             userId: userId,
+            thumbnail: product.images[0], // 썸네일 이미지 추가
+            productName, // 제품 이름 추가
+            productSize, // 제품 사이즈 추가
           });
 
           alert("장바구니에 추가되었습니다.");

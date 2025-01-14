@@ -1,61 +1,55 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../AuthContext";
 
-const PaymentSuccess = () => {
-  const [paymentStatus, setPaymentStatus] = useState(null);
-  const [error, setError] = useState(null);
+function PaymentSuccess() {
+  const { authToken } = useAuth(); // 인증 토큰 가져오기
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const orderId = urlParams.get("orderId");
-    const paymentKey = urlParams.get("paymentKey");
-    const amount = urlParams.get("amount");
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("orderId");
+    const paymentKey = params.get("paymentKey");
+    const amount = params.get("amount");
 
     if (!orderId || !paymentKey || !amount) {
-      setError("결제 정보가 부족합니다.");
+      alert("결제 정보가 유효하지 않습니다.");
+      navigate("/cart");
       return;
     }
 
-    const postPaymentSuccess = async () => {
+    const fetchPaymentSuccess = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:5001/api/payment/success",
+        // 인증 토큰을 헤더에 추가
+        const { data } = await axios.get(
+          `http://localhost:5001/api/payment/success?orderId=${orderId}&paymentKey=${paymentKey}&amount=${amount}`,
           {
-            method: "POST", // POST 요청으로 변경
             headers: {
-              "Content-Type": "application/json",
+              Authorization: `Bearer ${authToken}`, // 인증 토큰 추가
             },
-            body: JSON.stringify({
-              orderId,
-              amount,
-              orderName: "Sample Product",
-            }),
           }
         );
 
-        const result = await response.json();
-
-        if (response.ok) {
-          setPaymentStatus(result.message);
+        // 결제 성공 처리
+        if (data.success) {
+          alert("결제가 성공적으로 처리되었습니다.");
+          navigate("/order-success"); // 주문 완료 페이지로 리디렉션
         } else {
-          setError(result.message);
+          alert("결제에 실패했습니다.");
+          navigate("/cart");
         }
-      } catch (err) {
-        setError("결제 상태 처리 중 오류가 발생했습니다.");
+      } catch (error) {
+        console.error("결제 처리 오류:", error);
+        alert("결제 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+        navigate("/cart");
       }
     };
 
-    postPaymentSuccess();
-  }, []);
+    fetchPaymentSuccess();
+  }, [authToken, navigate]);
 
-  if (error) {
-    return <div>오류: {error}</div>;
-  }
-
-  if (paymentStatus) {
-    return <div>결제 성공: {paymentStatus}</div>;
-  }
-
-  return <div>결제 성공을 확인하는 중...</div>;
-};
+  return <div>결제 처리 중...</div>;
+}
 
 export default PaymentSuccess;

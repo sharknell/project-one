@@ -1,12 +1,34 @@
 .footer {
-  background-color: #f9f9f9;
+  background-color: #f5f5f5;
+  padding: 20px 0;
   text-align: center;
-  padding: 20px;
-  border-top: 1px solid #ddd;
+  font-family: "Noto Sans", sans-serif;
+  color: #333;
+  border-top: 1px solid #e1e1e1;
+}
+
+.footer-text {
+  font-size: 14px;
+  color: #666;
+}
+
+.footer-links {
+  margin-top: 10px;
 }
 
 .link {
-  margin-left: 10px;
+  color: #0061f2;
+  font-size: 14px;
   text-decoration: none;
-  color: #333;
+  margin: 0 5px;
+  transition: color 0.3s ease;
+}
+
+.link:hover {
+  color: #0048e0;
+}
+
+.divider {
+  color: #bbb;
+  margin: 0 5px;
 }

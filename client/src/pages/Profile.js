@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
-import api, { getProfile, getAddresses } from "../utils/api";
+import api, {
+  getProfile,
+  getAddresses,
+  getOrders,
+  getQnaData,
+} from "../utils/api";
 import Sidebar from "../components/SideBar";
 import BasicInfo from "../components/BasicInfo";
 import AddressList from "../components/AddressList";
 import AddressForm from "../components/AddressForm";
 import OrderList from "../components/OrderList";
-import QnaList from "../components/QnAList"; // QnA 목록을 표시하는 컴포넌트
+import QnaList from "../components/QnAList";
 import "../styles/Profile.css";
 
 const Profile = () => {
@@ -14,49 +19,42 @@ const Profile = () => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("basicInfo");
   const [addressToEdit, setAddressToEdit] = useState(null);
-  const [selectedProductId, setSelectedProductId] = useState(null);
-  const [qnaData, setQnaData] = useState([]); // QnA 데이터를 상태로 관리
+  const [qnaData, setQnaData] = useState([]);
+  const [orderData, setOrderData] = useState([]);
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
         const token = localStorage.getItem("authToken");
+
         const profileData = await getProfile(token);
         setProfile(profileData.user);
+
         const addressesData = await getAddresses(token);
         setProfile((prev) => ({ ...prev, addresses: addressesData.addresses }));
 
-        // QnA 데이터 가져오기
-        const qnaResponse = await api.get("/qna/user/qna", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const qnaResponse = await getQnaData(token);
+        setQnaData(Array.isArray(qnaResponse.data) ? qnaResponse.data : []);
 
-        // 받은 QnA 데이터 확인 (배열인지 체크)
-        console.log("QnA 데이터:", qnaResponse.data);
-
-        // qnaResponse.data.data 배열이므로 해당 데이터로 설정
-        if (Array.isArray(qnaResponse.data.data)) {
-          setQnaData(qnaResponse.data.data);
-        } else {
-          setQnaData([]); // 배열이 아니면 빈 배열로 처리
-        }
+        const ordersResponse = await getOrders(token);
+        setOrderData(ordersResponse.orders);
       } catch (err) {
-        setError("프로필 로드 실패");
+        setError(
+          err.message || "프로필 데이터를 로드하는 중 오류가 발생했습니다."
+        );
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfileData();
-  }, [selectedProductId]); // `selectedProductId`에 의존하여 QnA 데이터를 다시 가져옵니다.
+  }, []);
 
   const handleAddressSave = async (address) => {
     const token = localStorage.getItem("authToken");
 
-    if (addressToEdit) {
-      try {
+    try {
+      if (addressToEdit) {
         await updateAddress(token, addressToEdit.id, address);
         setProfile((prev) => ({
           ...prev,
@@ -65,19 +63,15 @@ const Profile = () => {
           ),
         }));
         setAddressToEdit(null);
-      } catch (err) {
-        setError("배송지 수정 실패");
-      }
-    } else {
-      try {
+      } else {
         await addAddress(token, address);
         setProfile((prev) => ({
           ...prev,
           addresses: [...prev.addresses, { ...address, id: Date.now() }],
         }));
-      } catch (err) {
-        setError("배송지 추가 실패");
       }
+    } catch (err) {
+      setError(err.message || "배송지 저장 중 오류가 발생했습니다.");
     }
   };
 
@@ -91,7 +85,7 @@ const Profile = () => {
         addresses: prev.addresses.filter((a) => a.id !== address.id),
       }));
     } catch (err) {
-      setError("배송지 삭제 실패");
+      setError(err.message || "배송지 삭제 중 오류가 발생했습니다.");
     }
   };
 
@@ -119,7 +113,15 @@ const Profile = () => {
             )}
           </>
         )}
-        {activeTab === "orders" && <OrderList />}
+        {activeTab === "orders" && (
+          <div className="order-section">
+            {orderData.length === 0 ? (
+              <p>주문 내역이 없습니다.</p>
+            ) : (
+              <OrderList orders={orderData} />
+            )}
+          </div>
+        )}
         {activeTab === "qna" && (
           <div className="qna-section">
             <h2>내가 작성한 질문</h2>

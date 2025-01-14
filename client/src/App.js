@@ -13,7 +13,18 @@ import PaymentCancel from "./components/PaymentCancel";
 import PaymentFail from "./components/PaymentFail";
 import PaymentSuccess from "./components/PaymentSuccess";
 import QnAForm from "./components/QnAForm";
-import { AuthProvider } from "./AuthContext";
+import { AuthProvider, useAuth } from "./AuthContext";
+import { Navigate } from "react-router-dom";
+
+function ProtectedRoute({ element, redirectTo }) {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Navigate to={redirectTo} />;
+  }
+
+  return element;
+}
 
 function App() {
   return (
@@ -30,9 +41,32 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/QnAForm" element={<QnAForm />} />
-            <Route path="/payment-success" element={<PaymentSuccess />} />
-            <Route path="/payment-fail" element={<PaymentFail />} />
-            <Route path="/payment-cancel" element={<PaymentCancel />} />
+
+            {/* 결제 관련 페이지 */}
+            <Route
+              path="/payment-success"
+              element={
+                <ProtectedRoute
+                  element={<PaymentSuccess />}
+                  redirectTo="/login"
+                />
+              }
+            />
+            <Route
+              path="/payment-fail"
+              element={
+                <ProtectedRoute element={<PaymentFail />} redirectTo="/login" />
+              }
+            />
+            <Route
+              path="/payment-cancel"
+              element={
+                <ProtectedRoute
+                  element={<PaymentCancel />}
+                  redirectTo="/login"
+                />
+              }
+            />
           </Routes>
         </main>
         <Footer />

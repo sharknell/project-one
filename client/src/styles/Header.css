@@ -4,21 +4,22 @@
 }
 
 body {
-  font-family: "Noto Sans", sans-serif; /* 깔끔한 고딕체 */
+  font-family: "Noto Sans", sans-serif;
   margin: 0;
   padding: 0;
 }
 
 header {
-  background-color: #fff; /* 흰색 배경 */
-  border-bottom: 1px solid #e0e0e0; /* 얇은 회색 선 */
+  background-color: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* 상단바 스타일 */
 .header-top {
-  padding: 20px 40px;
+  padding: 16px 32px;
   display: flex;
-  justify-content: space-between; /* 로고와 메뉴가 양 끝에 배치되도록 */
+  justify-content: space-between;
   align-items: center;
 }
 
@@ -26,44 +27,59 @@ header {
   display: flex;
   justify-content: space-between;
   width: 100%;
+  position: relative;
 }
 
 .header-logo {
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 20px;
+  font-weight: 600;
   color: #333;
   text-decoration: none;
+  white-space: nowrap; /* 로고가 짤리지 않도록 */
 }
 
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 30px;
+  color: #333;
+  cursor: pointer;
+}
+
+/* 네비게이션 메뉴 */
 .header-nav {
   display: flex;
   align-items: center;
-  margin-left: auto; /* 네비게이션 메뉴를 오른쪽으로 밀어줌 */
+  margin-left: auto;
+  gap: 20px;
 }
 
 .header-nav-item {
-  font-size: 16px;
-  margin: 0 20px;
-  text-decoration: none;
+  font-size: 14px;
   color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
 
 .header-nav-item:hover {
-  color: #00bcd4; /* 토스처럼 강조되는 색상 */
+  color: #00bcd4;
 }
 
 .header-logout-button {
-  background-color: #f44336; /* 빨간색 배경 */
+  background-color: #f44336;
   color: white;
   border: none;
-  padding: 10px 20px;
-  font-size: 16px;
+  padding: 8px 16px;
+  font-size: 14px;
   cursor: pointer;
   border-radius: 5px;
+  transition: background-color 0.3s ease;
 }
 
 .header-logout-button:hover {
-  background-color: #d32f2f; /* 빨간색 클릭시 강조 */
+  background-color: #d32f2f;
 }
 
 /* 회원가입 버튼 스타일 */
@@ -77,7 +93,7 @@ header {
 
 /* 하단 바 스타일 */
 .header-bottom {
-  padding: 10px 40px;
+  padding: 8px 32px;
   background-color: #f8f8f8;
   border-top: 1px solid #e0e0e0;
 }
@@ -91,9 +107,51 @@ header {
   margin: 0 20px;
   text-decoration: none;
   color: #555;
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .header-bottom-nav-item:hover {
   color: #00bcd4;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  /* 기본적으로 메뉴를 숨김 */
+  .header-nav {
+    display: none;
+    position: absolute;
+    top: 60px; /* 헤더 아래로 메뉴 배치 */
+    left: 0;
+    right: 0;
+    background-color: white;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 20px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* 메뉴가 열렸을 때 보이게 함 */
+  .header-nav.active {
+    display: flex;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  .header-nav-item {
+    margin: 10px 0; /* 항목 사이의 간격을 좁힘 */
+    font-size: 16px;
+  }
+
+  .header-logo {
+    font-size: 18px;
+  }
+
+  .header-container {
+    justify-content: space-between;
+    padding: 0 16px; /* 모바일에서 로고와 메뉴 간의 여백을 조정 */
+  }
 }

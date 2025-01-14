@@ -22,7 +22,10 @@ export const getProfile = async (token) => {
     });
     return response.data;
   } catch (error) {
-    throw new Error("프로필을 가져오는 중 오류가 발생했습니다.");
+    throw new Error(
+      error.response?.data?.message ||
+        "프로필을 가져오는 중 오류가 발생했습니다."
+    );
   }
 };
 
@@ -36,7 +39,10 @@ export const getAddresses = async (token) => {
     });
     return response.data;
   } catch (error) {
-    throw new Error("배송지를 가져오는 중 오류가 발생했습니다.");
+    throw new Error(
+      error.response?.data?.message ||
+        "배송지를 가져오는 중 오류가 발생했습니다."
+    );
   }
 };
 
@@ -50,7 +56,9 @@ export const addAddress = async (token, address) => {
     });
     return response.data;
   } catch (error) {
-    throw new Error("배송지 추가 중 오류가 발생했습니다.");
+    throw new Error(
+      error.response?.data?.message || "배송지 추가 중 오류가 발생했습니다."
+    );
   }
 };
 
@@ -68,7 +76,9 @@ export const updateAddress = async (token, addressId, updatedAddress) => {
     );
     return response.data;
   } catch (error) {
-    throw new Error("배송지 업데이트 중 오류가 발생했습니다.");
+    throw new Error(
+      error.response?.data?.message || "배송지 업데이트 중 오류가 발생했습니다."
+    );
   }
 };
 
@@ -82,9 +92,12 @@ export const deleteAddress = async (token, addressId) => {
     });
     return response.data;
   } catch (error) {
-    throw new Error("배송지 삭제 중 오류가 발생했습니다.");
+    throw new Error(
+      error.response?.data?.message || "배송지 삭제 중 오류가 발생했습니다."
+    );
   }
 };
+
 // QnA 데이터를 가져오는 함수
 export const getQnaData = async (token) => {
   try {
@@ -95,7 +108,24 @@ export const getQnaData = async (token) => {
     });
     return response.data;
   } catch (error) {
-    throw new Error("QnA 데이터를 가져오는 데 실패했습니다.");
+    throw new Error(
+      error.response?.data?.message || "QnA 데이터를 가져오는 데 실패했습니다."
+    );
+  }
+};
+
+// 주문 데이터 가져오기
+export const getOrders = async (token) => {
+  try {
+    const response = await api.get("/orders/user", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message ||
+        "주문 데이터를 가져오는 중 오류가 발생했습니다."
+    );
   }
 };
 

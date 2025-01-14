@@ -4,16 +4,16 @@ import "../styles/Footer.css";
 function Footer() {
   return (
     <footer className="footer">
-      <p>&copy; 2024 PerfumeShop. All rights reserved.</p>
-      <p>
+      <p className="footer-text">© 2024 PerfumeShop. All rights reserved.</p>
+      <div className="footer-links">
         <a href="/qna" className="link">
           Customer Support
-        </a>{" "}
-        |
+        </a>
+        <span className="divider">|</span>
         <a href="/terms" className="link">
           Terms of Service
         </a>
-      </p>
+      </div>
     </footer>
   );
 }

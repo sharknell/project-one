@@ -4,7 +4,8 @@ const { dbPromise } = require("../config/db"); // dbPromise 가져오기
 
 // 장바구니 추가 API
 router.post("/add", async (req, res) => {
-  const { productId, quantity, userId } = req.body;
+  const { productId, quantity, userId, thumbnail, productName, productSize } =
+    req.body;
   try {
     const [product] = await dbPromise.execute(
       "SELECT * FROM products WHERE id = ?",
@@ -35,8 +36,16 @@ router.post("/add", async (req, res) => {
     }
 
     await dbPromise.execute(
-      "INSERT INTO cart (product_id, quantity, price, user_id) VALUES (?, ?, ?, ?)",
-      [productId, quantity, productPrice, userId]
+      "INSERT INTO cart (product_id, quantity, price, user_id, thumbnail, product_name, product_size) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [
+        productId,
+        quantity,
+        productPrice,
+        userId,
+        thumbnail,
+        productName,
+        productSize,
+      ]
     );
 
     res.status(200).json({ message: "장바구니에 추가되었습니다." });
@@ -116,6 +125,29 @@ router.put("/updateQuantity/:id", async (req, res) => {
   } catch (err) {
     console.error("장바구니 수량 변경 오류:", err);
     res.status(500).json({ error: "장바구니 수량 변경에 실패했습니다." });
+  }
+});
+
+// 서버에서 배송지 조회 API
+router.get("/addresses", async (req, res) => {
+  const { userId } = req.query;
+
+  if (!userId) {
+    return res.status(400).json({ error: "사용자 ID가 필요합니다." });
+  }
+
+  try {
+    const [addresses] = await dbPromise.execute(
+      "SELECT * FROM addresses WHERE user_id = ?",
+      [userId]
+    );
+    if (addresses.length === 0) {
+      return res.status(404).json({ message: "배송지를 찾을 수 없습니다." });
+    }
+    res.status(200).json(addresses);
+  } catch (err) {
+    console.error("배송지 조회 오류:", err);
+    res.status(500).json({ error: "배송지 조회에 실패했습니다." });
   }
 });
 

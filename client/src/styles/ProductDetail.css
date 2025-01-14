@@ -1,4 +1,4 @@
-/* 제품 상세 페이지 기본 스타일 */
+/* 기본 제품 상세 페이지 스타일 */
 .product-detail-container {
   width: 100%;
   max-width: 1200px;
@@ -192,12 +192,6 @@
 .close-popup-button:hover {
   color: #333;
 }
-/* Iframe 스타일 */
-.qna-modal iframe {
-  border: none;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-}
 
 /* 모달 오버레이 */
 .qna-modal-overlay {
@@ -224,13 +218,78 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.close-modal-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 20px;
-  color: #777;
-  cursor: pointer;
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+  .product-detail-content {
+    flex-direction: column; /* 세로 레이아웃으로 변경 */
+    align-items: center;
+  }
+
+  .product-detail-main {
+    margin-bottom: 20px;
+  }
+
+  .product-detail-main-image img {
+    max-height: 400px; /* 모바일에서는 이미지 크기 축소 */
+  }
+
+  .thumbnail-image {
+    width: 60px;
+    height: 60px;
+  }
+
+  .product-detail-info {
+    margin-top: 20px;
+    align-items: center;
+  }
+
+  .product-detail-info h1 {
+    font-size: 24px; /* 모바일 화면에서 제목 크기 축소 */
+  }
+
+  .product-detail-info .product-detail-price {
+    font-size: 20px;
+  }
+
+  .product-detail-buttons button {
+    width: 100%; /* 버튼이 모바일 화면에 맞게 꽉 차도록 */
+    font-size: 14px;
+  }
+
+  .dropdown-toggle {
+    font-size: 14px; /* 버튼 텍스트 크기 축소 */
+  }
+
+  .qna-register-button {
+    font-size: 14px; /* QnA 등록 버튼 텍스트 크기 축소 */
+  }
+
+  .product-detail-extra-info h2 {
+    font-size: 20px; /* 제목 크기 축소 */
+  }
+
+  .qna-modal {
+    width: 90%; /* 모바일에서 모달 크기 조정 */
+  }
+}
+
+/* 더 작은 화면(모바일) 반응형 스타일 */
+@media (max-width: 480px) {
+  .product-detail-header h1 {
+    font-size: 24px; /* 제목 크기 축소 */
+  }
+
+  .product-detail-header p {
+    font-size: 14px; /* 부제목 크기 축소 */
+  }
+
+  .product-detail-info .product-detail-price {
+    font-size: 18px; /* 가격 텍스트 크기 축소 */
+  }
+
+  .product-detail-info .product-detail-category,
+  .product-detail-info .product-detail-size,
+  .product-detail-info .product-detail-stock {
+    font-size: 14px; /* 다른 텍스트 크기 축소 */
+  }
 }
