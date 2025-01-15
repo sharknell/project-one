@@ -20,13 +20,15 @@ function Cart() {
     if (isLoading) return;
 
     if (!isAuthenticated) {
+      console.log("로그인 상태가 아닙니다.");
       alert("로그인 후 장바구니를 확인할 수 있습니다.");
       setTimeout(() => navigate("/login"), 1000);
       return;
     }
 
-    const token = localStorage.getItem("authToken"); // authToken을 직접 가져옴
+    const token = authToken || localStorage.getItem("authToken"); // authToken을 먼저 확인, 없으면 로컬스토리지에서 가져옴
     if (!token) {
+      console.log("토큰이 존재하지 않습니다.");
       alert("토큰이 존재하지 않습니다. 로그인 상태를 확인해주세요.");
       setTimeout(() => navigate("/login"), 1000);
       return;
@@ -37,6 +39,7 @@ function Cart() {
     try {
       const decodedToken = jwtDecode(token); // 토큰 디코딩
       userId = decodedToken.id; // userId 추출
+      console.log("Decoded User ID:", userId); // 디버깅을 위한 출력
     } catch (error) {
       console.error("토큰 디코딩 실패:", error);
       alert("토큰에서 userId를 추출하는데 실패했습니다.");
@@ -55,12 +58,15 @@ function Cart() {
           }
         );
 
+        console.log("장바구니 아이템:", data); // 장바구니 아이템 출력
+
         if (data.message) {
           alert(data.message);
         } else {
           const items = data || [];
           setCartItems(items);
           setTotalAmount(calculateTotalAmount(items)); // 총 금액 계산
+          console.log("장바구니 총 금액:", calculateTotalAmount(items)); // 총 금액 출력
         }
       } catch (error) {
         console.error("장바구니 데이터를 불러오는데 실패했습니다.", error);
@@ -79,7 +85,7 @@ function Cart() {
             },
           }
         );
-        console.log("배송지 데이터:", data);
+        console.log("배송지 데이터:", data); // 배송지 데이터 출력
         setAddresses(data);
       } catch (error) {
         console.error("배송지 데이터를 불러오는데 실패했습니다.", error);
@@ -89,10 +95,30 @@ function Cart() {
 
     fetchCartItems();
     fetchAddresses();
-  }, [isAuthenticated, isLoading, navigate]);
-
+  }, [isAuthenticated, isLoading, authToken, navigate]);
   const handleQuantityChangeHandler = async (itemId, newQuantity) => {
-    if (newQuantity < 1) return; // 수량이 1보다 적게 변경되지 않도록
+    if (newQuantity < 1) {
+      if (
+        window.confirm(
+          "수량이 0이 됩니다. 이 품목을 장바구니에서 삭제하시겠습니까?"
+        )
+      ) {
+        handleRemove(itemId); // 품목 삭제 함수 호출
+      }
+      return; // 수량이 0 미만으로 떨어지지 않게 방지
+    }
+
+    // 수량이 1일 때 - 버튼을 누르면 삭제할지 묻는 팝업
+    if (newQuantity === 1) {
+      if (
+        window.confirm(
+          "수량이 0이 됩니다. 이 품목을 장바구니에서 삭제하시겠습니까?"
+        )
+      ) {
+        handleRemove(itemId); // 품목 삭제 함수 호출
+      }
+      return; // 수량을 1로 유지하도록 방지
+    }
 
     try {
       const { data } = await axios.put(
@@ -112,8 +138,6 @@ function Cart() {
       alert("장바구니 수량 변경에 실패했습니다.");
     }
   };
-
-  // 장바구니에서 아이템 삭제
   const handleRemove = async (itemId) => {
     try {
       const { data } = await axios.delete(
@@ -122,7 +146,7 @@ function Cart() {
       if (data.message === "장바구니에서 삭제되었습니다.") {
         const updatedCartItems = cartItems.filter((item) => item.id !== itemId);
         setCartItems(updatedCartItems);
-        setTotalAmount(calculateTotalAmount(updatedCartItems));
+        setTotalAmount(calculateTotalAmount(updatedCartItems)); // 수량 변경 후 총 금액 업데이트
       }
     } catch (error) {
       console.error("장바구니 삭제 실패:", error);
@@ -144,22 +168,42 @@ function Cart() {
     try {
       setLoading(true);
 
-      const token = localStorage.getItem("authToken"); // 로컬 스토리지에서 토큰 가져오기
+      const token = authToken || localStorage.getItem("authToken"); // 로컬 스토리지에서 토큰 가져오기
       if (!token) {
         alert("로그인 상태를 확인해주세요.");
         return;
       }
 
+      // JWT 토큰에서 userId 추출
+      let userId = null;
+      try {
+        const decodedToken = jwtDecode(token); // 토큰 디코딩
+        userId = decodedToken.id; // userId 추출
+        console.log("Checkout User ID:", userId); // 결제 시 userId 출력
+      } catch (error) {
+        console.error("토큰 디코딩 실패:", error);
+        alert("토큰에서 userId를 추출하는데 실패했습니다.");
+        setTimeout(() => navigate("/login"), 1000);
+        return;
+      }
+
+      // TossPayments 초기화
       const tossPayments = await loadTossPayments(
         "test_ck_pP2YxJ4K87RqyvqEbgjLrRGZwXLO"
       );
 
+      // 장바구니 아이템 정보와 함께 결제 요청
       const { data } = await axios.post(
         "http://localhost:5001/api/payment",
         {
           amount: totalAmount,
           orderName: "장바구니 상품",
           address: selectedAddress,
+          user_id: userId, // user_id 포함
+          cartItems: cartItems.map((item) => ({
+            productId: item.id,
+            quantity: item.quantity,
+          })), // 장바구니 아이템 정보 포함
         },
         {
           headers: {
@@ -168,48 +212,28 @@ function Cart() {
         }
       );
 
+      console.log("결제 데이터:", data); // 결제 데이터 출력
+
       tossPayments
         .requestPayment("카드", {
           amount: data.amount,
           orderId: data.orderId,
           orderName: data.orderName,
-          successUrl: "http://localhost:5001/api/payment/success",
-          failUrl: "http://localhost:5001/api/payment/fail",
-          cancelUrl: "http://localhost:5001/api/payment/cancel",
-        })
-        .then(() => {
-          alert("결제가 완료되었습니다.");
-          navigate("/order-success"); // 결제 성공 후 주문 완료 페이지로 이동
+          successUrl: "http://localhost:5001/api/payment/success", // POST로 변경
+          failUrl: "http://localhost:5001/api/payment/failed", // POST로 변경
+          cancelUrl: "http://localhost:5001/api/payment/cancel", // POST로 변경
         })
         .catch((error) => {
-          console.error("결제 오류:", error);
-          alert(
-            `결제 취소되었습니다. ${
-              error.message || "잠시 후 다시 시도해주세요."
-            }`
-          );
+          console.error("결제 처리 중 오류가 발생했습니다.", error);
+          alert("결제에 실패했습니다.");
+          setLoading(false);
         });
     } catch (error) {
-      console.error("결제 오류:", error);
-      alert(
-        `결제에 실패했습니다. ${error.message || "잠시 후 다시 시도해주세요."}`
-      );
-    } finally {
+      console.error("결제 처리 중 오류 발생:", error);
+      alert("결제 처리 중 오류가 발생했습니다.");
       setLoading(false);
     }
   };
-
-  if (isLoading || loading) {
-    return <div>로딩 중...</div>;
-  }
-
-  if (cartItems.length === 0) {
-    return (
-      <div className="cart-container">
-        <h1>장바구니가 비어 있습니다.</h1>
-      </div>
-    );
-  }
 
   return (
     <div className="cart-container">

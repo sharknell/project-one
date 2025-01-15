@@ -114,17 +114,18 @@ export const getQnaData = async (token) => {
   }
 };
 
-// 주문 데이터 가져오기
+// getOrders 함수 수정
 export const getOrders = async (token) => {
   try {
-    const response = await api.get("/orders/user", {
-      headers: { Authorization: `Bearer ${token}` },
+    const response = await api.get("profile/orders", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     return response.data;
   } catch (error) {
     throw new Error(
-      error.response?.data?.message ||
-        "주문 데이터를 가져오는 중 오류가 발생했습니다."
+      error.response?.data?.message || "주문 내역을 가져오는 데 실패했습니다."
     );
   }
 };

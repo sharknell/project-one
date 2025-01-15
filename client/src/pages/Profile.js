@@ -2,25 +2,25 @@ import React, { useState, useEffect } from "react";
 import api, {
   getProfile,
   getAddresses,
-  getOrders,
+  getOrders, // 주문 내역을 가져오는 API 추가
   getQnaData,
 } from "../utils/api";
 import Sidebar from "../components/SideBar";
 import BasicInfo from "../components/BasicInfo";
 import AddressList from "../components/AddressList";
 import AddressForm from "../components/AddressForm";
-import OrderList from "../components/OrderList";
 import QnaList from "../components/QnAList";
+import OrderList from "../components/OrderList"; // 주문 내역을 표시할 컴포넌트 추가
 import "../styles/Profile.css";
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
+  const [orders, setOrders] = useState([]); // 주문 내역 상태 추가
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("basicInfo");
   const [addressToEdit, setAddressToEdit] = useState(null);
   const [qnaData, setQnaData] = useState([]);
-  const [orderData, setOrderData] = useState([]);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -36,8 +36,8 @@ const Profile = () => {
         const qnaResponse = await getQnaData(token);
         setQnaData(Array.isArray(qnaResponse.data) ? qnaResponse.data : []);
 
-        const ordersResponse = await getOrders(token);
-        setOrderData(ordersResponse.orders);
+        const ordersResponse = await getOrders(token); // 주문 내역 가져오기
+        setOrders(ordersResponse.orders); // 주문 내역 상태 업데이트
       } catch (err) {
         setError(
           err.message || "프로필 데이터를 로드하는 중 오류가 발생했습니다."
@@ -113,19 +113,16 @@ const Profile = () => {
             )}
           </>
         )}
-        {activeTab === "orders" && (
-          <div className="order-section">
-            {orderData.length === 0 ? (
-              <p>주문 내역이 없습니다.</p>
-            ) : (
-              <OrderList orders={orderData} />
-            )}
-          </div>
-        )}
         {activeTab === "qna" && (
           <div className="qna-section">
             <h2>내가 작성한 질문</h2>
             <QnaList qnaData={qnaData} />
+          </div>
+        )}
+        {activeTab === "orders" && ( // 주문 내역 탭 추가
+          <div className="orders-section">
+            <h2>내 주문 내역</h2>
+            <OrderList orders={orders} /> {/* 주문 내역 리스트 렌더링 */}
           </div>
         )}
       </div>

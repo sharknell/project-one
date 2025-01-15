@@ -16,14 +16,20 @@ import QnAForm from "./components/QnAForm";
 import { AuthProvider, useAuth } from "./AuthContext";
 import { Navigate } from "react-router-dom";
 
-function ProtectedRoute({ element, redirectTo }) {
-  const { isAuthenticated } = useAuth();
+// ProtectedRoute 컴포넌트 수정
+function ProtectedRoute({ children, redirectTo }) {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // 로딩 중이거나 인증되지 않은 경우 로그인 페이지로 리디렉션
+  if (isLoading) {
+    return <div>Loading...</div>; // 로딩 중일 때 로딩 화면을 보여줄 수 있습니다.
+  }
 
   if (!isAuthenticated) {
     return <Navigate to={redirectTo} />;
   }
 
-  return element;
+  return children;
 }
 
 function App() {
@@ -46,25 +52,25 @@ function App() {
             <Route
               path="/payment-success"
               element={
-                <ProtectedRoute
-                  element={<PaymentSuccess />}
-                  redirectTo="/login"
-                />
+                <ProtectedRoute redirectTo="/login">
+                  <PaymentSuccess />
+                </ProtectedRoute>
               }
             />
             <Route
               path="/payment-fail"
               element={
-                <ProtectedRoute element={<PaymentFail />} redirectTo="/login" />
+                <ProtectedRoute redirectTo="/login">
+                  <PaymentFail />
+                </ProtectedRoute>
               }
             />
             <Route
               path="/payment-cancel"
               element={
-                <ProtectedRoute
-                  element={<PaymentCancel />}
-                  redirectTo="/login"
-                />
+                <ProtectedRoute redirectTo="/login">
+                  <PaymentCancel />
+                </ProtectedRoute>
               }
             />
           </Routes>

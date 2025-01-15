@@ -9,9 +9,7 @@ const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/products");
 const profileRoutes = require("./routes/profile");
 const paymentRoutes = require("./routes/payment");
-const orderlistRoutes = require("./routes/orderlist"); // 주문 내역 라우터 추가
 const qnaRoutes = require("./routes/qna"); // QnA 라우터 추가
-//const cartRoutes = require("./routes/cart"); // 카트 라우터 추가
 const cartRoutes = require("./routes/cartRoutes");
 const app = express();
 
@@ -24,7 +22,6 @@ app.use("/profile", profileRoutes);
 app.use("/shop", productRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/cart", cartRoutes);
-app.use("/profile/orders", orderlistRoutes); // 주문 내역 API 연결
 app.use("/qna", qnaRoutes); // QnA 관련 API 라우터 추가
 
 // QnA 데이터 가져오기

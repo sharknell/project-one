@@ -250,4 +250,37 @@ router.delete("/addresses/:id", async (req, res) => {
   }
 });
 
+// 결제 내역 조회
+router.get("/orders", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1]; // Bearer 토큰
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided." });
+  }
+
+  try {
+    const decoded = await verifyToken(token, JWT_SECRET);
+    const userId = decoded.id;
+
+    // payment 테이블에서 주문 내역과 결제 상태 조회
+    const connection = await dbPromise;
+
+    const query = `
+      SELECT order_id, user_id, amount, order_name, address, cart_items, status, created_at
+      FROM payment
+      WHERE user_id = ?
+    `;
+
+    const [orders] = await connection.execute(query, [userId]);
+
+    if (orders.length === 0) {
+      return res.status(404).json({ message: "No orders found." });
+    }
+    res.status(200).json({ orders });
+  } catch (err) {
+    console.error("Orders Error:", err);
+    res.status(500).json({ message: "Error fetching orders." });
+  }
+});
+
 module.exports = router;
