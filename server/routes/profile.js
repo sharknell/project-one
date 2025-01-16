@@ -274,7 +274,7 @@ router.get("/orders", async (req, res) => {
     const [orders] = await connection.execute(query, [userId]);
 
     if (orders.length === 0) {
-      return res.status(404).json({ message: "No orders found." });
+      // return res.status(404).json({ message: "No orders found." });
     }
     res.status(200).json({ orders });
   } catch (err) {

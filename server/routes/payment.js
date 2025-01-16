@@ -21,7 +21,6 @@ const updatePaymentStatus = async (orderId, status) => {
   }
 };
 
-// 결제 요청 처리
 router.post("/", async (req, res) => {
   const { amount, orderName, address, user_id, cartItems } = req.body;
 
@@ -48,7 +47,15 @@ router.post("/", async (req, res) => {
       amount,
       orderName,
       address,
-      JSON.stringify(cartItems),
+      JSON.stringify(
+        cartItems.map((item) => ({
+          productId: item.productId,
+          productName: item.productName, // 상품명
+          productSize: item.productSize, // 사이즈
+          quantity: item.quantity,
+          thumbnail: item.thumbnail, // 썸네일
+        }))
+      ), // cartItems에 제품명, 사이즈, 썸네일 포함
       "pending", // 결제 대기 상태로 시작
     ];
 

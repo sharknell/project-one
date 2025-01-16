@@ -1,0 +1,166 @@
+/* 기본적인 스타일 */
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f7fc;
+  color: #333;
+}
+
+.order-list-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #222;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.order-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.order-item {
+  padding: 20px;
+  margin-bottom: 16px;
+  background-color: #fafafa;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+}
+
+.order-item:hover {
+  transform: scale(1.02);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.order-id {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.order-date {
+  font-size: 14px;
+  color: #aaa;
+}
+
+.order-info p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.order-amount span {
+  font-weight: bold;
+  color: #007bff;
+}
+
+.delivery-status {
+  font-weight: bold;
+}
+
+.delivery-status.preparing {
+  color: #f0ad4e;
+}
+
+.delivery-status.success {
+  color: #5bc0de;
+}
+
+.payment-status {
+  font-weight: bold;
+}
+
+.payment-status.success {
+  color: #5cb85c;
+}
+
+.payment-status.pending {
+  color: #f0ad4e;
+}
+
+.order-items {
+  margin-top: 20px;
+}
+
+.product-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.product-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-thumbnail {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 12px;
+}
+
+.product-details p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.product-name {
+  font-weight: bold;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.page-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  margin: 0 5px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.page-button:hover {
+  background-color: #0056b3;
+}
+
+.page-button.active {
+  background-color: #0056b3;
+  font-weight: 700;
+}
+
+.no-orders {
+  text-align: center;
+  font-size: 18px;
+  color: #999;
+}

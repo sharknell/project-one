@@ -168,7 +168,7 @@ function Cart() {
     try {
       setLoading(true);
 
-      const token = authToken || localStorage.getItem("authToken"); // 로컬 스토리지에서 토큰 가져오기
+      const token = authToken || localStorage.getItem("authToken");
       if (!token) {
         alert("로그인 상태를 확인해주세요.");
         return;
@@ -177,9 +177,8 @@ function Cart() {
       // JWT 토큰에서 userId 추출
       let userId = null;
       try {
-        const decodedToken = jwtDecode(token); // 토큰 디코딩
-        userId = decodedToken.id; // userId 추출
-        console.log("Checkout User ID:", userId); // 결제 시 userId 출력
+        const decodedToken = jwtDecode(token);
+        userId = decodedToken.id;
       } catch (error) {
         console.error("토큰 디코딩 실패:", error);
         alert("토큰에서 userId를 추출하는데 실패했습니다.");
@@ -199,21 +198,23 @@ function Cart() {
           amount: totalAmount,
           orderName: "장바구니 상품",
           address: selectedAddress,
-          user_id: userId, // user_id 포함
+          user_id: userId,
           cartItems: cartItems.map((item) => ({
             productId: item.id,
+            productName: item.product_name, // 상품명 추가
+            productSize: item.product_size, // 사이즈 추가
             quantity: item.quantity,
-          })), // 장바구니 아이템 정보 포함
+            thumbnail: item.thumbnail, // 썸네일 추가
+          })),
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`, // 인증 토큰 포함
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
       console.log("결제 데이터:", data); // 결제 데이터 출력
-
       tossPayments
         .requestPayment("카드", {
           amount: data.amount,
