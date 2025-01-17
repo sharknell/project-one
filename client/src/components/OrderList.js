@@ -31,35 +31,39 @@ const OrderList = ({ orders }) => {
               })
             : "날짜 오류";
 
-          const cartItems = order.cart_items || [];
-
           return (
             <li key={order.order_id} className="order-item">
               <div className="order-header">
                 <h3 className="order-id">주문 번호: {order.order_id}</h3>
-                <span className="order-date">{formattedDate}</span>
-              </div>
-              <div className="order-info">
+                <span className="order-date">주문 시간: {formattedDate}</span>
                 <p className="order-amount">
-                  총 금액: <span>{order.amount.toLocaleString()}원</span>
+                  총 금액: ₩{order.amount.toLocaleString()}
                 </p>
-                <p className={`delivery-status ${order.delivery_status}`}>
+
+                <p
+                  className={`delivery-status ${
+                    order.delivery_status || "미정"
+                  }`}
+                >
                   배송 상태:{" "}
                   {order.delivery_status === "preparing"
                     ? "배송 준비 중"
-                    : "배송 완료"}
+                    : order.delivery_status === "delivered"
+                    ? "배송 완료"
+                    : "배송 상태 미정"}
                 </p>
                 <p className={`payment-status ${order.status}`}>
                   결제 상태:{" "}
                   {order.status === "success" ? "결제 완료" : "결제 대기 중"}
                 </p>
               </div>
-              <div className="order-items">
-                <p>주문 제품 목록:</p>
-                {cartItems.length > 0 ? (
+
+              {order.cart_items && order.cart_items.length > 0 && (
+                <div className="order-items">
+                  <p>주문 제품 목록:</p>
                   <ul className="product-list">
-                    {cartItems.map((item, index) => (
-                      <li key={index} className="product-item">
+                    {order.cart_items.map((item) => (
+                      <li key={item.productId} className="product-item">
                         <div className="product-info">
                           {item.thumbnail && (
                             <img
@@ -79,18 +83,22 @@ const OrderList = ({ orders }) => {
                             </p>
                           </div>
                         </div>
+                        {order.delivery_status === "delivered" && (
+                          <div className="review-section">
+                            <button className="review-submit-button">
+                              리뷰 작성하기
+                            </button>
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>
-                ) : (
-                  <p>제품 정보가 없습니다.</p>
-                )}
-              </div>
+                </div>
+              )}
             </li>
           );
         })}
       </ul>
-
       <div className="pagination">
         {Array.from(
           { length: Math.ceil(orders.length / ordersPerPage) },

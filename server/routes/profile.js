@@ -294,7 +294,7 @@ router.get("/orders", async (req, res) => {
     const connection = await dbPromise;
 
     const query = `
-      SELECT order_id, user_id, amount, order_name, address, cart_items, status, created_at
+      SELECT order_id, user_id, amount, order_name, address, cart_items, status, created_at,delivery_status
       FROM payment
       WHERE user_id = ?
     `;
