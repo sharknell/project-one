@@ -2,25 +2,29 @@ import React, { useState, useEffect } from "react";
 import api, {
   getProfile,
   getAddresses,
-  getOrders, // 주문 내역을 가져오는 API 추가
+  getOrders,
   getQnaData,
+  addAddress,
+  updateAddress,
+  deleteAddress,
 } from "../utils/api";
 import Sidebar from "../components/SideBar";
 import BasicInfo from "../components/BasicInfo";
 import AddressList from "../components/AddressList";
 import AddressForm from "../components/AddressForm";
 import QnaList from "../components/QnAList";
-import OrderList from "../components/OrderList"; // 주문 내역을 표시할 컴포넌트 추가
+import OrderList from "../components/OrderList";
 import "../styles/Profile.css";
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
-  const [orders, setOrders] = useState([]); // 주문 내역 상태 추가
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("basicInfo");
   const [addressToEdit, setAddressToEdit] = useState(null);
   const [qnaData, setQnaData] = useState([]);
+  const [isAddingAddress, setIsAddingAddress] = useState(false); // 새로운 추가 상태
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -36,8 +40,8 @@ const Profile = () => {
         const qnaResponse = await getQnaData(token);
         setQnaData(Array.isArray(qnaResponse.data) ? qnaResponse.data : []);
 
-        const ordersResponse = await getOrders(token); // 주문 내역 가져오기
-        setOrders(ordersResponse.orders); // 주문 내역 상태 업데이트
+        const ordersResponse = await getOrders(token);
+        setOrders(ordersResponse.orders);
       } catch (err) {
         setError(
           err.message || "프로필 데이터를 로드하는 중 오류가 발생했습니다."
@@ -52,7 +56,6 @@ const Profile = () => {
 
   const handleAddressSave = async (address) => {
     const token = localStorage.getItem("authToken");
-
     try {
       if (addressToEdit) {
         await updateAddress(token, addressToEdit.id, address);
@@ -69,6 +72,7 @@ const Profile = () => {
           ...prev,
           addresses: [...prev.addresses, { ...address, id: Date.now() }],
         }));
+        setIsAddingAddress(false); // 추가 폼 닫기
       }
     } catch (err) {
       setError(err.message || "배송지 저장 중 오류가 발생했습니다.");
@@ -77,7 +81,6 @@ const Profile = () => {
 
   const handleAddressDelete = async (address) => {
     const token = localStorage.getItem("authToken");
-
     try {
       await deleteAddress(token, address.id);
       setProfile((prev) => ({
@@ -104,11 +107,22 @@ const Profile = () => {
               setAddressToEdit={setAddressToEdit}
               handleAddressDelete={handleAddressDelete}
             />
-            {addressToEdit && (
+            {!isAddingAddress && !addressToEdit && (
+              <button
+                className="add-new-address-button"
+                onClick={() => setIsAddingAddress(true)}
+              >
+                새 배송지 추가
+              </button>
+            )}
+            {(addressToEdit || isAddingAddress) && (
               <AddressForm
                 address={addressToEdit}
                 onSave={handleAddressSave}
-                onCancel={() => setAddressToEdit(null)}
+                onCancel={() => {
+                  setAddressToEdit(null);
+                  setIsAddingAddress(false);
+                }}
               />
             )}
           </>
@@ -119,10 +133,10 @@ const Profile = () => {
             <QnaList qnaData={qnaData} />
           </div>
         )}
-        {activeTab === "orders" && ( // 주문 내역 탭 추가
+        {activeTab === "orders" && (
           <div className="orders-section">
             <h2>내 주문 내역</h2>
-            <OrderList orders={orders} /> {/* 주문 내역 리스트 렌더링 */}
+            <OrderList orders={orders} />
           </div>
         )}
       </div>

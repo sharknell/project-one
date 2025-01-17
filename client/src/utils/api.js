@@ -12,13 +12,10 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 프로필 가져오기
 export const getProfile = async (token) => {
   try {
     const response = await api.get("profile/profile", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   } catch (error) {
@@ -29,13 +26,10 @@ export const getProfile = async (token) => {
   }
 };
 
-// 배송지 목록 가져오기
 export const getAddresses = async (token) => {
   try {
     const response = await api.get("profile/addresses", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   } catch (error) {
@@ -46,13 +40,10 @@ export const getAddresses = async (token) => {
   }
 };
 
-// 배송지 추가하기
 export const addAddress = async (token, address) => {
   try {
     const response = await api.post("profile/addresses", address, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   } catch (error) {
@@ -62,16 +53,13 @@ export const addAddress = async (token, address) => {
   }
 };
 
-// 배송지 업데이트하기
 export const updateAddress = async (token, addressId, updatedAddress) => {
   try {
     const response = await api.put(
       `profile/addresses/${addressId}`,
       updatedAddress,
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
     return response.data;
@@ -82,13 +70,10 @@ export const updateAddress = async (token, addressId, updatedAddress) => {
   }
 };
 
-// 배송지 삭제하기
 export const deleteAddress = async (token, addressId) => {
   try {
     const response = await api.delete(`profile/addresses/${addressId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   } catch (error) {
@@ -98,13 +83,10 @@ export const deleteAddress = async (token, addressId) => {
   }
 };
 
-// QnA 데이터를 가져오는 함수
 export const getQnaData = async (token) => {
   try {
     const response = await api.get("/qna/user/qna", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   } catch (error) {
@@ -114,13 +96,10 @@ export const getQnaData = async (token) => {
   }
 };
 
-// getOrders 함수 수정
 export const getOrders = async (token) => {
   try {
     const response = await api.get("profile/orders", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
   } catch (error) {

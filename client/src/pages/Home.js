@@ -10,26 +10,24 @@ function Home() {
   const { products, isLoading, error } = useProducts();
   const scrollWrapperRef = useRef(null);
 
-  // 무한 스크롤을 위한 애니메이션 설정
   useEffect(() => {
     const scrollWrapper = scrollWrapperRef.current;
-
     if (scrollWrapper) {
+      let scrollAmount = 0; // 초기 스크롤 양
       const scrollSpeed = 1; // 스크롤 속도
       const scrollInterval = setInterval(() => {
-        scrollWrapper.scrollLeft += scrollSpeed;
-        if (scrollWrapper.scrollLeft >= scrollWrapper.scrollWidth / 2) {
-          scrollWrapper.scrollLeft = 0;
+        scrollWrapper.scrollLeft = scrollAmount;
+        scrollAmount += scrollSpeed;
+        if (scrollAmount >= scrollWrapper.scrollWidth / 2) {
+          scrollAmount = 0; // 스크롤을 다시 처음으로
         }
-      }, 16); // 60fps에 맞춰서 애니메이션 진행
-
-      return () => clearInterval(scrollInterval); // 컴포넌트 언마운트 시 애니메이션 정지
+      }, 16); // 60fps에 해당하는 16ms 간격
+      return () => clearInterval(scrollInterval);
     }
   }, []);
 
   return (
     <div className="home-container">
-      {/* 헤더 섹션 */}
       <header className="home-header">
         <h1 className="home-title">Welcome to Perfume Shop</h1>
         <p className="home-subtitle">
@@ -37,7 +35,6 @@ function Home() {
         </p>
       </header>
 
-      {/* 메인 배너 섹션 */}
       <div className="main-banner">
         <img
           src={bpicture1}
@@ -53,7 +50,6 @@ function Home() {
         </div>
       </div>
 
-      {/* 하단 배너 섹션 */}
       <div className="sub-banners">
         <div className="sub-banner">
           <img
@@ -85,17 +81,40 @@ function Home() {
         </div>
       </div>
 
-      {/* 상품 섹션 */}
       <section className="products-section">
         <h2 className="section-title">Our Bestsellers</h2>
         {isLoading && <div className="loading">로딩 중...</div>}
         {error && <div className="error">{error}</div>}
-        <div className="products">
-          <div className="products-wrapper" ref={scrollWrapperRef}>
-            {/* 상품 목록을 두 번 반복하여 무한 스크롤 효과 생성 */}
+        <div className="products" ref={scrollWrapperRef}>
+          <div className="products-wrapper">
             {products &&
-              [...products, ...products].map((product, index) => (
+              products.map((product, index) => (
                 <div key={`${product.id}-${index}`} className="product">
+                  <img
+                    src={product.image_url || "/default-image.jpg"}
+                    alt={product.name || "상품명 없음"}
+                    className="product-image"
+                  />
+                  <h3 className="product-name">
+                    {product.name || "상품명 없음"}
+                  </h3>
+                  <p className="product-price">
+                    {product.price
+                      ? `₩${product.price.toLocaleString()}`
+                      : "가격 정보 없음"}
+                  </p>
+                  <Link
+                    to={`/shop/product/${product.id}`}
+                    className="product-details"
+                  >
+                    View Details
+                  </Link>
+                </div>
+              ))}
+            {/* 동일한 상품 목록을 반복적으로 추가 */}
+            {products &&
+              products.map((product, index) => (
+                <div key={`${product.id}-repeat-${index}`} className="product">
                   <img
                     src={product.image_url || "/default-image.jpg"}
                     alt={product.name || "상품명 없음"}

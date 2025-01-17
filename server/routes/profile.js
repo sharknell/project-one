@@ -155,9 +155,37 @@ router.post("/addresses", async (req, res) => {
     const decoded = await verifyToken(token, JWT_SECRET);
     const userId = decoded.id;
 
+    // 현재 사용자의 기본 배송지 여부 확인
+    const [defaultAddress] = await dbPromise.query(
+      "SELECT id FROM addresses WHERE user_id = ? AND isDefault = 1",
+      [userId]
+    );
+
+    // 기본 배송지가 이미 있는 경우
+    let finalIsDefault = defaultAddress.length === 0 ? 1 : 0;
+
+    // 클라이언트에서 기본 배송지로 설정 요청 시
+    if (isDefault && defaultAddress.length > 0) {
+      // 기존 기본 배송지를 비활성화
+      await dbPromise.query(
+        "UPDATE addresses SET isDefault = 0 WHERE user_id = ?",
+        [userId]
+      );
+      finalIsDefault = 1; // 새로 추가되는 주소를 기본 배송지로 설정
+    }
+
+    // 배송지 추가
     await dbPromise.query(
       "INSERT INTO addresses (user_id, recipient, phone, zipcode, roadAddress, detailAddress, isDefault) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [userId, recipient, phone, zipcode, roadAddress, detailAddress, isDefault]
+      [
+        userId,
+        recipient,
+        phone,
+        zipcode,
+        roadAddress,
+        detailAddress,
+        finalIsDefault,
+      ]
     );
 
     res.status(201).json({ message: "Address added successfully" });
