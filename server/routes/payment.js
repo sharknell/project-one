@@ -21,26 +21,60 @@ const updatePaymentStatus = async (orderId, status) => {
   }
 };
 
+const clearCart = async (userId, cartItems) => {
+  try {
+    const connection = await dbPromise;
+    await connection.beginTransaction(); // 트랜잭션 시작
+
+    // 각 item을 처리할 때마다 로그 추가
+    console.log(`장바구니에서 삭제할 상품 개수: ${cartItems.length}`);
+    for (const item of cartItems) {
+      console.log(`상품 삭제 시작: ${item.productId}`);
+
+      const query = "DELETE FROM cart WHERE user_id = ? AND product_id = ?";
+      const values = [userId, item.productId];
+
+      // SQL 실행
+      const [result] = await connection.execute(query, values);
+
+      console.log(`DELETE 쿼리 실행 결과: ${JSON.stringify(result)}`);
+
+      if (result.affectedRows === 0) {
+        console.warn(`상품 ID ${item.productId} 삭제되지 않았습니다.`);
+      } else {
+        console.log(`상품 ID ${item.productId} 삭제 성공`);
+      }
+    }
+
+    await connection.commit(); // 트랜잭션 커밋
+    console.log("장바구니 삭제 완료");
+    return true;
+  } catch (error) {
+    console.error("장바구니 초기화 실패:", error);
+    await connection.rollback(); // 롤백
+    return false;
+  }
+};
+
+// 결제 요청 처리
 router.post("/", async (req, res) => {
   const { amount, orderName, address, user_id, cartItems } = req.body;
 
-  // 요청 본문 출력 (디버깅용)
   console.log("결제 요청 데이터:", req.body);
 
-  // 결제 데이터 검증
   if (!amount || !orderName || !address || !user_id || !cartItems) {
     return res.status(400).send({ message: "Invalid payment data" });
   }
 
-  // 고유 주문 ID 생성
-  const orderId = uuidv4();
+  const orderId = uuidv4(); // 고유 주문 ID 생성
 
-  // 결제 정보 DB에 저장
   try {
     const connection = await dbPromise;
 
-    const query = `INSERT INTO payment (order_id, user_id, amount, order_name, address, cart_items, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    const query = `
+      INSERT INTO payment (order_id, user_id, amount, order_name, address, cart_items, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
     const values = [
       orderId,
       user_id,
@@ -50,22 +84,20 @@ router.post("/", async (req, res) => {
       JSON.stringify(
         cartItems.map((item) => ({
           productId: item.productId,
-          productName: item.productName, // 상품명
-          productSize: item.productSize, // 사이즈
+          productName: item.productName,
+          productSize: item.productSize,
           quantity: item.quantity,
-          thumbnail: item.thumbnail, // 썸네일
+          thumbnail: item.thumbnail,
         }))
-      ), // cartItems에 제품명, 사이즈, 썸네일 포함
-      "pending", // 결제 대기 상태로 시작
+      ),
+      "pending", // 초기 상태는 결제 대기로 설정
     ];
 
-    await connection.execute(query, values); // MySQL 쿼리 실행
+    await connection.execute(query, values);
 
-    res.status(200).send({
-      orderId,
-      amount,
-      orderName,
-    });
+    console.log(`결제 정보 저장 성공. 주문 ID: ${orderId}`);
+
+    res.status(200).send({ orderId, amount, orderName });
   } catch (error) {
     console.error("결제 정보 DB 저장 실패:", error);
     res.status(500).send({ message: "결제 정보 저장에 실패했습니다." });
@@ -74,25 +106,37 @@ router.post("/", async (req, res) => {
 
 // 결제 성공 처리 (POST 요청)
 router.post("/success", async (req, res) => {
-  const { orderId, paymentKey, amount } = req.body;
+  const { orderId, paymentKey, amount, userId, cartItems } = req.body;
+
+  console.log("결제 성공 처리 - 요청 데이터:", req.body); // 요청 데이터 확인
+
+  if (!orderId || !userId || !cartItems) {
+    return res.status(400).send({ message: "결제 성공 정보가 부족합니다." });
+  }
 
   try {
-    // 결제 상태 업데이트 (예: 데이터베이스에서 주문 상태 변경)
+    console.log("결제 상태 업데이트 시작");
+    // 결제 상태 업데이트
     await updatePaymentStatus(orderId, "success");
 
+    console.log("장바구니 삭제 시작");
+    // 결제 후 장바구니 항목 삭제
+    const isCleared = await clearCart(userId, cartItems);
+
+    if (!isCleared) {
+      console.warn("장바구니 초기화 실패.");
+      return res.status(500).send({ message: "장바구니 삭제에 실패했습니다." });
+    } else {
+      console.log("장바구니 초기화 성공");
+    }
+
+    // 결제 성공 응답
     res.redirect(
       `http://localhost:3000/api/payment/success?orderId=${orderId}&paymentKey=${paymentKey}&amount=${amount}`
     );
-    // 결제 성공 응답
-    res.status(200).send({
-      message: "Payment successful",
-      orderId,
-      amount,
-      status: "success", // 결제 성공 상태 반환
-    });
   } catch (error) {
     console.error("결제 성공 처리 실패:", error);
-    res.status(500).send({ message: "결제 처리에 실패했습니다." });
+    res.status(500).send({ message: "결제 성공 처리 중 오류가 발생했습니다." });
   }
 });
 
@@ -127,7 +171,7 @@ router.post("/failed", async (req, res) => {
     res.status(200).send({ message: "Payment failed" });
   } catch (error) {
     console.error("결제 실패 처리 실패:", error);
-    res.status(500).send({ message: "결제 처리에 실패했습니다." });
+    res.status(500).send({ message: "결제 실패 처리 중 오류가 발생했습니다." });
   }
 });
 

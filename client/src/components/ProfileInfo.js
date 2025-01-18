@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../utils/api";
 import BasicInfo from "../components/BasicInfo";
-import AddressList from "../components/AddressList";
-import AddressForm from "../components/AddressForm";
-import PaymentForm from "../components/PaymentForm";
-import OrderList from "../components/OrderList";
 import "../styles/Profile.css";
 
 const Profile = () => {

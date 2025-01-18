@@ -1,11 +1,13 @@
 const express = require("express");
+const { v4: uuidv4 } = require("uuid");
 const router = express.Router();
-const { dbPromise } = require("../config/db"); // dbPromise 가져오기
+const { dbPromise } = require("../config/db"); // DB 연결
 
-// 장바구니 추가 API
+// 장바구니에 상품 추가
 router.post("/add", async (req, res) => {
   const { productId, quantity, userId, thumbnail, productName, productSize } =
     req.body;
+
   try {
     const [product] = await dbPromise.execute(
       "SELECT * FROM products WHERE id = ?",
@@ -55,7 +57,7 @@ router.post("/add", async (req, res) => {
   }
 });
 
-// 장바구니 항목 조회 API
+// 장바구니 항목 조회
 router.get("/", async (req, res) => {
   const { userId } = req.query;
 
@@ -75,7 +77,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// 장바구니 항목 삭제 API
+// 장바구니 항목 삭제
 router.delete("/remove/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -95,7 +97,7 @@ router.delete("/remove/:id", async (req, res) => {
   }
 });
 
-// 장바구니 수량 변경 API
+// 장바구니 수량 변경
 router.put("/updateQuantity/:id", async (req, res) => {
   const { id } = req.params;
   const { quantity } = req.body;
@@ -127,6 +129,32 @@ router.put("/updateQuantity/:id", async (req, res) => {
     res.status(500).json({ error: "장바구니 수량 변경에 실패했습니다." });
   }
 });
+
+// 결제 요청 후 장바구니 초기화
+const clearCart = async (userId, cartItems) => {
+  try {
+    const connection = await dbPromise;
+    await connection.beginTransaction(); // 트랜잭션 시작
+
+    for (const item of cartItems) {
+      const query = "DELETE FROM cart WHERE user_id = ? AND product_id = ?";
+      const values = [userId, item.productId];
+
+      const [result] = await connection.execute(query, values);
+
+      if (result.affectedRows === 0) {
+        console.warn(`상품 ID ${item.productId} 삭제되지 않았습니다.`);
+      }
+    }
+
+    await connection.commit(); // 트랜잭션 커밋
+    return true;
+  } catch (error) {
+    console.error("장바구니 초기화 실패:", error);
+    await connection.rollback(); // 롤백
+    return false;
+  }
+};
 
 // 서버에서 배송지 조회 API
 router.get("/addresses", async (req, res) => {
