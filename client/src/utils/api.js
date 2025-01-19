@@ -121,5 +121,21 @@ export const submitReview = async (token, reviewData) => {
     throw new Error(error.response?.data?.message || "리뷰 저장 실패");
   }
 };
+// utils/api.js
+
+export const getReviews = async (token) => {
+  try {
+    const response = await api.get("/profile/reviews", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message || "리뷰 데이터를 가져오는 데 실패했습니다."
+    );
+  }
+};
 
 export default api;

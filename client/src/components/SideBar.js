@@ -28,6 +28,12 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         >
           문의 내역
         </li>
+        <li
+          onClick={() => setActiveTab("reviews")}
+          className={activeTab === "reviews" ? "active" : ""}
+        >
+          리뷰 내역
+        </li>
       </ul>
     </div>
   );

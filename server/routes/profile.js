@@ -342,4 +342,35 @@ router.post("/reviews", async (req, res) => {
   }
 });
 
+// 본인이 작성한 리뷰 조회
+router.get("/reviews", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1]; // Bearer 토큰
+
+  if (!token) {
+    return res.status(401).json({ message: "토큰이 제공되지 않았습니다." });
+  }
+
+  try {
+    const decoded = await verifyToken(token, JWT_SECRET);
+    const userId = decoded.id;
+
+    // 해당 사용자가 작성한 리뷰 조회
+    const [reviews] = await dbPromise.query(
+      "SELECT r.id, r.product_id, r.rating, r.review_text, r.created_at, p.name AS product_name FROM reviews r JOIN products p ON r.product_id = p.id WHERE r.user_id = ?",
+      [userId]
+    );
+
+    if (reviews.length === 0) {
+      return res.status(404).json({ message: "작성한 리뷰가 없습니다." });
+    }
+
+    res.status(200).json({ reviews });
+  } catch (err) {
+    console.error("리뷰 조회 오류:", err);
+    res
+      .status(500)
+      .json({ message: "리뷰를 가져오는 중 오류가 발생했습니다." });
+  }
+});
+
 module.exports = router;

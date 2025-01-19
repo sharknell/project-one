@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import "./ReviewModal.css";
-
+import "../styles/ReviewModal.css";
 const ReviewModal = ({ isOpen, onClose, onSubmit, product }) => {
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState("");

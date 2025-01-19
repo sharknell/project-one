@@ -1,12 +1,11 @@
+// Profile.js
 import React, { useState, useEffect } from "react";
 import api, {
   getProfile,
   getAddresses,
   getOrders,
   getQnaData,
-  addAddress,
-  updateAddress,
-  deleteAddress,
+  getReviews,
 } from "../utils/api";
 import { submitReview } from "../utils/api";
 import Sidebar from "../components/SideBar";
@@ -15,17 +14,19 @@ import AddressList from "../components/AddressList";
 import AddressForm from "../components/AddressForm";
 import QnaList from "../components/QnAList";
 import OrderList from "../components/OrderList";
+import MyReviewsList from "../components/MyReviewsList";
 import "../styles/Profile.css";
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
   const [orders, setOrders] = useState([]);
+  const [reviews, setReviews] = useState([]); // 추가된 리뷰 상태
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("basicInfo");
   const [addressToEdit, setAddressToEdit] = useState(null);
   const [qnaData, setQnaData] = useState([]);
-  const [isAddingAddress, setIsAddingAddress] = useState(false); // 새로운 추가 상태
+  const [isAddingAddress, setIsAddingAddress] = useState(false);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -43,6 +44,10 @@ const Profile = () => {
 
         const ordersResponse = await getOrders(token);
         setOrders(ordersResponse.orders);
+
+        // 리뷰 데이터를 가져오는 부분 추가
+        const reviewsResponse = await getReviews(token);
+        setReviews(reviewsResponse.reviews); // reviews 상태에 저장
       } catch (err) {
         setError(
           err.message || "프로필 데이터를 로드하는 중 오류가 발생했습니다."
@@ -55,47 +60,11 @@ const Profile = () => {
     fetchProfileData();
   }, []);
 
-  const handleAddressSave = async (address) => {
-    const token = localStorage.getItem("authToken");
-    try {
-      if (addressToEdit) {
-        await updateAddress(token, addressToEdit.id, address);
-        setProfile((prev) => ({
-          ...prev,
-          addresses: prev.addresses.map((a) =>
-            a.id === addressToEdit.id ? address : a
-          ),
-        }));
-        setAddressToEdit(null);
-      } else {
-        await addAddress(token, address);
-        setProfile((prev) => ({
-          ...prev,
-          addresses: [...prev.addresses, { ...address, id: Date.now() }],
-        }));
-        setIsAddingAddress(false); // 추가 폼 닫기
-      }
-    } catch (err) {
-      setError(err.message || "배송지 저장 중 오류가 발생했습니다.");
-    }
-  };
-
-  const handleAddressDelete = async (address) => {
-    const token = localStorage.getItem("authToken");
-    try {
-      await deleteAddress(token, address.id);
-      setProfile((prev) => ({
-        ...prev,
-        addresses: prev.addresses.filter((a) => a.id !== address.id),
-      }));
-    } catch (err) {
-      setError(err.message || "배송지 삭제 중 오류가 발생했습니다.");
-    }
-  };
   const handleReviewSubmit = async (reviewData) => {
     const token = localStorage.getItem("authToken");
     try {
-      await submitReview(token, reviewData);
+      const newReview = await submitReview(token, reviewData);
+      setReviews((prevReviews) => [...prevReviews, newReview]); // 리뷰를 리스트에 추가
       alert("리뷰가 성공적으로 저장되었습니다!");
     } catch (err) {
       console.error(err);
@@ -116,26 +85,7 @@ const Profile = () => {
             <AddressList
               addresses={profile.addresses}
               setAddressToEdit={setAddressToEdit}
-              handleAddressDelete={handleAddressDelete}
             />
-            {!isAddingAddress && !addressToEdit && (
-              <button
-                className="add-new-address-button"
-                onClick={() => setIsAddingAddress(true)}
-              >
-                새 배송지 추가
-              </button>
-            )}
-            {(addressToEdit || isAddingAddress) && (
-              <AddressForm
-                address={addressToEdit}
-                onSave={handleAddressSave}
-                onCancel={() => {
-                  setAddressToEdit(null);
-                  setIsAddingAddress(false);
-                }}
-              />
-            )}
           </>
         )}
         {activeTab === "qna" && (
@@ -148,6 +98,13 @@ const Profile = () => {
           <div className="orders-section">
             <h2>내 주문 내역</h2>
             <OrderList orders={orders} onSubmitReview={handleReviewSubmit} />
+          </div>
+        )}
+        {activeTab === "reviews" && (
+          <div className="reviews-section">
+            <h2>내 리뷰 내역</h2>
+            <MyReviewsList reviews={reviews} />{" "}
+            {/* MyReviewsList에 리뷰 전달 */}
           </div>
         )}
       </div>

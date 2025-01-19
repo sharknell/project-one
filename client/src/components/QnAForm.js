@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../AuthContext"; // 인증 상태를 관리하는 훅을 불러옵니다.
-import "./QnAForm.css";
-
+import "../styles/QnAForm.css";
 function QnAForm({ onSubmit, onCancel, question, setQuestion, productId }) {
   const { userName } = useAuth(); // 인증된 사용자 이름을 가져옵니다.
   const [isSubmitting, setIsSubmitting] = useState(false);
