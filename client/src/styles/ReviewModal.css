@@ -51,4 +51,39 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
+} /* ReviewModal.css */
+/* 평점 컨테이너 */
+.rating-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  cursor: pointer;
+  user-select: none;
+}
+
+.rating {
+  display: flex;
+  gap: 5px;
+  font-size: 30px;
+}
+
+.star {
+  color: #ccc; /* 기본 색상 (회색) */
+}
+
+.star.filled {
+  color: #ffcc00; /* 선택된 별 색상 (노란색) */
+}
+
+.rating-indicator {
+  font-size: 18px;
+  margin-top: 10px;
+}
+
+/* 마우스를 드래그할 때만 활성화 */
+.rating-container:hover {
+  border: 1px dashed #ccc;
+  padding: 10px;
+  border-radius: 5px;
 }

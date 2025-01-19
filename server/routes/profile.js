@@ -362,7 +362,6 @@ router.get("/reviews", async (req, res) => {
     );
 
     if (reviews.length === 0) {
-      return res.status(404).json({ message: "작성한 리뷰가 없습니다." });
     }
 
     res.status(200).json({ reviews });

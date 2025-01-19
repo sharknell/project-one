@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "../styles/ReviewModal.css";
 
 const ReviewModal = ({ isOpen, onClose, onSubmit, product }) => {
-  const [rating, setRating] = useState(5);
+  const [rating, setRating] = useState(5.0); // 평점 초기값
   const [reviewText, setReviewText] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
+  const ratingRef = useRef(null); // 평점 컨테이너 참조
 
   const handleSubmit = () => {
     if (!rating || reviewText.trim() === "") {
@@ -20,6 +22,27 @@ const ReviewModal = ({ isOpen, onClose, onSubmit, product }) => {
     onSubmit(reviewData);
   };
 
+  const handleMouseMove = (e) => {
+    if (isDragging && ratingRef.current) {
+      const rect = ratingRef.current.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      // 0~5 범위에서 0.5 단위로 평점 계산
+      const newRating = Math.min(
+        5,
+        Math.max(0, Math.round((offsetX / rect.width) * 10) / 2) // 0.5 단위로 계산
+      );
+      setRating(newRating); // 소수 첫째 자리까지 표시
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseDown = () => {
+    setIsDragging(true);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -32,19 +55,29 @@ const ReviewModal = ({ isOpen, onClose, onSubmit, product }) => {
           alt={`Product ${product.productId}`}
           className="product-thumbnail"
         />
-        <label>
-          평점:
-          <select
-            value={rating}
-            onChange={(e) => setRating(Number(e.target.value))}
-          >
+        <div
+          className="rating-container"
+          ref={ratingRef}
+          onMouseMove={handleMouseMove}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        >
+          <p>평점:</p>
+          <div className="rating">
             {[1, 2, 3, 4, 5].map((star) => (
-              <option key={star} value={star}>
-                {star}점
-              </option>
+              <span
+                key={star}
+                className={`star ${rating >= star ? "filled" : ""}`}
+              >
+                ★
+              </span>
             ))}
-          </select>
-        </label>
+          </div>
+          <div className="rating-indicator">
+            <p>{rating} 점</p>
+          </div>
+        </div>
         <textarea
           placeholder="리뷰 내용을 입력하세요..."
           value={reviewText}
