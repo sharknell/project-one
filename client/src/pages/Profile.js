@@ -8,6 +8,7 @@ import api, {
   updateAddress,
   deleteAddress,
 } from "../utils/api";
+import { submitReview } from "../utils/api";
 import Sidebar from "../components/SideBar";
 import BasicInfo from "../components/BasicInfo";
 import AddressList from "../components/AddressList";
@@ -91,6 +92,16 @@ const Profile = () => {
       setError(err.message || "배송지 삭제 중 오류가 발생했습니다.");
     }
   };
+  const handleReviewSubmit = async (reviewData) => {
+    const token = localStorage.getItem("authToken");
+    try {
+      await submitReview(token, reviewData);
+      alert("리뷰가 성공적으로 저장되었습니다!");
+    } catch (err) {
+      console.error(err);
+      alert("리뷰 저장 중 오류가 발생했습니다.");
+    }
+  };
 
   if (loading) return <div>로딩 중...</div>;
   if (error) return <div>{error}</div>;
@@ -136,7 +147,7 @@ const Profile = () => {
         {activeTab === "orders" && (
           <div className="orders-section">
             <h2>내 주문 내역</h2>
-            <OrderList orders={orders} />
+            <OrderList orders={orders} onSubmitReview={handleReviewSubmit} />
           </div>
         )}
       </div>

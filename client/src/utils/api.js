@@ -110,18 +110,15 @@ export const getOrders = async (token) => {
 };
 export const submitReview = async (token, reviewData) => {
   try {
-    const response = await axios.post(
-      "http://localhost:5001/profile/reviews", // 서버 URL
-      reviewData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`, // JWT 토큰
-        },
-      }
-    );
+    const response = await api.post("/profile/reviews", reviewData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "리뷰 제출 실패");
+    throw new Error(error.response?.data?.message || "리뷰 저장 실패");
   }
 };
 

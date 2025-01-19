@@ -1,8 +1,12 @@
 import React, { useState } from "react";
+import ReviewModal from "./ReviewModal";
 import "./OrderList.css";
 
-const OrderList = ({ orders }) => {
+const OrderList = ({ orders, onSubmitReview }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+
   const ordersPerPage = 5;
 
   if (!orders || orders.length === 0) {
@@ -14,6 +18,16 @@ const OrderList = ({ orders }) => {
   const currentOrders = orders.slice(indexOfFirstOrder, indexOfLastOrder);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const openReviewModal = (product) => {
+    setSelectedProduct(product);
+    setIsReviewModalOpen(true);
+  };
+
+  const closeReviewModal = () => {
+    setSelectedProduct(null);
+    setIsReviewModalOpen(false);
+  };
 
   return (
     <div className="order-list-container">
@@ -39,7 +53,6 @@ const OrderList = ({ orders }) => {
                 <p className="order-amount">
                   총 금액: ₩{order.amount.toLocaleString()}
                 </p>
-
                 <p
                   className={`delivery-status ${
                     order.delivery_status || "미정"
@@ -85,7 +98,10 @@ const OrderList = ({ orders }) => {
                         </div>
                         {order.delivery_status === "delivered" && (
                           <div className="review-section">
-                            <button className="review-submit-button">
+                            <button
+                              className="review-submit-button"
+                              onClick={() => openReviewModal(item)}
+                            >
                               리뷰 작성하기
                             </button>
                           </div>
@@ -115,6 +131,17 @@ const OrderList = ({ orders }) => {
           )
         )}
       </div>
+      {isReviewModalOpen && selectedProduct && (
+        <ReviewModal
+          isOpen={isReviewModalOpen}
+          onClose={closeReviewModal}
+          onSubmit={(reviewData) => {
+            onSubmitReview(reviewData);
+            closeReviewModal();
+          }}
+          product={selectedProduct}
+        />
+      )}
     </div>
   );
 };
