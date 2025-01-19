@@ -200,7 +200,7 @@ function Cart() {
           address: selectedAddress,
           user_id: userId,
           cartItems: cartItems.map((item) => ({
-            productId: item.id,
+            productId: item.product_id,
             productName: item.product_name, // 상품명 추가
             productSize: item.product_size, // 사이즈 추가
             quantity: item.quantity,

@@ -108,5 +108,21 @@ export const getOrders = async (token) => {
     );
   }
 };
+export const submitReview = async (token, reviewData) => {
+  try {
+    const response = await axios.post(
+      "http://localhost:5001/profile/reviews", // 서버 URL
+      reviewData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // JWT 토큰
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "리뷰 제출 실패");
+  }
+};
 
 export default api;

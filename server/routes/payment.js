@@ -26,18 +26,13 @@ const clearCart = async (userId, cartItems) => {
     const connection = await dbPromise;
     await connection.beginTransaction(); // 트랜잭션 시작
 
-    // 각 item을 처리할 때마다 로그 추가
-    console.log(`장바구니에서 삭제할 상품 개수: ${cartItems.length}`);
     for (const item of cartItems) {
-      console.log(`상품 삭제 시작: ${item.productId}`);
-
+      console.log(
+        `삭제할 상품 ID: ${item.productId}, 상품 이름: ${item.productName}`
+      );
       const query = "DELETE FROM cart WHERE user_id = ? AND product_id = ?";
       const values = [userId, item.productId];
-
-      // SQL 실행
       const [result] = await connection.execute(query, values);
-
-      console.log(`DELETE 쿼리 실행 결과: ${JSON.stringify(result)}`);
 
       if (result.affectedRows === 0) {
         console.warn(`상품 ID ${item.productId} 삭제되지 않았습니다.`);
@@ -47,7 +42,6 @@ const clearCart = async (userId, cartItems) => {
     }
 
     await connection.commit(); // 트랜잭션 커밋
-    console.log("장바구니 삭제 완료");
     return true;
   } catch (error) {
     console.error("장바구니 초기화 실패:", error);
@@ -60,7 +54,7 @@ const clearCart = async (userId, cartItems) => {
 router.post("/", async (req, res) => {
   const { amount, orderName, address, user_id, cartItems } = req.body;
 
-  console.log("결제 요청 데이터:", req.body);
+  console.log("결제 요청 데이터:", req.body); // 요청 데이터 확인
 
   if (!amount || !orderName || !address || !user_id || !cartItems) {
     return res.status(400).send({ message: "Invalid payment data" });
@@ -71,6 +65,7 @@ router.post("/", async (req, res) => {
   try {
     const connection = await dbPromise;
 
+    // cartItems에 productId가 포함되도록 수정
     const query = `
       INSERT INTO payment (order_id, user_id, amount, order_name, address, cart_items, status)
       VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -83,7 +78,7 @@ router.post("/", async (req, res) => {
       address,
       JSON.stringify(
         cartItems.map((item) => ({
-          productId: item.productId,
+          productId: item.productId, // productId 추가
           productName: item.productName,
           productSize: item.productSize,
           quantity: item.quantity,
@@ -93,6 +88,7 @@ router.post("/", async (req, res) => {
       "pending", // 초기 상태는 결제 대기로 설정
     ];
 
+    // 결제 정보 DB에 저장
     await connection.execute(query, values);
 
     console.log(`결제 정보 저장 성공. 주문 ID: ${orderId}`);

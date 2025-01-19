@@ -310,46 +310,35 @@ router.get("/orders", async (req, res) => {
     res.status(500).json({ message: "Error fetching orders." });
   }
 });
-
-// 리뷰 작성
+// 리뷰 제출
 router.post("/reviews", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
   const { productId, rating, reviewText } = req.body;
+  const token = req.headers.authorization?.split(" ")[1]; // Bearer 토큰
 
   if (!token) {
     return res.status(401).json({ message: "토큰이 제공되지 않았습니다." });
   }
 
-  if (!productId || !rating || !reviewText) {
-    return res.status(400).json({ message: "모든 필드를 작성해주세요." });
+  if (!productId || !rating || !reviewText.trim()) {
+    return res.status(400).json({ message: "모든 필드를 채워주세요." });
   }
 
   try {
     const decoded = await verifyToken(token, JWT_SECRET);
     const userId = decoded.id;
 
-    // 리뷰 작성 데이터 삽입
-    const query = `
-      INSERT INTO reviews (user_id, product_id, rating, review_text, created_at)
-      VALUES (?, ?, ?, ?, NOW());
-    `;
+    // 리뷰 데이터베이스에 삽입
+    await dbPromise.query(
+      "INSERT INTO reviews (user_id, product_id, rating, review_text) VALUES (?, ?, ?, ?)",
+      [userId, productId, rating, reviewText]
+    );
 
-    const result = await dbPromise.query(query, [
-      userId,
-      productId,
-      rating,
-      reviewText,
-    ]);
-
-    res
-      .status(201)
-      .json({
-        message: "리뷰가 성공적으로 작성되었습니다.",
-        reviewId: result.insertId,
-      });
+    res.status(201).json({ message: "리뷰가 성공적으로 저장되었습니다." });
   } catch (err) {
-    console.error("리뷰 작성 오류:", err);
-    res.status(500).json({ message: "리뷰 작성 중 오류가 발생했습니다." });
+    console.error("리뷰 저장 오류:", err);
+    res
+      .status(500)
+      .json({ message: "리뷰를 저장하는 중 오류가 발생했습니다." });
   }
 });
 
