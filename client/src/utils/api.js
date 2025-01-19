@@ -121,6 +121,7 @@ export const submitReview = async (token, reviewData) => {
     throw new Error(error.response?.data?.message || "리뷰 저장 실패");
   }
 };
+
 // utils/api.js
 
 export const getReviews = async (token) => {

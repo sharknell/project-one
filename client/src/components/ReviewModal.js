@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../styles/ReviewModal.css";
+
 const ReviewModal = ({ isOpen, onClose, onSubmit, product }) => {
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState("");
@@ -11,10 +12,12 @@ const ReviewModal = ({ isOpen, onClose, onSubmit, product }) => {
     }
     const reviewData = {
       productId: product.productId,
+      productName: product.productName,
+      thumbnail: product.thumbnail, // 썸네일 포함
       rating,
       reviewText,
     };
-    onSubmit(reviewData); // 부모 컴포넌트로 데이터 전달
+    onSubmit(reviewData);
   };
 
   if (!isOpen) return null;
@@ -24,6 +27,11 @@ const ReviewModal = ({ isOpen, onClose, onSubmit, product }) => {
       <div className="modal-content">
         <h2>리뷰 작성하기</h2>
         <p>제품명: {product.productName}</p>
+        <img
+          src={product.thumbnail}
+          alt={`Product ${product.productId}`}
+          className="product-thumbnail"
+        />
         <label>
           평점:
           <select
@@ -42,7 +50,7 @@ const ReviewModal = ({ isOpen, onClose, onSubmit, product }) => {
           value={reviewText}
           onChange={(e) => setReviewText(e.target.value)}
         />
-        <div>
+        <div className="modal-buttons">
           <button onClick={handleSubmit}>제출</button>
           <button onClick={onClose}>취소</button>
         </div>

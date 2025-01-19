@@ -1,17 +1,15 @@
-// Profile.js
 import React, { useState, useEffect } from "react";
-import api, {
+import {
   getProfile,
   getAddresses,
   getOrders,
   getQnaData,
   getReviews,
-} from "../utils/api";
-import { submitReview } from "../utils/api";
+  submitReview, // 올바른 경로로 submitReview 가져오기
+} from "../utils/api"; // 경로 확인
 import Sidebar from "../components/SideBar";
 import BasicInfo from "../components/BasicInfo";
 import AddressList from "../components/AddressList";
-import AddressForm from "../components/AddressForm";
 import QnaList from "../components/QnAList";
 import OrderList from "../components/OrderList";
 import MyReviewsList from "../components/MyReviewsList";
@@ -20,13 +18,11 @@ import "../styles/Profile.css";
 const Profile = () => {
   const [profile, setProfile] = useState(null);
   const [orders, setOrders] = useState([]);
-  const [reviews, setReviews] = useState([]); // 추가된 리뷰 상태
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("basicInfo");
-  const [addressToEdit, setAddressToEdit] = useState(null);
   const [qnaData, setQnaData] = useState([]);
-  const [isAddingAddress, setIsAddingAddress] = useState(false);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -45,9 +41,8 @@ const Profile = () => {
         const ordersResponse = await getOrders(token);
         setOrders(ordersResponse.orders);
 
-        // 리뷰 데이터를 가져오는 부분 추가
         const reviewsResponse = await getReviews(token);
-        setReviews(reviewsResponse.reviews); // reviews 상태에 저장
+        setReviews(reviewsResponse.reviews);
       } catch (err) {
         setError(
           err.message || "프로필 데이터를 로드하는 중 오류가 발생했습니다."
@@ -64,7 +59,7 @@ const Profile = () => {
     const token = localStorage.getItem("authToken");
     try {
       const newReview = await submitReview(token, reviewData);
-      setReviews((prevReviews) => [...prevReviews, newReview]); // 리뷰를 리스트에 추가
+      setReviews((prevReviews) => [...prevReviews, newReview]);
       alert("리뷰가 성공적으로 저장되었습니다!");
     } catch (err) {
       console.error(err);
@@ -81,32 +76,13 @@ const Profile = () => {
       <div className="profile-content">
         {activeTab === "basicInfo" && <BasicInfo user={profile} />}
         {activeTab === "shipping" && (
-          <>
-            <AddressList
-              addresses={profile.addresses}
-              setAddressToEdit={setAddressToEdit}
-            />
-          </>
+          <AddressList addresses={profile.addresses} />
         )}
-        {activeTab === "qna" && (
-          <div className="qna-section">
-            <h2>내가 작성한 질문</h2>
-            <QnaList qnaData={qnaData} />
-          </div>
-        )}
+        {activeTab === "qna" && <QnaList qnaData={qnaData} />}
         {activeTab === "orders" && (
-          <div className="orders-section">
-            <h2>내 주문 내역</h2>
-            <OrderList orders={orders} onSubmitReview={handleReviewSubmit} />
-          </div>
+          <OrderList orders={orders} onSubmitReview={handleReviewSubmit} />
         )}
-        {activeTab === "reviews" && (
-          <div className="reviews-section">
-            <h2>내 리뷰 내역</h2>
-            <MyReviewsList reviews={reviews} />{" "}
-            {/* MyReviewsList에 리뷰 전달 */}
-          </div>
-        )}
+        {activeTab === "reviews" && <MyReviewsList reviews={reviews} />}
       </div>
     </div>
   );

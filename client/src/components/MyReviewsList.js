@@ -2,6 +2,7 @@ import React from "react";
 import "./MyReviewsList.css"; // 외부 CSS로 스타일을 관리
 
 const MyReviewsList = ({ reviews = [] }) => {
+  console.log(reviews);
   return (
     <div className="reviews-container">
       <h2 className="title">내 리뷰 목록</h2>
@@ -13,7 +14,7 @@ const MyReviewsList = ({ reviews = [] }) => {
             <div className="review-card" key={review.id}>
               {/* 제품 이미지 추가 */}
               <img
-                src={review.product_image_url}
+                src={review.thumbnail || "/default-product-image.jpg"}
                 alt={review.product_name}
                 className="product-image"
               />
