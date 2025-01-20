@@ -1,9 +1,19 @@
 import React from "react";
-import "./MyReviewsList.css"; // 외부 CSS로 스타일을 관리
+import "../styles/MyReviewsList.css";
 
 const MyReviewsList = ({ reviews = [] }) => {
-  if (!Array.isArray(reviews) || reviews.length === 0) {
-    return <div className="no-reviews">작성한 리뷰가 없습니다.</div>; // 리뷰가 없으면 메시지 출력
+  // 리뷰 데이터 형식이 잘못된 경우
+  if (!Array.isArray(reviews)) {
+    return (
+      <div className="error-message">
+        리뷰 데이터 형식에 오류가 발생했습니다.
+      </div>
+    );
+  }
+
+  // 리뷰가 없는 경우
+  if (reviews.length === 0) {
+    return <div className="no-reviews">작성한 리뷰가 없습니다.</div>;
   }
 
   return (
@@ -13,7 +23,7 @@ const MyReviewsList = ({ reviews = [] }) => {
         {reviews.map((review) => (
           <div className="review-card" key={review.id}>
             <img
-              src={review.product_image_url || "/default-product-image.jpg"} // 이미지가 없으면 기본 이미지로 대체
+              src={review.thumbnail || "/default-product-image.jpg"}
               alt={review.product_name}
               className="product-image"
             />

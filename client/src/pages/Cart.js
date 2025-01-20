@@ -9,11 +9,11 @@ import { jwtDecode } from "jwt-decode"; // JWT 디코딩을 위한 라이브러�
 
 function Cart() {
   const { isAuthenticated, isLoading, authToken } = useAuth();
-  const [cartItems, setCartItems] = useState([]); // 기본값을 빈 배열로 설정
+  const [cartItems, setCartItems] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState(null); // 선택된 배송지
-  const [addresses, setAddresses] = useState([]); // 사용자 배송지 목록
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [addresses, setAddresses] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,7 +26,7 @@ function Cart() {
       return;
     }
 
-    const token = authToken || localStorage.getItem("authToken"); // authToken을 먼저 확인, 없으면 로컬스토리지에서 가져옴
+    const token = authToken || localStorage.getItem("authToken");
     if (!token) {
       console.log("토큰이 존재하지 않습니다.");
       alert("토큰이 존재하지 않습니다. 로그인 상태를 확인해주세요.");
@@ -34,11 +34,10 @@ function Cart() {
       return;
     }
 
-    // JWT 토큰에서 userId 추출
     let userId = null;
     try {
-      const decodedToken = jwtDecode(token); // 토큰 디코딩
-      userId = decodedToken.id; // userId 추출
+      const decodedToken = jwtDecode(token);
+      userId = decodedToken.id;
       console.log("Decoded User ID:", userId); // 디버깅을 위한 출력
     } catch (error) {
       console.error("토큰 디코딩 실패:", error);
@@ -57,7 +56,6 @@ function Cart() {
             },
           }
         );
-
         console.log("장바구니 아이템:", data); // 장바구니 아이템 출력
 
         if (data.message) {
@@ -65,7 +63,7 @@ function Cart() {
         } else {
           const items = data || [];
           setCartItems(items);
-          setTotalAmount(calculateTotalAmount(items)); // 총 금액 계산
+          setTotalAmount(calculateTotalAmount(items));
           console.log("장바구니 총 금액:", calculateTotalAmount(items)); // 총 금액 출력
         }
       } catch (error) {
@@ -74,7 +72,6 @@ function Cart() {
       }
     };
 
-    // 배송지 목록 불러오기
     const fetchAddresses = async () => {
       try {
         const { data } = await axios.get(
@@ -85,7 +82,7 @@ function Cart() {
             },
           }
         );
-        console.log("배송지 데이터:", data); // 배송지 데이터 출력
+        console.log("배송지 데이터:", data);
         setAddresses(data);
       } catch (error) {
         console.error("배송지 데이터를 불러오는데 실패했습니다.", error);
@@ -96,63 +93,6 @@ function Cart() {
     fetchCartItems();
     fetchAddresses();
   }, [isAuthenticated, isLoading, authToken, navigate]);
-  const handleQuantityChangeHandler = async (itemId, newQuantity) => {
-    if (newQuantity < 1) {
-      if (
-        window.confirm(
-          "수량이 0이 됩니다. 이 품목을 장바구니에서 삭제하시겠습니까?"
-        )
-      ) {
-        handleRemove(itemId); // 품목 삭제 함수 호출
-      }
-      return; // 수량이 0 미만으로 떨어지지 않게 방지
-    }
-
-    // 수량이 1일 때 - 버튼을 누르면 삭제할지 묻는 팝업
-    if (newQuantity === 1) {
-      if (
-        window.confirm(
-          "수량이 0이 됩니다. 이 품목을 장바구니에서 삭제하시겠습니까?"
-        )
-      ) {
-        handleRemove(itemId); // 품목 삭제 함수 호출
-      }
-      return; // 수량을 1로 유지하도록 방지
-    }
-
-    try {
-      const { data } = await axios.put(
-        `http://localhost:5001/cart/updateQuantity/${itemId}`,
-        { quantity: newQuantity }
-      );
-
-      if (data.message === "장바구니 수량이 업데이트되었습니다.") {
-        const updatedCartItems = cartItems.map((item) =>
-          item.id === itemId ? { ...item, quantity: newQuantity } : item
-        );
-        setCartItems(updatedCartItems);
-        setTotalAmount(calculateTotalAmount(updatedCartItems)); // 수량 변경 후 총 금액 업데이트
-      }
-    } catch (error) {
-      console.error("장바구니 수량 변경 실패:", error);
-      alert("장바구니 수량 변경에 실패했습니다.");
-    }
-  };
-  const handleRemove = async (itemId) => {
-    try {
-      const { data } = await axios.delete(
-        `http://localhost:5001/cart/remove/${itemId}`
-      );
-      if (data.message === "장바구니에서 삭제되었습니다.") {
-        const updatedCartItems = cartItems.filter((item) => item.id !== itemId);
-        setCartItems(updatedCartItems);
-        setTotalAmount(calculateTotalAmount(updatedCartItems)); // 수량 변경 후 총 금액 업데이트
-      }
-    } catch (error) {
-      console.error("장바구니 삭제 실패:", error);
-      alert("장바구니 아이템 삭제에 실패했습니다.");
-    }
-  };
 
   const handleCheckoutHandler = async () => {
     if (totalAmount <= 0) {
@@ -174,8 +114,7 @@ function Cart() {
         return;
       }
 
-      // JWT 토큰에서 userId 추출
-      let userId = null;
+      let userId;
       try {
         const decodedToken = jwtDecode(token);
         userId = decodedToken.id;
@@ -186,12 +125,10 @@ function Cart() {
         return;
       }
 
-      // TossPayments 초기화
       const tossPayments = await loadTossPayments(
         "test_ck_pP2YxJ4K87RqyvqEbgjLrRGZwXLO"
       );
 
-      // 장바구니 아이템 정보와 함께 결제 요청
       const { data } = await axios.post(
         "http://localhost:5001/api/payment",
         {
@@ -201,10 +138,10 @@ function Cart() {
           user_id: userId,
           cartItems: cartItems.map((item) => ({
             productId: item.product_id,
-            productName: item.product_name, // 상품명 추가
-            productSize: item.product_size, // 사이즈 추가
+            productName: item.product_name,
+            productSize: item.product_size,
             quantity: item.quantity,
-            thumbnail: item.thumbnail, // 썸네일 추가
+            thumbnail: item.thumbnail,
           })),
         },
         {
@@ -214,15 +151,21 @@ function Cart() {
         }
       );
 
-      console.log("결제 데이터:", data); // 결제 데이터 출력
       tossPayments
         .requestPayment("카드", {
           amount: data.amount,
           orderId: data.orderId,
           orderName: data.orderName,
-          successUrl: "http://localhost:5001/api/payment/success", // POST로 변경
-          failUrl: "http://localhost:5001/api/payment/failed", // POST로 변경
-          cancelUrl: "http://localhost:5001/api/payment/cancel", // POST로 변경
+          successUrl: "http://localhost:5001/api/payment/success",
+          failUrl: "http://localhost:5001/api/payment/failed",
+          cancelUrl: "http://localhost:5001/api/payment/cancel",
+        })
+        .then(async () => {
+          // 결제가 성공하면 장바구니 상태 초기화
+          setCartItems([]);
+          setTotalAmount(0);
+          alert("결제가 완료되었습니다! 장바구니를 초기화합니다.");
+          navigate("/payment-success");
         })
         .catch((error) => {
           console.error("결제 처리 중 오류가 발생했습니다.", error);
@@ -247,7 +190,7 @@ function Cart() {
             <p>배송지가 없습니다. 배송지를 추가해주세요.</p>
             <button
               className="add-address-button"
-              onClick={() => navigate("/add-address")} // 배송지 추가 페이지로 이동
+              onClick={() => navigate("/add-address")}
             >
               배송지 추가하기
             </button>
@@ -270,7 +213,7 @@ function Cart() {
             </select>
             <button
               className="add-address-button"
-              onClick={() => navigate("/profile")} // 배송지 추가 페이지로 이동
+              onClick={() => navigate("/profile")}
             >
               새로운 배송지 추가
             </button>
@@ -278,7 +221,6 @@ function Cart() {
         )}
       </div>
 
-      {/* 장바구니 아이템 표시 */}
       <div className="cart-items">
         {cartItems.length === 0 ? (
           <p>장바구니에 아이템이 없습니다.</p>
@@ -314,7 +256,10 @@ function Cart() {
                     <span>{item.quantity}</span>
                     <button
                       onClick={() =>
-                        handleQuantityChangeHandler(item.id, item.quantity + 1)
+                        handleQuantityChangeHandler(
+                          item.id,
+                          Math.min(99, item.quantity + 1)
+                        )
                       }
                     >
                       +
@@ -322,25 +267,15 @@ function Cart() {
                   </div>
                 </div>
               </div>
-              <button
-                onClick={() => handleRemove(item.id)}
-                className="remove-item-button"
-              >
-                삭제
-              </button>
             </div>
           ))
         )}
       </div>
 
-      <div className="cart-summary">
-        <p>총 금액: ₩ {totalAmount ? totalAmount.toLocaleString() : "0"}</p>
-        <button
-          onClick={handleCheckoutHandler}
-          className="checkout-button"
-          disabled={loading || !selectedAddress}
-        >
-          {loading ? "결제 중..." : "결제하기"}
+      <div className="total-amount">
+        <p>총 금액: ₩{totalAmount.toLocaleString()}</p>
+        <button className="checkout-button" onClick={handleCheckoutHandler}>
+          결제하기
         </button>
       </div>
     </div>
