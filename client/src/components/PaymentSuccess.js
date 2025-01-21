@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 function PaymentSuccess() {
   const location = useLocation();
@@ -19,7 +20,7 @@ function PaymentSuccess() {
       // 5초 뒤에 메인 페이지로 이동
       setTimeout(() => {
         navigate("/"); // 메인 페이지로 이동
-      }, 1000);
+      }, 5000);
     } else {
       alert("결제 정보가 부족합니다.");
     }

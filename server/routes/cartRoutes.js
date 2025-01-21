@@ -130,31 +130,39 @@ router.put("/updateQuantity/:id", async (req, res) => {
   }
 });
 
-// 결제 요청 후 장바구니 초기화
-const clearCart = async (userId, cartItems) => {
+router.post("/clear", async (req, res) => {
+  const { userId } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ error: "사용자 ID가 필요합니다." });
+  }
+
   try {
-    const connection = await dbPromise;
-    await connection.beginTransaction(); // 트랜잭션 시작
+    const [cartItems] = await dbPromise.execute(
+      "SELECT product_id AS productId FROM cart WHERE user_id = ?",
+      [userId]
+    );
 
-    for (const item of cartItems) {
-      const query = "DELETE FROM cart WHERE user_id = ? AND product_id = ?";
-      const values = [userId, item.productId];
-
-      const [result] = await connection.execute(query, values);
-
-      if (result.affectedRows === 0) {
-        console.warn(`상품 ID ${item.productId} 삭제되지 않았습니다.`);
-      }
+    if (cartItems.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "초기화할 장바구니 항목이 없습니다." });
     }
 
-    await connection.commit(); // 트랜잭션 커밋
-    return true;
-  } catch (error) {
-    console.error("장바구니 초기화 실패:", error);
-    await connection.rollback(); // 롤백
-    return false;
+    const success = await clearCart(userId, cartItems);
+
+    if (success) {
+      return res.status(200).json({ message: "장바구니가 초기화되었습니다." });
+    } else {
+      return res
+        .status(500)
+        .json({ error: "장바구니 초기화 중 오류가 발생했습니다." });
+    }
+  } catch (err) {
+    console.error("장바구니 초기화 API 오류:", err);
+    res.status(500).json({ error: "장바구니 초기화에 실패했습니다." });
   }
-};
+});
 
 // 서버에서 배송지 조회 API
 router.get("/addresses", async (req, res) => {
