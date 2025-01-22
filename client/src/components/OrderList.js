@@ -6,6 +6,8 @@ import { submitReview } from "../utils/api";
 const OrderList = ({ orders }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8; // 한 페이지에 표시할 주문 수
 
   const openReviewModal = (product) => {
     setSelectedProduct(product);
@@ -27,6 +29,16 @@ const OrderList = ({ orders }) => {
     }
   };
 
+  const totalPages = Math.ceil((orders?.length || 0) / itemsPerPage);
+  const paginatedOrders = orders?.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   if (!orders || orders.length === 0) {
     return <p className="no-orders">주문 내역이 없습니다.</p>;
   }
@@ -35,7 +47,7 @@ const OrderList = ({ orders }) => {
     <div className="order-list-container">
       <h2>주문 내역</h2>
       <ul className="order-list">
-        {orders.map((order) => (
+        {paginatedOrders.map((order) => (
           <li key={order.order_id} className="order-item">
             <div className="order-header">
               <h3 className="order-id">주문 번호: {order.order_id}</h3>
@@ -97,6 +109,21 @@ const OrderList = ({ orders }) => {
           </li>
         ))}
       </ul>
+      <div className="pagination">
+        {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+          (pageNumber) => (
+            <button
+              key={pageNumber}
+              className={`pagination-button ${
+                currentPage === pageNumber ? "active" : ""
+              }`}
+              onClick={() => handlePageChange(pageNumber)}
+            >
+              {pageNumber}
+            </button>
+          )
+        )}
+      </div>
       {isModalOpen && (
         <ReviewModal
           isOpen={isModalOpen}

@@ -13,20 +13,22 @@ import PaymentCancel from "./components/PaymentCancel";
 import PaymentFail from "./components/PaymentFail";
 import PaymentSuccess from "./components/PaymentSuccess";
 import QnAForm from "./components/QnAForm";
+import Admin from "./pages/Admin";
 import { AuthProvider, useAuth } from "./AuthContext";
 import { Navigate } from "react-router-dom";
+function ProtectedRoute({ children, redirectTo, requireAdmin = false }) {
+  const { isAuthenticated, isLoading, isAdmin } = useAuth();
 
-// ProtectedRoute 컴포넌트 수정
-function ProtectedRoute({ children, redirectTo }) {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  // 로딩 중이거나 인증되지 않은 경우 로그인 페이지로 리디렉션
   if (isLoading) {
-    return <div>Loading...</div>; // 로딩 중일 때 로딩 화면을 보여줄 수 있습니다.
+    return <div>Loading...</div>;
   }
 
   if (!isAuthenticated) {
     return <Navigate to={redirectTo} />;
+  }
+
+  if (requireAdmin && !isAdmin) {
+    return <Navigate to="/" />; // 일반 사용자는 홈으로 리디렉션
   }
 
   return children;
@@ -47,6 +49,16 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/QnAForm" element={<QnAForm />} />
+
+            {/* 어드민 페이지 경로 추가 */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute redirectTo="/login" requireAdmin>
+                  <Admin />
+                </ProtectedRoute>
+              }
+            />
 
             {/* 결제 관련 페이지 */}
             <Route

@@ -1,26 +1,19 @@
-import React, { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
-import { useAuth } from "../AuthContext";
+import React, { useState } from "react";
+import ProductForm from "../components/ProductForm"; // 제품 등록 폼 컴포넌트
 
-const AdminPage = () => {
-  const { isAuthenticated, user } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
+const Admin = () => {
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
 
-  useEffect(() => {
-    if (isAuthenticated && user && user.isAdmin) {
-      setIsAdmin(true);
-    }
-  }, [isAuthenticated, user]);
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
-
-  if (!isAdmin) {
-    return <Navigate to="/" />; // 어드민이 아니라면 메인 페이지로 리디렉션
-  }
-
-  return <div>Welcome to the Admin Page!</div>;
+  return (
+    <div>
+      <h1>Admin Page</h1>
+      <button onClick={() => setIsAddingProduct(!isAddingProduct)}>
+        {isAddingProduct ? "Hide Product Form" : "Add Product"}
+      </button>
+      {isAddingProduct && <ProductForm />}
+      {/* 추후 다른 관리 기능 추가 가능 */}
+    </div>
+  );
 };
 
-export default AdminPage;
+export default Admin;

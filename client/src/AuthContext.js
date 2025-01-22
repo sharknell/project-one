@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false); // 어드민 상태 추가
 
   // 로컬스토리지에서 인증 토큰 확인
   useEffect(() => {
@@ -44,6 +45,7 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(true); // 토큰이 있으면 인증됨
         setUserName(user.username); // 사용자 이름 설정
         setUserId(user.id); // userId를 user.id로 설정
+        setIsAdmin(user.role === "admin"); // JWT에서 어드민 여부 확인
       }
     }
     setIsLoading(false); // 로딩 완료
@@ -54,6 +56,7 @@ export const AuthProvider = ({ children }) => {
     if (user) {
       setUserName(user.username); // 추출된 사용자 이름 설정
       setUserId(user.id); // userId 설정
+      setIsAdmin(user.role === "admin"); // JWT에서 어드민 여부 설정
       localStorage.setItem("authToken", token);
       localStorage.setItem("userName", user.username); // 사용자 이름 로컬스토리지에 저장
       setIsAuthenticated(true);
@@ -66,11 +69,20 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     setUserName(""); // 로그아웃 시 사용자 이름 초기화
     setUserId(null); // 로그아웃 시 userId 초기화
+    setIsAdmin(false); // 로그아웃 시 어드민 상태 초기화
   };
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, userName, userId, isLoading, login, logout }}
+      value={{
+        isAuthenticated,
+        userName,
+        userId,
+        isAdmin,
+        isLoading,
+        login,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
