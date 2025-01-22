@@ -13,7 +13,6 @@ import PaymentCancel from "./components/PaymentCancel";
 import PaymentFail from "./components/PaymentFail";
 import PaymentSuccess from "./components/PaymentSuccess";
 import QnAForm from "./components/QnAForm";
-import AdminPage from "./pages/Admin"; // 어드민 페이지 임포트
 import { AuthProvider, useAuth } from "./AuthContext";
 import { Navigate } from "react-router-dom";
 
@@ -71,16 +70,6 @@ function App() {
               element={
                 <ProtectedRoute redirectTo="/login">
                   <PaymentCancel />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* 어드민 페이지 추가 */}
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute redirectTo="/login">
-                  <AdminPage />
                 </ProtectedRoute>
               }
             />

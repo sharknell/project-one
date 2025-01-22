@@ -79,6 +79,7 @@ function Cart() {
     fetchAddresses();
   }, [isAuthenticated, isLoading, authToken, navigate]);
 
+  // Handle Quantity Change
   const handleQuantityChangeHandler = async (itemId, newQuantity) => {
     if (newQuantity < 1) return;
 
@@ -100,6 +101,7 @@ function Cart() {
     }
   };
 
+  // Handle Item Removal
   const handleRemove = async (itemId) => {
     try {
       const { data } = await axios.delete(
@@ -115,6 +117,7 @@ function Cart() {
     }
   };
 
+  // Handle Checkout
   const handleCheckoutHandler = async () => {
     if (totalAmount <= 0) {
       alert("결제 금액이 올바르지 않습니다.");
@@ -146,7 +149,7 @@ function Cart() {
       }
 
       const tossPayments = await loadTossPayments(
-        "test_ck_pP2YxJ4K87RqyvqEbgjLrRGZwXLO"
+        "test_ck_pP2YxJ4K87RqyvqEbgjLrRGZwXLO" // Update to actual live key
       );
 
       const { data } = await axios.post(
