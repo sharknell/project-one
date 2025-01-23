@@ -51,14 +51,7 @@ function App() {
             <Route path="/QnAForm" element={<QnAForm />} />
 
             {/* 어드민 페이지 경로 추가 */}
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute redirectTo="/login" requireAdmin>
-                  <Admin />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/admin" element={<Admin />} />
 
             {/* 결제 관련 페이지 */}
             <Route

@@ -10,7 +10,12 @@ const JWT_SECRET = "your-jwt-secret";
 
 // JWT 생성 함수
 const generateToken = (user) => {
-  const payload = { id: user.id, username: user.username, email: user.email };
+  const payload = {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    role: user.role, // role을 추가하여 JWT 토큰에 포함
+  };
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "6h" }); // 토큰 유효시간: 6시간
 };
 
@@ -47,7 +52,7 @@ router.post("/login", async (req, res) => {
 
   try {
     const [user] = await dbPromise.query(
-      "SELECT id, username, email, password FROM users WHERE email = ?",
+      "SELECT id, username, email, password, role FROM users WHERE email = ?",
       [email]
     );
 
@@ -61,7 +66,16 @@ router.post("/login", async (req, res) => {
     }
 
     const token = generateToken(user[0]);
-    res.status(200).json({ message: "Login successful!", token });
+
+    // 로그인한 사용자의 정보 출력 (어드민 및 일반회원 구분)
+    console.log(`User Logged In: ${user[0].username} (${user[0].role})`);
+
+    const roleMessage =
+      user[0].role === "admin"
+        ? "Admin login successful!"
+        : "User login successful!";
+
+    res.status(200).json({ message: roleMessage, token });
   } catch (err) {
     console.error("Login Error:", err);
     res.status(500).json({ message: "Error during login process." });
@@ -88,7 +102,7 @@ router.post("/signup", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const [result] = await dbPromise.query(
-      "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+      "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, 'user')", // 기본값은 'user'
       [username, email, hashedPassword]
     );
 
@@ -115,6 +129,7 @@ router.post("/refresh-token", (req, res) => {
       id: decoded.id,
       username: decoded.username,
       email: decoded.email,
+      role: decoded.role, // 갱신된 토큰에도 role 포함
     });
 
     res.status(200).json({ token: newToken });

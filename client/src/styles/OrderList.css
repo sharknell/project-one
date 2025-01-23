@@ -1,12 +1,15 @@
 /* OrderList.css */
 
+/* 기본 설정 */
 body {
   font-family: "Pretendard", sans-serif;
   margin: 0;
   padding: 0;
   background-color: #f9fafa;
+  color: #1e293b;
 }
 
+/* 컨테이너 스타일 */
 .order-list-container {
   width: 100%;
   max-width: 720px;
@@ -16,18 +19,19 @@ body {
 }
 
 h2 {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
-  color: #333;
   margin-bottom: 20px;
+  color: #333;
 }
 
 .no-orders {
   text-align: center;
-  color: #8e8e93;
   font-size: 16px;
+  color: #8e8e93;
 }
 
+/* 리스트 스타일 */
 .order-list {
   list-style: none;
   padding: 0;
@@ -35,17 +39,20 @@ h2 {
 }
 
 .order-item {
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
+  background-color: #ffffff;
   border-radius: 12px;
   margin-bottom: 16px;
   padding: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.order-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .order-header {
-  display: flex;
-  flex-direction: column;
   margin-bottom: 12px;
 }
 
@@ -53,41 +60,19 @@ h2 {
 .order-date,
 .order-amount {
   font-size: 14px;
-  color: #555;
   margin: 4px 0;
 }
 
 .order-id {
   font-weight: 600;
-  color: #1e293b;
-}
-
-.order-status {
-  margin-top: 8px;
-}
-
-.delivery-status,
-.payment-status {
-  font-size: 14px;
-  color: #555;
-}
-
-.delivery-status.preparing {
   color: #007aff;
 }
 
-.delivery-status.completed {
-  color: #34c759;
+.order-amount {
+  color: #555;
 }
 
-.payment-status.success {
-  color: #34c759;
-}
-
-.payment-status.pending {
-  color: #ff3b30;
-}
-
+/* 제품 목록 스타일 */
 .order-items {
   margin-top: 16px;
 }
@@ -100,14 +85,8 @@ h2 {
 
 .product-item {
   display: flex;
-  flex-direction: column;
-  margin-bottom: 12px;
-}
-
-.product-info {
-  display: flex;
   align-items: center;
-  width: 100%;
+  margin-bottom: 12px;
 }
 
 .product-thumbnail {
@@ -116,6 +95,7 @@ h2 {
   border-radius: 8px;
   object-fit: cover;
   margin-right: 12px;
+  border: 1px solid #e0e0e0;
 }
 
 .product-details {
@@ -125,7 +105,7 @@ h2 {
 .product-name {
   font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  margin-bottom: 4px;
 }
 
 .product-size,
@@ -135,35 +115,31 @@ h2 {
   color: #8e8e93;
 }
 
-.review-section {
-  margin-top: 12px;
-  display: flex;
-  justify-content: flex-start;
-}
-
+/* 리뷰 버튼 스타일 */
 .review-submit-button {
-  background: #007aff;
+  background-color: #007aff;
   color: #fff;
-  border: none;
-  border-radius: 8px;
   padding: 8px 16px;
   font-size: 14px;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background-color 0.3s ease;
 }
 
 .review-submit-button:hover {
-  background: #0056d6;
+  background-color: #0056d6;
 }
 
+/* 페이지네이션 스타일 */
 .pagination {
   display: flex;
   justify-content: center;
   margin-top: 20px;
 }
 
-.page-button {
-  background: #e0e0e0;
+.pagination-button {
+  background-color: #e0e0e0;
   color: #555;
   border: none;
   border-radius: 8px;
@@ -171,69 +147,15 @@ h2 {
   margin: 0 4px;
   font-size: 14px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.page-button.active {
-  background: #007aff;
+.pagination-button.active {
+  background-color: #007aff;
   color: #fff;
 }
 
-.page-button:hover {
-  background: #0056d6;
+.pagination-button:hover {
+  background-color: #0056d6;
   color: #fff;
-}
-/* 모달 오버레이 */
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000; /* 다른 요소들 위에 띄우기 */
-}
-
-/* 모달 내용 */
-.popup-content {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 400px; /* 원하는 크기로 설정 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  text-align: center;
-}
-
-/* 버튼 스타일 */
-button {
-  padding: 8px 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin: 10px 5px;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-/* 텍스트영역 */
-textarea {
-  width: 100%;
-  padding: 8px;
-  margin-top: 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-select {
-  width: 100%;
-  padding: 8px;
-  margin-top: 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
 }

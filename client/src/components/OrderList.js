@@ -7,7 +7,7 @@ const OrderList = ({ orders }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8; // 한 페이지에 표시할 주문 수
+  const itemsPerPage = 5; // 한 페이지에 표시할 주문 수
 
   const openReviewModal = (product) => {
     setSelectedProduct(product);
