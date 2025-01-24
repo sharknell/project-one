@@ -1,11 +1,7 @@
 import React from "react";
 import "../styles/AddressList.css";
 
-const AddressList = ({
-  addresses = [],
-  setAddressToEdit,
-  handleAddressDelete,
-}) => {
+const AddressList = ({ addresses = [], setAddressToEdit }) => {
   return (
     <div className="address-list-container">
       <h2 className="address-list-title">배송지 관리</h2>
@@ -28,15 +24,9 @@ const AddressList = ({
               <div className="address-actions">
                 <button
                   className="address-edit-button"
-                  onClick={() => setAddressToEdit(address)}
+                  onClick={() => setAddressToEdit(address)} // 수정 시 해당 주소를 설정
                 >
                   수정
-                </button>
-                <button
-                  className="address-delete-button"
-                  onClick={() => handleAddressDelete(address)}
-                >
-                  삭제
                 </button>
               </div>
             </li>

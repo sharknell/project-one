@@ -54,9 +54,7 @@ function Cart() {
         );
         setCartItems(data || []);
         setTotalAmount(calculateTotalAmount(data));
-      } catch (error) {
-        alert("장바구니 데이터를 불러오는데 실패했습니다.");
-      }
+      } catch (error) {}
     };
 
     const fetchAddresses = async () => {
@@ -70,9 +68,7 @@ function Cart() {
           }
         );
         setAddresses(data);
-      } catch (error) {
-        alert("배송지 데이터를 불러오는데 실패했습니다.");
-      }
+      } catch (error) {}
     };
 
     fetchCartItems();
@@ -208,7 +204,7 @@ function Cart() {
         {addresses.length === 0 ? (
           <div>
             <p>배송지가 없습니다. 배송지를 추가해주세요.</p>
-            <button onClick={() => navigate("/add-address")}>
+            <button onClick={() => navigate("/profile")}>
               배송지 추가하기
             </button>
           </div>

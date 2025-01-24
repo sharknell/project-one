@@ -6,13 +6,17 @@ import {
   getQnaData,
   getReviews,
   submitReview,
-} from "../utils/api"; // 경로 확인
+  addAddress,
+  updateAddress,
+  deleteAddress,
+} from "../utils/api";
 import Sidebar from "../components/SideBar";
 import BasicInfo from "../components/BasicInfo";
 import AddressList from "../components/AddressList";
 import QnaList from "../components/QnAList";
 import OrderList from "../components/OrderList";
 import MyReviewsList from "../components/MyReviewsList";
+import AddressForm from "../components/AddressForm";
 import "../styles/Profile.css";
 
 const Profile = () => {
@@ -23,6 +27,8 @@ const Profile = () => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("basicInfo");
   const [qnaData, setQnaData] = useState([]);
+  const [isFormVisible, setFormVisible] = useState(false);
+  const [addressToEdit, setAddressToEdit] = useState(null);
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -41,14 +47,8 @@ const Profile = () => {
         const ordersResponse = await getOrders(token);
         setOrders(ordersResponse.orders);
 
-        // 리뷰 응답 처리 (빈 배열을 처리)
         const reviewsResponse = await getReviews(token);
-        console.log(reviewsResponse); // 추가된 로그로 응답을 확인
-        if (reviewsResponse.reviews && reviewsResponse.reviews.length > 0) {
-          setReviews(reviewsResponse.reviews);
-        } else {
-          setReviews([]); // 빈 배열 처리
-        }
+        setReviews(reviewsResponse.reviews || []);
       } catch (err) {
         setError(
           err.message || "프로필 데이터를 로드하는 중 오류가 발생했습니다."
@@ -73,6 +73,58 @@ const Profile = () => {
     }
   };
 
+  const handleAddAddress = () => {
+    setFormVisible(true);
+    setAddressToEdit(null); // 새 주소 추가
+  };
+
+  const handleSaveAddress = async (newAddress) => {
+    const token = localStorage.getItem("authToken");
+    try {
+      if (addressToEdit) {
+        // 주소 수정
+        await updateAddress(token, addressToEdit.id, newAddress);
+        setProfile((prev) => ({
+          ...prev,
+          addresses: prev.addresses.map((address) =>
+            address.id === addressToEdit.id
+              ? { ...address, ...newAddress }
+              : address
+          ),
+        }));
+      } else {
+        // 새 주소 추가
+        await addAddress(token, newAddress);
+        setProfile((prev) => ({
+          ...prev,
+          addresses: [...prev.addresses, newAddress],
+        }));
+      }
+      setFormVisible(false);
+    } catch (error) {
+      console.error(error);
+      alert("주소 저장 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleDeleteAddress = async (addressId) => {
+    const token = localStorage.getItem("authToken");
+    try {
+      await deleteAddress(token, addressId);
+      setProfile((prev) => ({
+        ...prev,
+        addresses: prev.addresses.filter((address) => address.id !== addressId),
+      }));
+    } catch (error) {
+      console.error(error);
+      alert("주소 삭제 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleCancelAddress = () => {
+    setFormVisible(false);
+  };
+
   if (loading) return <div>로딩 중...</div>;
   if (error) return <div>{error}</div>;
 
@@ -82,7 +134,16 @@ const Profile = () => {
       <div className="profile-content">
         {activeTab === "basicInfo" && <BasicInfo user={profile} />}
         {activeTab === "shipping" && (
-          <AddressList addresses={profile.addresses} />
+          <div>
+            <button className="add-address-button" onClick={handleAddAddress}>
+              배송지 추가하기
+            </button>
+            <AddressList
+              addresses={profile.addresses}
+              setAddressToEdit={setAddressToEdit}
+              onDeleteAddress={handleDeleteAddress} // 삭제 함수 전달
+            />
+          </div>
         )}
         {activeTab === "qna" && <QnaList qnaData={qnaData} />}
         {activeTab === "orders" && (
@@ -98,6 +159,14 @@ const Profile = () => {
               <MyReviewsList reviews={reviews} />
             )}
           </div>
+        )}
+
+        {isFormVisible && (
+          <AddressForm
+            address={addressToEdit}
+            onSave={handleSaveAddress}
+            onCancel={handleCancelAddress}
+          />
         )}
       </div>
     </div>

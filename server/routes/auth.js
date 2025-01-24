@@ -139,4 +139,21 @@ router.post("/refresh-token", (req, res) => {
   }
 });
 
+// 회원 목록 조회 라우트 (어드민만 접근 가능)
+router.get("/users", verifyToken, async (req, res) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Admin access only." });
+  }
+
+  try {
+    const [users] = await dbPromise.query(
+      "SELECT id, username, email, role FROM users"
+    );
+    res.status(200).json({ users });
+  } catch (err) {
+    console.error("User Fetch Error:", err);
+    res.status(500).json({ message: "Error fetching users." });
+  }
+});
+
 module.exports = router;

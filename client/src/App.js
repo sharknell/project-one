@@ -13,9 +13,9 @@ import PaymentCancel from "./components/PaymentCancel";
 import PaymentFail from "./components/PaymentFail";
 import PaymentSuccess from "./components/PaymentSuccess";
 import QnAForm from "./components/QnAForm";
-import Admin from "./pages/Admin";
 import { AuthProvider, useAuth } from "./AuthContext";
 import { Navigate } from "react-router-dom";
+import AdminDashboard from "./pages/AdminDashboard";
 function ProtectedRoute({ children, redirectTo, requireAdmin = false }) {
   const { isAuthenticated, isLoading, isAdmin } = useAuth();
 
@@ -51,7 +51,7 @@ function App() {
             <Route path="/QnAForm" element={<QnAForm />} />
 
             {/* 어드민 페이지 경로 추가 */}
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/admindashboard" element={<AdminDashboard />} />
 
             {/* 결제 관련 페이지 */}
             <Route

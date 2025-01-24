@@ -1,91 +1,131 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React from "react";
 
-const ProductForm = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    price: "",
-    imageUrl: "",
-    category: "",
-    effect: "",
-    size: "",
-    stock: "",
-    description: "",
-    detailedInfo: "",
-    artOfPerfuming: "",
-    shippingTime: "",
-    returnPolicy: "",
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post("http://localhost:5001/admin/add-product", formData);
-      alert("Product added successfully!");
-      setFormData({
-        name: "",
-        price: "",
-        imageUrl: "",
-        category: "",
-        effect: "",
-        size: "",
-        stock: "",
-        description: "",
-        detailedInfo: "",
-        artOfPerfuming: "",
-        shippingTime: "",
-        returnPolicy: "",
-      });
-    } catch (error) {
-      console.error("Error adding product:", error);
-      alert("Failed to add product.");
-    }
-  };
-
+const ProductForm = ({ newProduct, setNewProduct, handleAddProduct }) => {
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Add Product</h2>
-      <input
-        type="text"
-        name="name"
-        placeholder="Product Name"
-        value={formData.name}
-        onChange={handleChange}
-      />
-      <input
-        type="number"
-        name="price"
-        placeholder="Price"
-        value={formData.price}
-        onChange={handleChange}
-      />
-      <input
-        type="text"
-        name="imageUrl"
-        placeholder="Image URL"
-        value={formData.imageUrl}
-        onChange={handleChange}
-      />
-      <input
-        type="text"
-        name="category"
-        placeholder="Category"
-        value={formData.category}
-        onChange={handleChange}
-      />
-      <textarea
-        name="description"
-        placeholder="Description"
-        value={formData.description}
-        onChange={handleChange}
-      />
-      {/* 나머지 필드도 추가 */}
-      <button type="submit">Add Product</button>
+    <form onSubmit={handleAddProduct}>
+      <div>
+        <label>상품명</label>
+        <input
+          type="text"
+          value={newProduct.name}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, name: e.target.value })
+          }
+          required
+        />
+      </div>
+      <div>
+        <label>가격</label>
+        <input
+          type="number"
+          value={newProduct.price}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, price: e.target.value })
+          }
+          required
+        />
+      </div>
+      <div>
+        <label>설명</label>
+        <textarea
+          value={newProduct.description}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, description: e.target.value })
+          }
+          required
+        />
+      </div>
+      <div>
+        <label>카테고리</label>
+        <input
+          type="text"
+          value={newProduct.category}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, category: e.target.value })
+          }
+          required
+        />
+      </div>
+      <div>
+        <label>효과</label>
+        <textarea
+          value={newProduct.effect}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, effect: e.target.value })
+          }
+          required
+        />
+      </div>
+      <div>
+        <label>사이즈</label>
+        <input
+          type="text"
+          value={newProduct.size}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, size: e.target.value })
+          }
+        />
+      </div>
+      <div>
+        <label>재고</label>
+        <input
+          type="number"
+          value={newProduct.stock}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, stock: e.target.value })
+          }
+          required
+        />
+      </div>
+      <div>
+        <label>배송 시간</label>
+        <input
+          type="text"
+          value={newProduct.shippingTime}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, shippingTime: e.target.value })
+          }
+        />
+      </div>
+      <div>
+        <label>반품 정책</label>
+        <textarea
+          value={newProduct.returnPolicy}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, returnPolicy: e.target.value })
+          }
+        />
+      </div>
+      <div>
+        <label>향수 예술</label>
+        <textarea
+          value={newProduct.artOfPerfuming}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, artOfPerfuming: e.target.value })
+          }
+          required
+        />
+      </div>
+      <div>
+        <label>상세 정보</label>
+        <textarea
+          value={newProduct.detailedInfo}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, detailedInfo: e.target.value })
+          }
+        />
+      </div>
+      <div>
+        <label>상품 이미지 URL</label>
+        <input
+          type="text"
+          value={newProduct.imageUrl}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, imageUrl: e.target.value })
+          }
+        />
+      </div>
+      <button type="submit">상품 등록</button>
     </form>
   );
 };
