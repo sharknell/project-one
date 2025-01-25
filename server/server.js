@@ -23,7 +23,6 @@ app.use("/shop", productRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/cart", cartRoutes);
 app.use("/qna", qnaRoutes); // QnA 관련 API 라우터 추가
-
 // QnA 데이터 가져오기
 app.get("/shop/product/:productId/qna", async (req, res) => {
   const { productId } = req.params;

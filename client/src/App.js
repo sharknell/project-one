@@ -16,6 +16,8 @@ import QnAForm from "./components/QnAForm";
 import { AuthProvider, useAuth } from "./AuthContext";
 import { Navigate } from "react-router-dom";
 import AdminDashboard from "./pages/AdminDashboard";
+
+// ProtectedRoute 컴포넌트
 function ProtectedRoute({ children, redirectTo, requireAdmin = false }) {
   const { isAuthenticated, isLoading, isAdmin } = useAuth();
 
@@ -34,6 +36,7 @@ function ProtectedRoute({ children, redirectTo, requireAdmin = false }) {
   return children;
 }
 
+// App 컴포넌트
 function App() {
   return (
     <AuthProvider>
@@ -51,7 +54,14 @@ function App() {
             <Route path="/QnAForm" element={<QnAForm />} />
 
             {/* 어드민 페이지 경로 추가 */}
-            <Route path="/admindashboard" element={<AdminDashboard />} />
+            <Route
+              path="/admindashboard"
+              element={
+                <ProtectedRoute redirectTo="/login" requireAdmin={true}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
 
             {/* 결제 관련 페이지 */}
             <Route

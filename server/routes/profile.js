@@ -7,6 +7,7 @@ const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+
 console.log("JWT_SECRET:", JWT_SECRET);
 console.log("JWT_REFRESH_SECRET:", JWT_REFRESH_SECRET);
 
@@ -290,20 +291,14 @@ router.get("/orders", async (req, res) => {
     const decoded = await verifyToken(token, JWT_SECRET);
     const userId = decoded.id;
 
-    // payment 테이블에서 주문 내역과 결제 상태 조회
-    const connection = await dbPromise;
-
     const query = `
       SELECT order_id, user_id, amount, order_name, address, cart_items, status, created_at,delivery_status
       FROM payment
       WHERE user_id = ?
     `;
 
-    const [orders] = await connection.execute(query, [userId]);
+    const [orders] = await dbPromise.query(query, [userId]);
 
-    if (orders.length === 0) {
-      // return res.status(404).json({ message: "No orders found." });
-    }
     res.status(200).json({ orders });
   } catch (err) {
     console.error("Orders Error:", err);
@@ -330,7 +325,6 @@ router.post("/reviews", async (req, res) => {
     const decoded = await verifyToken(token, JWT_SECRET);
     const userId = decoded.id;
 
-    // 리뷰 추가 시 썸네일 포함
     await dbPromise.query(
       "INSERT INTO reviews (user_id, product_id, rating, review_text, thumbnail) VALUES (?, ?, ?, ?, ?)",
       [userId, productId, rating, reviewText || null, thumbnail || null]
@@ -338,12 +332,11 @@ router.post("/reviews", async (req, res) => {
 
     res.status(201).json({ message: "리뷰가 성공적으로 저장되었습니다." });
   } catch (err) {
-    console.error("리뷰 저장 오류:", err);
-    res.status(500).json({ message: "리뷰 저장 중 오류가 발생했습니다." });
+    console.error("Add Review Error:", err);
+    res.status(500).json({ message: "리뷰 추가 중 오류가 발생했습니다." });
   }
 });
 
-// 내 아이디로 작성한 리뷰 조회
 router.get("/reviews", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
 
@@ -362,6 +355,7 @@ router.get("/reviews", async (req, res) => {
     );
 
     if (reviews.length === 0) {
+      return res.status(404).json({ message: "리뷰가 없습니다." });
     }
 
     res.status(200).json({ reviews });

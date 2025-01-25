@@ -1,0 +1,15 @@
+[2025-01-24T14:41:55.245Z] INFO: User logged in: qortmdgus@naver.com (user)
+[2025-01-24T14:44:28.135Z] INFO: User logged in: admin@naver.com (admin)
+[2025-01-25T13:06:43.607Z] ERROR: Token verification failed: jwt expired
+[2025-01-25T13:06:43.645Z] ERROR: Token verification failed: jwt expired
+[2025-01-25T13:09:06.306Z] ERROR: Token verification failed: jwt expired
+[2025-01-25T13:09:06.311Z] ERROR: Token verification failed: jwt expired
+[2025-01-25T13:09:29.399Z] ERROR: Token verification failed: jwt expired
+[2025-01-25T13:09:29.412Z] ERROR: Token verification failed: jwt expired
+[2025-01-25T13:09:44.344Z] ERROR: Token verification failed: jwt expired
+[2025-01-25T13:09:44.348Z] ERROR: Token verification failed: jwt expired
+[2025-01-25T13:12:27.424Z] INFO: User logged in: admin@naver.com (admin)
+[2025-01-25T14:06:16.778Z] INFO: User logged in: admin@naver.com (admin)
+[2025-01-25T14:28:02.333Z] INFO: Login failed: Invalid password for email qortmdgus@naver.com
+[2025-01-25T14:28:04.749Z] INFO: Login failed: Invalid password for email qortmdgus@naver.com
+[2025-01-25T14:28:07.645Z] INFO: User logged in: qortmdgus@naver.com (user)
