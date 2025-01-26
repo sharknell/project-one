@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
-import { loginWithCredentials, loginWithKakao } from "../models/AuthModel";
+import { loginWithCredentials } from "../models/AuthModel";
 import { signupUser } from "../models/AuthModel";
 
 export const handleSignup = async (
@@ -33,19 +33,6 @@ export const useLoginController = () => {
     } catch (error) {
       console.error("Login Error:", error);
       alert("Invalid credentials");
-    }
-  };
-
-  const handleKakaoLogin = async (response) => {
-    try {
-      const kakaoAccessToken = response.response.access_token;
-      const data = await loginWithKakao(kakaoAccessToken);
-      alert("Kakao Login successful!");
-      login(data.token); // 전역 상태 업데이트
-      navigate("/"); // 홈 페이지로 이동
-    } catch (err) {
-      console.error("Kakao Login Error:", err);
-      alert("Kakao Login failed");
     }
   };
 

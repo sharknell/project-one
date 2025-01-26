@@ -30,34 +30,85 @@ const Profile = () => {
   const [isFormVisible, setFormVisible] = useState(false);
   const [addressToEdit, setAddressToEdit] = useState(null);
 
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        const token = localStorage.getItem("authToken");
+  // 액세스 토큰 재발급 함수
+  const refreshAccessToken = async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
 
-        const profileData = await getProfile(token);
-        setProfile(profileData.user);
+    if (!refreshToken) {
+      throw new Error("리프레시 토큰이 없습니다.");
+    }
 
-        const addressesData = await getAddresses(token);
-        setProfile((prev) => ({ ...prev, addresses: addressesData.addresses }));
+    try {
+      const response = await fetch("/refresh", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
 
-        const qnaResponse = await getQnaData(token);
-        setQnaData(Array.isArray(qnaResponse.data) ? qnaResponse.data : []);
-
-        const ordersResponse = await getOrders(token);
-        setOrders(ordersResponse.orders);
-
-        const reviewsResponse = await getReviews(token);
-        setReviews(reviewsResponse.reviews || []);
-      } catch (err) {
-        setError(
-          err.message || "프로필 데이터를 로드하는 중 오류가 발생했습니다."
+      if (!response.ok) {
+        throw new Error(
+          "리프레시 토큰으로 새로운 액세스 토큰을 발급할 수 없습니다."
         );
-      } finally {
-        setLoading(false);
       }
-    };
 
+      const data = await response.json();
+      const { accessToken } = data;
+      localStorage.setItem("authToken", accessToken); // 새 액세스 토큰 저장
+      return accessToken;
+    } catch (error) {
+      console.error("리프레시 토큰 오류:", error);
+      throw error;
+    }
+  };
+
+  const fetchProfileData = async () => {
+    setLoading(true);
+    try {
+      let token = localStorage.getItem("authToken");
+
+      if (!token) {
+        throw new Error("토큰이 존재하지 않습니다.");
+      }
+
+      // 인증 헤더에 토큰 추가
+      const headers = new Headers({
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      });
+
+      const profileData = await getProfile(headers);
+      const addressesData = await getAddresses(headers);
+      const qnaResponse = await getQnaData(headers);
+      const ordersResponse = await getOrders(headers);
+      const reviewsResponse = await getReviews(headers);
+
+      // 모든 데이터를 한 번에 상태에 반영
+      setProfile((prev) => ({
+        ...prev,
+        user: profileData.user,
+        addresses: addressesData.addresses,
+      }));
+      setOrders(ordersResponse.orders);
+      setReviews(reviewsResponse.reviews || []);
+      setQnaData(Array.isArray(qnaResponse.data) ? qnaResponse.data : []);
+    } catch (err) {
+      if (err.message === "jwt expired") {
+        // 토큰 만료 처리: 리프레시 토큰을 통해 새 액세스 토큰을 발급
+        const newToken = await refreshAccessToken();
+        await fetchProfileData(newToken); // 새로운 토큰으로 다시 시도
+      } else if (err.message === "토큰이 존재하지 않습니다.") {
+        setError("로그인이 필요합니다. 다시 로그인해주세요.");
+      } else {
+        setError("프로필 데이터를 로드하는 중 오류가 발생했습니다.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchProfileData();
   }, []);
 
@@ -132,16 +183,16 @@ const Profile = () => {
     <div className="profile-container">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="profile-content">
-        {activeTab === "basicInfo" && <BasicInfo user={profile} />}
+        {activeTab === "basicInfo" && <BasicInfo user={profile?.user} />}
         {activeTab === "shipping" && (
           <div>
             <button className="add-address-button" onClick={handleAddAddress}>
               배송지 추가하기
             </button>
             <AddressList
-              addresses={profile.addresses}
+              addresses={profile?.addresses || []}
               setAddressToEdit={setAddressToEdit}
-              onDeleteAddress={handleDeleteAddress} // 삭제 함수 전달
+              onDeleteAddress={handleDeleteAddress}
             />
           </div>
         )}

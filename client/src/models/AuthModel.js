@@ -15,14 +15,6 @@ export const loginWithCredentials = async (email, password) => {
   };
 };
 
-// 카카오 로그인 함수
-export const loginWithKakao = async (kakaoAccessToken) => {
-  const response = await api.post("/auth/kakao-login", {
-    accessToken: kakaoAccessToken,
-  });
-  return response.data;
-};
-
 // 회원 가입 함수
 export const signupUser = async (email, password, username) => {
   try {

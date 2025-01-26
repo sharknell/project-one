@@ -184,5 +184,15 @@ router.delete("/product/:id", async (req, res) => {
     return res.status(500).json({ message: "상품 삭제에 실패했습니다." });
   }
 });
+// 전체 상품 조회
+router.get("/", async (req, res) => {
+  try {
+    const [results] = await dbPromise.query("SELECT * FROM products");
+    res.json({ message: "상품 목록 조회 성공", data: results });
+  } catch (err) {
+    console.error("상품 목록 조회 오류:", err);
+    return res.status(500).json({ message: "상품 목록 조회에 실패했습니다." });
+  }
+});
 
 module.exports = router;

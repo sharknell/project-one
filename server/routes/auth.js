@@ -1,23 +1,17 @@
-require("dotenv").config();
+// auth.js
 const express = require("express");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const { dbPromise } = require("../config/db");
+const {
+  generateToken,
+  generateRefreshToken,
+  verifyToken,
+} = require("./tokenUtils");
 const winston = require("winston");
 
 const router = express.Router();
 
-// 환경 변수 설정
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET is not defined in environment variables.");
-}
-
-const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS, 10) || 12;
-const ACCESS_TOKEN_EXPIRY = process.env.ACCESS_TOKEN_EXPIRY || "15m";
-const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRY || "7d";
-
-// 로깅 설정
+// 로깅 설정 (여기서는 그대로 유지)
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
@@ -31,50 +25,6 @@ const logger = winston.createLogger({
     new winston.transports.Console(),
   ],
 });
-
-// 리프레시 토큰 저장 (메모리 기반, 실무에서는 DB 사용 권장)
-const refreshTokens = new Map();
-
-// 토큰 생성 함수
-const generateToken = (user) => {
-  const payload = {
-    id: user.id,
-    username: user.username,
-    email: user.email,
-    role: user.role,
-  };
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
-};
-
-const generateRefreshToken = (user) => {
-  const refreshToken = jwt.sign({ id: user.id }, JWT_SECRET, {
-    expiresIn: REFRESH_TOKEN_EXPIRY,
-  });
-  refreshTokens.set(user.id, refreshToken);
-  return refreshToken;
-};
-
-// JWT 검증 미들웨어
-const verifyToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) {
-    return res.status(401).json({ message: "Token is required." });
-  }
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (err) {
-    logger.error(`Token verification failed: ${err.message}`);
-    if (err.name === "TokenExpiredError") {
-      return res
-        .status(401)
-        .json({ message: "Token expired. Please refresh your token." });
-    }
-    return res.status(403).json({ message: "Authentication failed." });
-  }
-};
 
 // 로그인
 router.post("/login", async (req, res) => {
@@ -114,53 +64,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// 회원가입
-router.post("/signup", async (req, res) => {
-  const { username, email, password } = req.body;
-
-  if (!username || !email || !password) {
-    return res.status(400).json({ message: "All fields are required." });
-  }
-
-  // 비밀번호 정책 검증
-  if (
-    password.length < 8 ||
-    !/\d/.test(password) ||
-    !/[A-Za-z]/.test(password)
-  ) {
-    return res.status(400).json({
-      message:
-        "Password must be at least 8 characters long and include letters and numbers.",
-    });
-  }
-
-  try {
-    const [existingUser] = await dbPromise.query(
-      "SELECT id FROM users WHERE email = ?",
-      [email]
-    );
-
-    if (existingUser.length > 0) {
-      return res.status(409).json({ message: "Email already in use." });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-    const [result] = await dbPromise.query(
-      "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, 'user')",
-      [username, email, hashedPassword]
-    );
-
-    logger.info(`User signed up: ${email}`);
-    res
-      .status(201)
-      .json({ message: "Signup successful!", userId: result.insertId });
-  } catch (err) {
-    logger.error(`Signup error: ${err.message}`);
-    res.status(500).json({ message: "Error during signup process." });
-  }
-});
-
-// 토큰 갱신
+// 리프레시 토큰을 통한 새로운 액세스 토큰 발급
 router.post("/refresh-token", (req, res) => {
   const { refreshToken } = req.body;
 
@@ -169,14 +73,7 @@ router.post("/refresh-token", (req, res) => {
   }
 
   try {
-    const decoded = jwt.verify(refreshToken, JWT_SECRET);
-    if (
-      !refreshTokens.has(decoded.id) ||
-      refreshTokens.get(decoded.id) !== refreshToken
-    ) {
-      return res.status(403).json({ message: "Invalid refresh token." });
-    }
-
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const user = {
       id: decoded.id,
       username: decoded.username,

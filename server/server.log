@@ -13,3 +13,28 @@
 [2025-01-25T14:28:02.333Z] INFO: Login failed: Invalid password for email qortmdgus@naver.com
 [2025-01-25T14:28:04.749Z] INFO: Login failed: Invalid password for email qortmdgus@naver.com
 [2025-01-25T14:28:07.645Z] INFO: User logged in: qortmdgus@naver.com (user)
+[2025-01-25T15:00:41.879Z] INFO: User logged in: qortmdgus@naver.com (user)
+[2025-01-26T02:44:42.011Z] INFO: User logged in: qortmdgus@naver.com (user)
+[2025-01-26T02:53:49.951Z] INFO: User logged in: admin@naver.com (admin)
+[2025-01-26T03:27:22.405Z] INFO: User logged in: qortmdgus@naver.com (user)
+[2025-01-26T07:34:37.656Z] INFO: User logged in: qortmdgus@naver.com (user)
+[2025-01-26T10:36:43.182Z] INFO: Login failed: Invalid password for email qortmdgus@naver.com
+[2025-01-26T10:36:47.293Z] INFO: User logged in: qortmdgus@naver.com (user)
+[2025-01-26T12:08:59.631Z] INFO: Login failed: Invalid password for email qortmdgus@naver.com
+[2025-01-26T12:09:02.710Z] INFO: User logged in: qortmdgus@naver.com (user)
+[2025-01-26T12:18:36.127Z] INFO: Login failed: Invalid password for email admin@naver.com
+[2025-01-26T12:18:39.444Z] INFO: User logged in: admin@naver.com (admin)
+[2025-01-26T12:34:06.072Z] ERROR: Token verification failed: jwt expired
+[2025-01-26T12:36:35.317Z] ERROR: Token verification failed: jwt expired
+[2025-01-26T12:38:03.075Z] ERROR: Token verification failed: jwt expired
+[2025-01-26T12:38:03.081Z] ERROR: Token verification failed: jwt expired
+[2025-01-26T12:38:11.441Z] ERROR: Token verification failed: jwt expired
+[2025-01-26T12:38:11.449Z] ERROR: Token verification failed: jwt expired
+[2025-01-26T12:40:12.058Z] ERROR: Token verification failed: jwt expired
+[2025-01-26T12:50:46.872Z] ERROR: Token verification failed: jwt expired
+[2025-01-26T12:50:46.876Z] ERROR: Token verification failed: jwt expired
+[2025-01-26T13:01:12.008Z] ERROR: Token verification failed: jwt expired
+[2025-01-26T13:01:12.012Z] ERROR: Token verification failed: jwt expired
+[2025-01-26T13:01:18.148Z] INFO: Login failed: Invalid password for email admin@naver.com
+[2025-01-26T13:01:21.041Z] INFO: User logged in: admin@naver.com (admin)
+[2025-01-26T14:27:28.523Z] INFO: User logged in: qortmdgus@naver.com (user)

@@ -35,9 +35,6 @@ function Header() {
 
           {/* 네비게이션 메뉴 */}
           <nav className={`header-nav ${isMenuOpen ? "active" : ""}`}>
-            <Link to="/shop" className="header-nav-item">
-              Shop
-            </Link>
             <Link to="/cart" className="header-nav-item">
               장바구니
             </Link>
