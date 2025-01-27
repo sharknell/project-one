@@ -13,39 +13,39 @@ if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
   throw new Error("JWT_SECRET or JWT_REFRESH_SECRET is not defined.");
 }
 
-// 리프레시 토큰으로 액세스 토큰 재발급
-router.post("/refresh", async (req, res) => {
+// 리프레시 토큰을 통한 새로운 액세스 토큰 발급
+router.post("/refresh-token", (req, res) => {
   const { refreshToken } = req.body;
 
   if (!refreshToken) {
-    return res
-      .status(401)
-      .json({ message: "리프레시 토큰이 제공되지 않았습니다." });
+    return res.status(400).json({ message: "Refresh token is required." });
   }
 
   try {
-    const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET); // 리프레시 토큰 검증
-    const userId = decoded.id;
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const user = {
+      id: decoded.id,
+      username: decoded.username,
+      email: decoded.email,
+      role: decoded.role,
+    };
 
-    const [user] = await dbPromise.query(
-      "SELECT refresh_token FROM users WHERE id = ?",
-      [userId]
+    // 만료 시간 계산
+    const expirationTime = decoded.exp * 1000; // exp는 초 단위로 되어 있으므로 밀리초로 변환
+    const currentTime = Date.now();
+    const timeRemaining = Math.max(expirationTime - currentTime, 0); // 남은 시간 (음수 방지)
+
+    // 토큰 만료 시간 출력 (초 단위)
+    console.log(
+      `Token expires in: ${Math.floor(timeRemaining / 1000)} seconds`
     );
 
-    if (!user.length || user[0].refresh_token !== refreshToken) {
-      return res
-        .status(403)
-        .json({ message: "리프레시 토큰이 유효하지 않습니다." });
-    }
+    const newAccessToken = generateToken(user);
 
-    const accessToken = jwt.sign({ id: userId }, JWT_SECRET, {
-      expiresIn: "1h", // 새 액세스 토큰 1시간 유효
-    });
-
-    res.status(200).json({ accessToken });
+    res.status(200).json({ token: newAccessToken });
   } catch (err) {
-    console.error("리프레시 토큰 오류:", err);
-    res.status(500).json({ message: "리프레시 토큰 처리 중 오류 발생." });
+    console.error(`Token refresh error: ${err.message}`);
+    res.status(401).json({ message: "Invalid or expired refresh token." });
   }
 });
 

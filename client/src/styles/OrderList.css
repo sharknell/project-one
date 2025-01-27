@@ -7,6 +7,9 @@
   --card-background-color: #ffffff; /* 카드 배경 */
   --border-color: #e5e5ea; /* 경계선 색상 */
   --hover-color: #004ecc; /* 버튼 호버 색상 */
+  --dropdown-bg: #ffffff; /* 드롭다운 배경색 */
+  --dropdown-border: #e0e0e0; /* 드롭다운 경계선 색상 */
+  --dropdown-hover-bg: #f0f8ff; /* 드롭다운 호버 배경색 */
 }
 
 /* 기본 설정 */
@@ -40,6 +43,34 @@ h2 {
   text-align: center;
   font-size: 16px;
   color: var(--subtle-text-color);
+}
+
+/* 정렬 드롭다운 메뉴 스타일 */
+.order-list__sort {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.order-list__sort select {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid var(--dropdown-border);
+  border-radius: 8px;
+  background-color: var(--dropdown-bg);
+  color: var(--text-color);
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.order-list__sort select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 4px rgba(0, 102, 255, 0.5);
+}
+
+.order-list__sort select:hover {
+  background-color: var(--dropdown-hover-bg);
 }
 
 /* 리스트 스타일 */

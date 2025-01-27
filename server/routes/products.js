@@ -187,11 +187,24 @@ router.delete("/product/:id", async (req, res) => {
 // 전체 상품 조회
 router.get("/", async (req, res) => {
   try {
+    // 모든 상품 조회 쿼리
     const [results] = await dbPromise.query("SELECT * FROM products");
-    res.json({ message: "상품 목록 조회 성공", data: results });
+
+    // 상품이 존재하지 않으면 404 응답
+    if (results.length === 0) {
+      return res.status(404).json({ message: "상품 목록이 비어 있습니다." });
+    }
+
+    // 상품 목록 조회 성공 시 응답
+    res.json({
+      message: "상품 목록 조회 성공",
+      data: results,
+    });
   } catch (err) {
     console.error("상품 목록 조회 오류:", err);
-    return res.status(500).json({ message: "상품 목록 조회에 실패했습니다." });
+    return res.status(500).json({
+      message: "상품 목록 조회에 실패했습니다.",
+    });
   }
 });
 

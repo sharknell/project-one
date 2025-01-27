@@ -38,3 +38,26 @@
 [2025-01-26T13:01:18.148Z] INFO: Login failed: Invalid password for email admin@naver.com
 [2025-01-26T13:01:21.041Z] INFO: User logged in: admin@naver.com (admin)
 [2025-01-26T14:27:28.523Z] INFO: User logged in: qortmdgus@naver.com (user)
+[2025-01-26T14:58:52.086Z] INFO: Login failed: Invalid password for email qortmdgus@naver.com
+[2025-01-26T14:58:53.587Z] INFO: Login failed: Invalid password for email qortmdgus@naver.com
+[2025-01-26T14:58:56.270Z] INFO: User logged in: qortmdgus@naver.com (user)
+[2025-01-26T15:17:39.119Z] ERROR: Token refresh error: jwt is not defined
+[2025-01-26T15:17:39.125Z] ERROR: Token refresh error: jwt is not defined
+[2025-01-26T15:18:11.721Z] ERROR: Token refresh error: jwt is not defined
+[2025-01-26T15:18:11.725Z] ERROR: Token refresh error: jwt is not defined
+[2025-01-26T15:18:57.356Z] ERROR: Token refresh error: jwt malformed
+[2025-01-26T15:18:57.365Z] ERROR: Token refresh error: jwt malformed
+[2025-01-26T15:23:57.429Z] ERROR: Token refresh error: jwt malformed
+[2025-01-26T15:23:57.437Z] ERROR: Token refresh error: jwt malformed
+[2025-01-26T15:24:04.128Z] INFO: Login failed: Invalid password for email admin@naver.com
+[2025-01-26T15:24:06.537Z] INFO: User logged in: admin@naver.com (admin)
+[2025-01-26T15:42:34.903Z] INFO: Login failed: Invalid password for email qortmdgus@naver.com
+[2025-01-26T15:42:36.498Z] INFO: Login failed: Invalid password for email qortmdgus@naver.com
+[2025-01-26T15:42:38.895Z] INFO: User logged in: qortmdgus@naver.com (user)
+[2025-01-27T03:10:20.816Z] INFO: User logged in: qortmdgus@naver.com (user)
+[2025-01-27T04:31:29.398Z] INFO: User logged in: admin@naver.com (admin)
+[2025-01-27T06:34:46.348Z] INFO: Login failed: Invalid password for email admin@naver.com
+[2025-01-27T06:34:47.599Z] INFO: Login failed: Invalid password for email admin@naver.com
+[2025-01-27T06:34:50.702Z] INFO: User logged in: admin@naver.com (admin)
+[2025-01-27T06:35:41.780Z] INFO: Login failed: Invalid password for email admin@naver.com
+[2025-01-27T06:35:43.437Z] INFO: User logged in: admin@naver.com (admin)

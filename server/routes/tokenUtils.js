@@ -1,8 +1,9 @@
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET, JWT_REFRESH_SECRET } = process.env;
 
+// 액세스 토큰 검증 미들웨어
 const verifyToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
+  const token = req.headers.authorization?.split(" ")[1]; // Bearer <token>
 
   if (!token) {
     return res.status(401).json({ message: "Token is required." });
@@ -46,7 +47,7 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-// 토큰 생성 함수
+// 액세스 토큰 생성
 const generateToken = (user) => {
   const payload = {
     id: user.id,

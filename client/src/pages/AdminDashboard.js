@@ -142,6 +142,7 @@ const AdminDashboard = () => {
           setNewProduct={setNewProduct}
           handleAddProduct={handleAddProduct}
         />
+        {/* 추가 기능: 상품 목록 및 회원 목록 */}
         <div>
           <h2>상품 목록</h2>
           <ul>

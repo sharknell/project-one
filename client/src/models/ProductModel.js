@@ -1,10 +1,11 @@
 import axios from "axios";
 
+// 전체 상품 조회 함수
 export const fetchProducts = async () => {
   try {
     const response = await axios.get("http://localhost:5001/shop");
     if (response.data && Array.isArray(response.data.data)) {
-      return response.data.data;
+      return response.data.data; // 전체 상품 데이터를 반환
     } else {
       throw new Error("상품 목록이 비어 있습니다.");
     }
@@ -14,6 +15,7 @@ export const fetchProducts = async () => {
   }
 };
 
+// 특정 ID로 상품 조회
 export const getProductById = async (id) => {
   try {
     const response = await axios.get(
@@ -34,13 +36,14 @@ export const getProductById = async (id) => {
   }
 };
 
+// 카테고리별 상품 조회 함수
 export const fetchProductsByCategory = async (category) => {
   try {
     const response = await axios.get(
       `http://localhost:5001/shop/category/${category}`
     );
     if (response.data) {
-      return response.data;
+      return response.data; // 카테고리별 상품 데이터 반환
     } else {
       throw new Error("해당 카테고리의 상품이 없습니다.");
     }
@@ -50,5 +53,18 @@ export const fetchProductsByCategory = async (category) => {
       error
     );
     throw new Error("상품 목록을 불러오는 데 오류가 발생했습니다.");
+  }
+};
+export const fetchAllProducts = async () => {
+  try {
+    const response = await axios.get("http://localhost:5001/shop/");
+    if (response.data && Array.isArray(response.data.data)) {
+      return response.data.data; // 전체 상품 데이터를 반환
+    } else {
+      throw new Error("상품 목록이 비어 있습니다.");
+    }
+  } catch (err) {
+    console.error("상품 목록을 가져오는 데 실패했습니다.", err);
+    throw new Error("상품 목록을 가져오는 데 실패했습니다.");
   }
 };

@@ -1,4 +1,3 @@
-// auth.js
 const express = require("express");
 const bcrypt = require("bcrypt");
 const { dbPromise } = require("../config/db");
@@ -8,10 +7,11 @@ const {
   verifyToken,
 } = require("./tokenUtils");
 const winston = require("winston");
+const jwt = require("jsonwebtoken"); // jsonwebtoken 모듈 추가
 
 const router = express.Router();
 
-// 로깅 설정 (여기서는 그대로 유지)
+// 로깅 설정
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
@@ -80,12 +80,22 @@ router.post("/refresh-token", (req, res) => {
       email: decoded.email,
       role: decoded.role,
     };
+
+    // 만료 시간 계산
+    const expirationTime = decoded.exp * 1000; // exp는 초 단위로 되어 있으므로 밀리초로 변환
+    const currentTime = Date.now();
+    const timeRemaining = Math.max(expirationTime - currentTime, 0); // 남은 시간 (음수 방지)
+
+    // 토큰 만료 시간 출력 (초 단위)
+    console.log(
+      `Token expires in: ${Math.floor(timeRemaining / 1000)} seconds`
+    );
+
     const newAccessToken = generateToken(user);
 
-    logger.info(`Token refreshed for user ID: ${decoded.id}`);
     res.status(200).json({ token: newAccessToken });
   } catch (err) {
-    logger.error(`Token refresh error: ${err.message}`);
+    console.error(`Token refresh error: ${err.message}`);
     res.status(401).json({ message: "Invalid or expired refresh token." });
   }
 });
