@@ -2,31 +2,13 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const { dbPromise } = require("../config/db");
 const {
+  verifyToken,
   generateToken,
   generateRefreshToken,
-  verifyToken,
 } = require("./tokenUtils");
-const winston = require("winston");
-const jwt = require("jsonwebtoken"); // jsonwebtoken 모듈 추가
 
 const router = express.Router();
 
-// 로깅 설정
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message }) => {
-      return `[${timestamp}] ${level.toUpperCase()}: ${message}`;
-    })
-  ),
-  transports: [
-    new winston.transports.File({ filename: "server.log" }),
-    new winston.transports.Console(),
-  ],
-});
-
-// 로그인
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -43,30 +25,32 @@ router.post("/login", async (req, res) => {
     );
 
     if (user.length === 0) {
-      logger.info(`Login failed: User not found for email ${email}`);
       return res.status(404).json({ message: "User not found." });
     }
 
     const match = await bcrypt.compare(password, user[0].password);
     if (!match) {
-      logger.info(`Login failed: Invalid password for email ${email}`);
       return res.status(401).json({ message: "Invalid credentials." });
     }
 
     const accessToken = generateToken(user[0]);
     const refreshToken = generateRefreshToken(user[0]);
 
-    logger.info(`User logged in: ${user[0].email} (${user[0].role})`);
-    res.status(200).json({ token: accessToken, refreshToken });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+    });
+
+    res.status(200).json({ token: accessToken });
   } catch (err) {
-    logger.error(`Login error: ${err.message}`);
-    res.status(500).json({ message: "Error during login process." });
+    console.error("Login error:", err);
+    res.status(500).json({ message: "Login failed." });
   }
 });
 
-// 리프레시 토큰을 통한 새로운 액세스 토큰 발급
 router.post("/refresh-token", (req, res) => {
-  const { refreshToken } = req.body;
+  const refreshToken = req.cookies?.refreshToken;
 
   if (!refreshToken) {
     return res.status(400).json({ message: "Refresh token is required." });
@@ -74,33 +58,25 @@ router.post("/refresh-token", (req, res) => {
 
   try {
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    const user = {
-      id: decoded.id,
-      username: decoded.username,
-      email: decoded.email,
-      role: decoded.role,
-    };
-
-    // 만료 시간 계산
-    const expirationTime = decoded.exp * 1000; // exp는 초 단위로 되어 있으므로 밀리초로 변환
-    const currentTime = Date.now();
-    const timeRemaining = Math.max(expirationTime - currentTime, 0); // 남은 시간 (음수 방지)
-
-    // 토큰 만료 시간 출력 (초 단위)
-    console.log(
-      `Token expires in: ${Math.floor(timeRemaining / 1000)} seconds`
-    );
-
-    const newAccessToken = generateToken(user);
-
+    const newAccessToken = generateToken(decoded);
     res.status(200).json({ token: newAccessToken });
   } catch (err) {
-    console.error(`Token refresh error: ${err.message}`);
+    console.error("Token refresh error:", err);
     res.status(401).json({ message: "Invalid or expired refresh token." });
   }
 });
 
-// 회원 목록 조회 (어드민 전용)
+router.post("/logout", (req, res) => {
+  // 쿠키에서 refreshToken을 클리어
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict",
+  });
+
+  res.status(200).json({ message: "Logged out successfully." });
+});
+
 router.get("/users", verifyToken, async (req, res) => {
   if (req.user.role !== "admin") {
     return res.status(403).json({ message: "Admin access only." });
@@ -112,7 +88,7 @@ router.get("/users", verifyToken, async (req, res) => {
     );
     res.status(200).json({ users });
   } catch (err) {
-    logger.error(`User fetch error: ${err.message}`);
+    console.error(`User fetch error: ${err.message}`);
     res.status(500).json({ message: "Error fetching users." });
   }
 });

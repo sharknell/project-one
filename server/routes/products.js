@@ -207,5 +207,33 @@ router.get("/", async (req, res) => {
     });
   }
 });
+// 상품 QnA 등록
+router.post("/product/:id/qna", async (req, res) => {
+  const { id } = req.params;
+  const { question, userName } = req.body;
+
+  // 질문과 사용자 이름이 없으면 오류 처리
+  if (!question || !userName) {
+    return res
+      .status(400)
+      .json({ message: "질문과 사용자 이름은 필수입니다." });
+  }
+
+  try {
+    // QnA를 테이블에 저장 (createdAt, updatedAt은 현재 시간으로 설정)
+    const [result] = await dbPromise.query(
+      "INSERT INTO qna (question, userName, productId, createdAt, updatedAt) VALUES (?, ?, ?, NOW(), NOW())",
+      [question, userName, id]
+    );
+
+    res.status(201).json({
+      message: "QnA 등록 성공",
+      data: { id: result.insertId, question, userName, productId: id },
+    });
+  } catch (err) {
+    console.error("QnA 등록 실패:", err);
+    return res.status(500).json({ message: "QnA 등록에 실패했습니다." });
+  }
+});
 
 module.exports = router;

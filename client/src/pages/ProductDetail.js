@@ -67,6 +67,7 @@ function ProductDetail() {
         userName: userName || "익명", // 인증된 사용자 이름 또는 익명
         productId: id, // 상품 ID
       });
+      console.log("QnA 등록 성공:", question);
 
       alert(
         `QnA가 등록되었습니다: ${question} (작성자: ${userName || "익명"})`
