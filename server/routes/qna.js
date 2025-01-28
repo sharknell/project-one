@@ -39,7 +39,7 @@ router.get("/qna", async (req, res) => {
 
   try {
     const query = `
-      SELECT qna.id, qna.question, qna.userName, qna.productId, qna.createdAt, qna.updatedAt,
+      SELECT qna.id, qna.question, qna.userName, qna.productId, qna.productName, qna.createdAt, qna.updatedAt,
              p.image_url AS productImage
       FROM qna
       JOIN products p ON qna.productId = p.id

@@ -1,34 +1,71 @@
-/* AdminDashboard.css */
-
-.dashboard-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+/* AdminDashboard 기본 스타일 */
+.admin-dashboard {
+  display: flex;
+  height: 100vh;
+  background-color: #f5f5f5;
 }
 
-.dashboard-header {
-  text-align: center;
-  color: #2c3e50;
-  margin-bottom: 20px;
+.content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: white;
 }
 
 .dashboard-section {
-  margin-bottom: 30px;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 40px;
 }
 
-.dashboard-section h2 {
-  color: #34495e;
-  border-bottom: 2px solid #ecf0f1;
-  padding-bottom: 5px;
-  margin-bottom: 15px;
+h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* Sidebar 스타일 */
+.admin-sidebar {
+  width: 250px;
+  background-color: #2f3d4e;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+}
+
+.admin-sidebar .sidebar-item {
+  margin: 20px 0;
+  padding: 10px;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  background-color: #3c4b5c;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.admin-sidebar .sidebar-item:hover {
+  background-color: #4d5f70;
+}
+
+.filter-buttons {
+  margin-bottom: 20px;
+}
+
+.filter-button {
+  padding: 10px 20px;
+  margin: 0 10px 10px 0;
+  background-color: #4caf50;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.filter-button:hover {
+  background-color: #45a049;
 }
 
 .dashboard-list {
@@ -37,24 +74,127 @@
 }
 
 .dashboard-list-item {
-  padding: 10px;
-  background-color: #ecf0f1;
+  display: flex;
+  flex-direction: column;
+  background-color: #f1f1f1;
+  padding: 20px;
   margin-bottom: 10px;
   border-radius: 5px;
-  transition: background-color 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.dashboard-list-item:hover {
-  background-color: #dcdde1;
+.dashboard-list-item .product-info {
+  display: flex;
+  flex-direction: row;
 }
 
-.dashboard-empty {
-  color: #7f8c8d;
+.product-image {
+  max-width: 100px;
+  margin-right: 20px;
+  border-radius: 5px;
+}
+
+.no-answer {
+  color: red;
   font-style: italic;
 }
 
-.loader {
+.dashboard-empty {
   text-align: center;
-  font-size: 18px;
-  color: #7f8c8d;
+  color: #888;
+}
+
+/* 로딩 화면 스타일 */
+.loader {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  color: #333;
+}
+
+/* 로그인 화면 스타일 */
+.login-form {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.login-form input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.login-form button {
+  width: 100%;
+  padding: 12px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.login-form button:hover {
+  background-color: #45a049;
+}
+
+.login-form .error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 400px;
+  text-align: center;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  resize: vertical;
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+button:last-of-type {
+  background-color: #ccc;
+}
+
+button:last-of-type:hover {
+  background-color: #aaa;
 }

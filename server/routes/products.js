@@ -220,15 +220,32 @@ router.post("/product/:id/qna", async (req, res) => {
   }
 
   try {
+    // 제품명 조회
+    const [product] = await dbPromise.query(
+      "SELECT name FROM products WHERE id = ?",
+      [id]
+    );
+    if (product.length === 0) {
+      return res.status(404).json({ message: "제품을 찾을 수 없습니다." });
+    }
+
+    const productName = product[0].name;
+
     // QnA를 테이블에 저장 (createdAt, updatedAt은 현재 시간으로 설정)
     const [result] = await dbPromise.query(
-      "INSERT INTO qna (question, userName, productId, createdAt, updatedAt) VALUES (?, ?, ?, NOW(), NOW())",
-      [question, userName, id]
+      "INSERT INTO qna (question, userName, productId, productName, createdAt, updatedAt) VALUES (?, ?, ?, ?, NOW(), NOW())",
+      [question, userName, id, productName]
     );
 
     res.status(201).json({
       message: "QnA 등록 성공",
-      data: { id: result.insertId, question, userName, productId: id },
+      data: {
+        id: result.insertId,
+        question,
+        userName,
+        productId: id,
+        productName,
+      },
     });
   } catch (err) {
     console.error("QnA 등록 실패:", err);
