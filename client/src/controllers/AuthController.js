@@ -36,11 +36,6 @@ export const useLoginController = () => {
     }
   };
 
-  const handleKakaoFailure = (error) => {
-    console.error("Kakao Login Failure:", error);
-    alert("Kakao Login failed");
-  };
-
   return {
     handleLogin,
     handleKakaoLogin,

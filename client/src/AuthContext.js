@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 
-// JWT 토큰을 디코딩하여 사용자 정보를 가져오는 함수
+// JWT 토큰 디코딩 함수
 const parseJwt = (token) => {
   try {
     const base64Url = token.split(".")[1];
@@ -11,65 +11,71 @@ const parseJwt = (token) => {
         .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
         .join("")
     );
-    const decoded = JSON.parse(jsonPayload);
-    console.log("Decoded JWT Payload:", decoded); // 디코딩된 JWT payload 확인
-    return decoded;
+    return JSON.parse(jsonPayload);
   } catch (e) {
     console.error("JWT Parsing Error:", e);
     return null;
   }
 };
 
-// 인증 상태를 관리하는 컨텍스트 생성
-const AuthContext = createContext();
-
-export const useAuth = () => {
-  return useContext(AuthContext);
+// JWT 토큰 만료 여부 확인
+const isTokenExpired = (token) => {
+  const user = parseJwt(token);
+  return !user || !user.exp || Date.now() >= user.exp * 1000;
 };
+
+// 로컬스토리지에서 사용자 데이터 가져오기
+const getStoredAuthData = () => {
+  const token = localStorage.getItem("authToken");
+  return token && !isTokenExpired(token)
+    ? { user: parseJwt(token), token }
+    : null;
+};
+
+// 인증 컨텍스트 생성
+const AuthContext = createContext();
+export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false); // 어드민 상태 추가
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [logoutMessage, setLogoutMessage] = useState("");
 
-  // 로컬스토리지에서 인증 토큰 확인
+  // 초기 인증 상태 확인
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    const storedUserName = localStorage.getItem("userName");
-
-    if (token && storedUserName) {
-      const user = parseJwt(token);
-      if (user) {
-        setIsAuthenticated(true); // 토큰이 있으면 인증됨
-        setUserName(user.username); // 사용자 이름 설정
-        setUserId(user.id); // userId를 user.id로 설정
-        setIsAdmin(user.role === "admin"); // JWT에서 어드민 여부 확인
-      }
+    const storedData = getStoredAuthData();
+    if (storedData) {
+      setIsAuthenticated(true);
+      setUserName(storedData.user.username);
+      setUserId(storedData.user.id);
+      setIsAdmin(storedData.user.role === "admin");
     }
-    setIsLoading(false); // 로딩 완료
+    setIsLoading(false);
   }, []);
 
+  // 로그인 함수
   const login = (token) => {
-    const user = parseJwt(token); // 토큰을 디코딩하여 사용자 정보 추출
+    const user = parseJwt(token);
     if (user) {
-      setUserName(user.username); // 추출된 사용자 이름 설정
-      setUserId(user.id); // userId 설정
-      setIsAdmin(user.role === "admin"); // JWT에서 어드민 여부 설정
+      setUserName(user.username);
+      setUserId(user.id);
+      setIsAdmin(user.role === "admin");
       localStorage.setItem("authToken", token);
-      localStorage.setItem("userName", user.username); // 사용자 이름 로컬스토리지에 저장
       setIsAuthenticated(true);
     }
   };
 
+  // 로그아웃 함수
   const logout = () => {
     localStorage.removeItem("authToken");
-    localStorage.removeItem("userName");
     setIsAuthenticated(false);
-    setUserName(""); // 로그아웃 시 사용자 이름 초기화
-    setUserId(null); // 로그아웃 시 userId 초기화
-    setIsAdmin(false); // 로그아웃 시 어드민 상태 초기화
+    setUserName("");
+    setUserId(null);
+    setIsAdmin(false);
+    setLogoutMessage("로그아웃되었습니다.");
   };
 
   return (
@@ -82,6 +88,8 @@ export const AuthProvider = ({ children }) => {
         isLoading,
         login,
         logout,
+        logoutMessage,
+        setLogoutMessage,
       }}
     >
       {children}

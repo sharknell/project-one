@@ -8,15 +8,19 @@ function Header() {
     useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // 로그아웃 메시지 상태가 있으면 알림을 띄운 후 메시지를 초기화
+  // 로그아웃 메시지 알림 표시
   useEffect(() => {
     if (logoutMessage) {
-      alert(logoutMessage); // 로그아웃 메시지 알림
-      setLogoutMessage(""); // 메시지 초기화
+      alert(logoutMessage);
+      setLogoutMessage("");
     }
   }, [logoutMessage, setLogoutMessage]);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  // 모바일 메뉴 토글
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
+
+  // 메뉴 닫기
+  const closeMenu = () => setIsMenuOpen(false);
 
   return (
     <header className="header">
@@ -35,24 +39,42 @@ function Header() {
 
           {/* 네비게이션 메뉴 */}
           <nav className={`header-nav ${isMenuOpen ? "active" : ""}`}>
-            <Link to="/cart" className="header-nav-item">
+            <Link to="/cart" className="header-nav-item" onClick={closeMenu}>
               장바구니
             </Link>
             {isAuthenticated ? (
               <>
-                <Link to="/profile" className="header-nav-item">
+                <Link
+                  to="/profile"
+                  className="header-nav-item"
+                  onClick={closeMenu}
+                >
                   마이 페이지
                 </Link>
-                <button onClick={logout} className="header-logout-button">
+                <button
+                  onClick={() => {
+                    logout();
+                    closeMenu();
+                  }}
+                  className="header-logout-button"
+                >
                   로그아웃
                 </button>
               </>
             ) : (
               <>
-                <Link to="/login" className="header-nav-item">
+                <Link
+                  to="/login"
+                  className="header-nav-item"
+                  onClick={closeMenu}
+                >
                   로그인
                 </Link>
-                <Link to="/signup" className="header-nav-item signup">
+                <Link
+                  to="/signup"
+                  className="header-nav-item signup"
+                  onClick={closeMenu}
+                >
                   회원가입
                 </Link>
               </>
@@ -61,14 +83,22 @@ function Header() {
         </div>
       </div>
 
-      {/* 하단 바 (서비스와 연락처 항목) */}
+      {/* 하단 바 (서비스와 연락처) */}
       <div className="header-bottom">
         <div className="header-container">
           <nav className="header-bottom-nav">
-            <Link to="/service" className="header-bottom-nav-item">
+            <Link
+              to="/service"
+              className="header-bottom-nav-item"
+              onClick={closeMenu}
+            >
               Service
             </Link>
-            <Link to="/contact" className="header-bottom-nav-item">
+            <Link
+              to="/contact"
+              className="header-bottom-nav-item"
+              onClick={closeMenu}
+            >
               Contact
             </Link>
           </nav>

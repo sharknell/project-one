@@ -125,6 +125,11 @@ const AdminDashboard = () => {
       return;
     }
 
+    // 콘솔에 답변을 출력
+    console.log("입력된 답변:", answer);
+    console.log("선택된 질문:", selectedQuestion);
+    console.log("질문 ID:", selectedQuestion.id);
+
     try {
       const response = await fetch(`${API_BASE_URL}/qna/answer`, {
         method: "POST",

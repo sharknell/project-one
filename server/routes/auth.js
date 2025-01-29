@@ -24,7 +24,7 @@ router.post("/login", async (req, res) => {
       [email]
     );
 
-    if (user.length === 0) {
+    if (!user?.[0]) {
       return res.status(404).json({ message: "User not found." });
     }
 
@@ -34,7 +34,7 @@ router.post("/login", async (req, res) => {
     }
 
     const accessToken = generateToken(user[0]);
-    const refreshToken = generateRefreshToken(user[0]);
+    const refreshToken = await generateRefreshToken(user[0]); // DB 저장 포함
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
@@ -49,7 +49,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post("/refresh-token", (req, res) => {
+router.post("/refresh-token", async (req, res) => {
   const refreshToken = req.cookies?.refreshToken;
 
   if (!refreshToken) {
@@ -57,8 +57,18 @@ router.post("/refresh-token", (req, res) => {
   }
 
   try {
+    const [storedToken] = await dbPromise.query(
+      "SELECT * FROM refresh_tokens WHERE token = ?",
+      [refreshToken]
+    );
+
+    if (!storedToken?.[0]) {
+      return res.status(401).json({ message: "Invalid refresh token." });
+    }
+
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const newAccessToken = generateToken(decoded);
+
     res.status(200).json({ token: newAccessToken });
   } catch (err) {
     console.error("Token refresh error:", err);
@@ -66,8 +76,15 @@ router.post("/refresh-token", (req, res) => {
   }
 });
 
-router.post("/logout", (req, res) => {
-  // 쿠키에서 refreshToken을 클리어
+router.post("/logout", async (req, res) => {
+  const refreshToken = req.cookies?.refreshToken;
+
+  if (refreshToken) {
+    await dbPromise.query("DELETE FROM refresh_tokens WHERE token = ?", [
+      refreshToken,
+    ]);
+  }
+
   res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
