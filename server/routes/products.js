@@ -1,5 +1,5 @@
 const express = require("express");
-const { dbPromise } = require("../config/db"); // dbPromise 사용
+const { dbPromise } = require("../config/db");
 const router = express.Router();
 
 // 유효성 검사 함수
@@ -9,6 +9,13 @@ const validateId = (id) => !isNaN(id) && id > 0;
 router.get("/category/:category", async (req, res) => {
   const { category } = req.params;
   try {
+    // 'all' 카테고리일 경우 모든 상품 조회 처리
+    if (category === "all") {
+      const [results] = await dbPromise.query("SELECT * FROM products");
+      return res.json({ message: "전체 상품 목록 조회 성공", data: results });
+    }
+
+    // 다른 카테고리의 상품 조회
     const [results] = await dbPromise.query(
       "SELECT * FROM products WHERE category = ?",
       [category]
@@ -184,29 +191,7 @@ router.delete("/product/:id", async (req, res) => {
     return res.status(500).json({ message: "상품 삭제에 실패했습니다." });
   }
 });
-// 전체 상품 조회
-router.get("/", async (req, res) => {
-  try {
-    // 모든 상품 조회 쿼리
-    const [results] = await dbPromise.query("SELECT * FROM products");
 
-    // 상품이 존재하지 않으면 404 응답
-    if (results.length === 0) {
-      return res.status(404).json({ message: "상품 목록이 비어 있습니다." });
-    }
-
-    // 상품 목록 조회 성공 시 응답
-    res.json({
-      message: "상품 목록 조회 성공",
-      data: results,
-    });
-  } catch (err) {
-    console.error("상품 목록 조회 오류:", err);
-    return res.status(500).json({
-      message: "상품 목록 조회에 실패했습니다.",
-    });
-  }
-});
 // 상품 QnA 등록
 router.post("/product/:id/qna", async (req, res) => {
   const { id } = req.params;
@@ -250,6 +235,17 @@ router.post("/product/:id/qna", async (req, res) => {
   } catch (err) {
     console.error("QnA 등록 실패:", err);
     return res.status(500).json({ message: "QnA 등록에 실패했습니다." });
+  }
+});
+
+// 전체 상품 조회
+router.get("/", async (req, res) => {
+  try {
+    const [results] = await dbPromise.query("SELECT * FROM products");
+    res.json({ message: "상품 목록 조회 성공", data: results });
+  } catch (err) {
+    console.error("상품 목록 조회 오류:", err);
+    return res.status(500).json({ message: "상품 목록 조회에 실패했습니다." });
   }
 });
 

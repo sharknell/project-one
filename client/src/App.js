@@ -45,7 +45,7 @@ function App() {
         <main style={{ minHeight: "calc(100vh - 200px)" }}>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/shop/:category" element={<Shop />} />
+            <Route path="/shop" element={<Shop />} />
             <Route path="/shop/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/login" element={<Login />} />

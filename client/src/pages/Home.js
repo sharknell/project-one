@@ -7,21 +7,21 @@ import bpicture2 from "../banner/shoppingmallbannerSub.jpg";
 import bpicture3 from "../banner/shoppingmallbannerSub2.jpg";
 
 function Home() {
-  const { products, isLoading, error } = useProducts();
+  const { products, isLoading, error } = useProducts(null); // 모든 상품 가져오기
   const scrollWrapperRef = useRef(null);
 
   useEffect(() => {
     const scrollWrapper = scrollWrapperRef.current;
     if (scrollWrapper) {
-      let scrollAmount = 0; // 초기 스크롤 양
-      const scrollSpeed = 1; // 스크롤 속도
+      let scrollAmount = 0;
+      const scrollSpeed = 1;
       const scrollInterval = setInterval(() => {
         scrollWrapper.scrollLeft = scrollAmount;
         scrollAmount += scrollSpeed;
         if (scrollAmount >= scrollWrapper.scrollWidth / 2) {
-          scrollAmount = 0; // 스크롤을 다시 처음으로
+          scrollAmount = 0;
         }
-      }, 16); // 60fps에 해당하는 16ms 간격
+      }, 16);
       return () => clearInterval(scrollInterval);
     }
   }, []);
@@ -44,8 +44,8 @@ function Home() {
         <div className="banner-overlay">
           <h2 className="banner-text">신비로움으로 가득한</h2>
           <h2 className="banner-text">향수를 선물하세요.</h2>
-          <Link to="/shop/perfume" className="banner-button">
-            향수 라인업 보기
+          <Link to="/shop" className="banner-button">
+            모든 상품 보기
           </Link>
         </div>
       </div>
@@ -60,7 +60,7 @@ function Home() {
           <div className="sub-banner-overlay">
             <h3 className="sub-banner-title">당신의 매력을 한층 더</h3>
             <p className="sub-banner-text">메이크업으로 완성하세요.</p>
-            <Link to="/shop/makeup" className="sub-banner-link">
+            <Link to="/shop" className="sub-banner-link">
               메이크업 라인업 보기
             </Link>
           </div>
@@ -74,7 +74,7 @@ function Home() {
           <div className="sub-banner-overlay">
             <h3 className="sub-banner-title">맑고 깨끗한 피부의 시작</h3>
             <p className="sub-banner-text">스킨 케어로 빛나세요.</p>
-            <Link to="/shop/skincare" className="sub-banner-link">
+            <Link to="/shop" className="sub-banner-link">
               스킨케어 라인업 보기
             </Link>
           </div>
@@ -88,33 +88,8 @@ function Home() {
         <div className="products" ref={scrollWrapperRef}>
           <div className="products-wrapper">
             {products &&
-              products.map((product, index) => (
-                <div key={`${product.id}-${index}`} className="product">
-                  <img
-                    src={product.image_url || "/default-image.jpg"}
-                    alt={product.name || "상품명 없음"}
-                    className="product-image"
-                  />
-                  <h3 className="product-name">
-                    {product.name || "상품명 없음"}
-                  </h3>
-                  <p className="product-price">
-                    {product.price
-                      ? `₩${product.price.toLocaleString()}`
-                      : "가격 정보 없음"}
-                  </p>
-                  <Link
-                    to={`/shop/product/${product.id}`}
-                    className="product-details"
-                  >
-                    View Details
-                  </Link>
-                </div>
-              ))}
-            {/* 동일한 상품 목록을 반복적으로 추가 */}
-            {products &&
-              products.map((product, index) => (
-                <div key={`${product.id}-repeat-${index}`} className="product">
+              products.map((product) => (
+                <div key={product.id} className="product">
                   <img
                     src={product.image_url || "/default-image.jpg"}
                     alt={product.name || "상품명 없음"}
