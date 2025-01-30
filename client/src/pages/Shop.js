@@ -1,36 +1,66 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { CircularProgress, Typography, MenuItem, Select } from "@mui/material";
+import { CircularProgress, Typography } from "@mui/material";
+import { Link, useLocation } from "react-router-dom";
 import { loadProducts } from "../controllers/ProductController";
 import "../styles/Shop.css";
 
 function Shop() {
-  const { category } = useParams(); // URL 파라미터로 카테고리 값 가져오기
   const [products, setProducts] = useState([]); // 상품 상태
   const [isLoading, setIsLoading] = useState(true); // 로딩 상태
   const [error, setError] = useState(null); // 에러 상태
   const [selectedCategory, setSelectedCategory] = useState("all"); // 카테고리 선택 상태
+  const [searchQuery, setSearchQuery] = useState(""); // 검색 쿼리 상태
+  const [sortOrder, setSortOrder] = useState("newest"); // 정렬 기준 상태
+
+  const location = useLocation();
+
+  // URL의 쿼리 파라미터에서 category 값을 읽음
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const categoryFromURL = params.get("category") || "all"; // 쿼리 파라미터에서 category 값을 읽어옴, 없으면 'all'로 기본값 설정
+    setSelectedCategory(categoryFromURL);
+  }, [location.search]);
 
   // 상품을 로드하는 useEffect (카테고리별 상품 로드)
   useEffect(() => {
     loadProducts(selectedCategory, setProducts, setError, setIsLoading); // 상품 로드
-  }, [selectedCategory]); // selectedCategory가 변경될 때마다 호출
+  }, [selectedCategory]);
 
-  // 상품이 로드된 후 콘솔 로그 출력
-  useEffect(() => {
-    console.log("상품 데이터:", products); // 상품 데이터 출력
-  }, [products]); // products 상태가 변경될 때마다 실행
+  // 검색 쿼리 및 정렬 기준에 따라 필터링과 정렬 수행
+  const filteredProducts = products
+    .filter((product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ) // 검색 기능
+    .filter(
+      (product) =>
+        selectedCategory === "all" || product.category === selectedCategory
+    ) // 카테고리 필터링
+    .sort((a, b) => {
+      switch (sortOrder) {
+        case "newest":
+          return new Date(b.upload_date) - new Date(a.upload_date); // 최신순
+        case "oldest":
+          return new Date(a.upload_date) - new Date(b.upload_date); // 오래된 순
+        case "priceHigh":
+          return b.price - a.price; // 가격 높은 순
+        case "priceLow":
+          return a.price - b.price; // 가격 낮은 순
+        default:
+          return 0;
+      }
+    });
 
-  // 카테고리 선택 변경 핸들러
   const handleCategoryChange = (event) => {
     setSelectedCategory(event.target.value);
   };
 
-  // 카테고리별로 상품을 필터링
-  const filteredProducts =
-    selectedCategory === "all"
-      ? products
-      : products.filter((product) => product.category === selectedCategory);
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleSortOrderChange = (event) => {
+    setSortOrder(event.target.value);
+  };
 
   return (
     <div className="shop-container">
@@ -38,17 +68,45 @@ function Shop() {
         Product Collection
       </Typography>
 
-      {/* 카테고리 선택 메뉴 */}
-      <Select
-        value={selectedCategory}
-        onChange={handleCategoryChange}
-        className="category-select"
-      >
-        <MenuItem value="all">모든 상품</MenuItem>
-        <MenuItem value="skincare">스킨 케어</MenuItem>
-        <MenuItem value="makeup">메이크업</MenuItem>
-        <MenuItem value="perfume">향수</MenuItem>
-      </Select>
+      <div className="select-wrapper">
+        {/* 카테고리 선택 메뉴 */}
+        <select
+          value={selectedCategory}
+          onChange={handleCategoryChange}
+          className="select"
+        >
+          <option value="all">모든 상품</option>
+          <option value="skincare">스킨 케어</option>
+          <option value="makeup">메이크업</option>
+          <option value="perfume">향수</option>
+        </select>
+      </div>
+
+      <div className="input-field">
+        {/* 검색 입력 필드 */}
+        <label htmlFor="search">검색</label>
+        <input
+          id="search"
+          type="text"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          placeholder="검색어를 입력하세요"
+        />
+      </div>
+
+      <div className="select-wrapper">
+        {/* 정렬 선택 메뉴 */}
+        <select
+          value={sortOrder}
+          onChange={handleSortOrderChange}
+          className="select"
+        >
+          <option value="newest">최신순</option>
+          <option value="oldest">오래된 순</option>
+          <option value="priceHigh">가격 높은 순</option>
+          <option value="priceLow">가격 낮은 순</option>
+        </select>
+      </div>
 
       {/* 로딩 상태 표시 */}
       {isLoading && <CircularProgress className="loading" />}

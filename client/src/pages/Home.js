@@ -44,8 +44,8 @@ function Home() {
         <div className="banner-overlay">
           <h2 className="banner-text">신비로움으로 가득한</h2>
           <h2 className="banner-text">향수를 선물하세요.</h2>
-          <Link to="/shop" className="banner-button">
-            모든 상품 보기
+          <Link to="/shop?category=perfume" className="banner-button">
+            향수 라인업 보기
           </Link>
         </div>
       </div>
@@ -60,7 +60,7 @@ function Home() {
           <div className="sub-banner-overlay">
             <h3 className="sub-banner-title">당신의 매력을 한층 더</h3>
             <p className="sub-banner-text">메이크업으로 완성하세요.</p>
-            <Link to="/shop" className="sub-banner-link">
+            <Link to="/shop?category=makeup" className="sub-banner-link">
               메이크업 라인업 보기
             </Link>
           </div>
@@ -74,7 +74,7 @@ function Home() {
           <div className="sub-banner-overlay">
             <h3 className="sub-banner-title">맑고 깨끗한 피부의 시작</h3>
             <p className="sub-banner-text">스킨 케어로 빛나세요.</p>
-            <Link to="/shop" className="sub-banner-link">
+            <Link to="/shop?category=skincare" className="sub-banner-link">
               스킨케어 라인업 보기
             </Link>
           </div>
@@ -88,7 +88,7 @@ function Home() {
         <div className="products" ref={scrollWrapperRef}>
           <div className="products-wrapper">
             {products &&
-              products.map((product) => (
+              [...products, ...products].map((product) => (
                 <div key={product.id} className="product">
                   <img
                     src={product.image_url || "/default-image.jpg"}
