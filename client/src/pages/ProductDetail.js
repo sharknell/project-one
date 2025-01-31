@@ -14,13 +14,8 @@ function ProductDetail() {
   const [newQuestion, setNewQuestion] = useState(""); // 새로운 질문 상태
   const [product, setProduct] = useState(null); // 제품 상태 추가
   const [error, setError] = useState(null); // 오류 상태 추가
-  const {
-    mainImage,
-    openDropdown,
-    handleThumbnailClick,
-    handleButtonClick,
-    toggleDropdown,
-  } = useProductController(id);
+  const { mainImage, openDropdown, handleThumbnailClick, toggleDropdown } =
+    useProductController(id);
 
   // 제품 정보 가져오기
   useEffect(() => {

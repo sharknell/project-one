@@ -3,7 +3,8 @@ import { useAuth } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../components/LoginForm";
 import ProductForm from "../components/ProductForm";
-import AdminSidebar from "../components/AdminSidebar"; // AdminSidebar import
+import AdminSidebar from "../components/AdminSidebar";
+import QnaAdmin from "../components/QnaAdmin"; // 새로운 QnA 리스트 컴포넌트
 import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
@@ -15,11 +16,8 @@ const AdminDashboard = () => {
   const [members, setMembers] = useState([]);
   const [qna, setQna] = useState([]);
   const [filteredQna, setFilteredQna] = useState([]);
-  const [answerModalVisible, setAnswerModalVisible] = useState(false); // 답변 모달의 상태
-  const [selectedQuestion, setSelectedQuestion] = useState(null); // 선택된 질문
-  const [answer, setAnswer] = useState(""); // 입력된 답변
-
-  const initialProductState = {
+  const [activeTab, setActiveTab] = useState("productForm");
+  const [newProduct, setNewProduct] = useState({
     name: "",
     price: "",
     description: "",
@@ -32,34 +30,47 @@ const AdminDashboard = () => {
     returnPolicy: "",
     artOfPerfuming: "",
     detailedInfo: "",
-  };
-  const [newProduct, setNewProduct] = useState(initialProductState);
-  const navigate = useNavigate();
+  });
 
+  const navigate = useNavigate();
   const API_BASE_URL =
     process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
 
+  // API 호출 함수 재사용
+  const fetchData = async (url, method = "GET", body = null) => {
+    setLoading(true);
+    try {
+      const options = {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        body: body ? JSON.stringify(body) : null,
+      };
+      const response = await fetch(`${API_BASE_URL}${url}`, options);
+
+      if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      setError("API 호출 중 오류가 발생했습니다.");
+      console.error(error);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 로그인 처리 함수
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        setError("로그인 실패: 올바르지 않은 자격 증명");
-        setLoading(false);
-        return;
-      }
-
-      const data = await response.json();
-      if (data.token) {
+      const data = await fetchData("/auth/login", "POST", { email, password });
+      if (data && data.token) {
         login(data.token);
         if (isAdmin) {
           navigate("/admindashboard");
@@ -69,117 +80,69 @@ const AdminDashboard = () => {
       } else {
         setError("로그인 실패");
       }
-    } catch (err) {
+    } catch {
       setError("로그인 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchQna = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/qna/qna`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-      });
+  // Q&A와 회원 목록을 불러오는 함수
+  const fetchQnaAndMembers = async () => {
+    const qnaData = await fetchData("/qna/qna");
+    setQna(qnaData ? qnaData.data : []);
+    setFilteredQna(qnaData ? qnaData.data : []);
 
-      if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status}`);
-      }
+    const memberData = await fetchData("/auth/users");
+    setMembers(memberData ? memberData.users : []);
+  };
 
-      const data = await response.json();
-      console.log("Q&A 데이터:", data);
-      setQna(data.data || []);
-      setFilteredQna(data.data || []);
-    } catch (err) {
-      console.error("Q&A 조회 오류:", err);
-      setQna([]);
-      setError("Q&A 목록을 불러오는 중 오류가 발생했습니다.");
-    } finally {
-      setLoading(false);
+  // useEffect로 데이터 로드
+  useEffect(() => {
+    if (isAuthenticated && isAdmin) {
+      fetchQnaAndMembers();
     }
-  };
+  }, [isAuthenticated, isAdmin]);
 
-  const filterUnanswered = () => {
+  // Q&A 필터링 함수
+  const filterUnanswered = () =>
     setFilteredQna(qna.filter((item) => !item.answer));
-  };
-
-  const sortNewestFirst = () => {
+  const sortNewestFirst = () =>
     setFilteredQna(
       [...qna].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     );
-  };
-
-  const sortOldestFirst = () => {
+  const sortOldestFirst = () =>
     setFilteredQna(
       [...qna].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
     );
-  };
 
-  const handleAnswerSubmit = async () => {
-    if (!answer) {
-      alert("답변을 입력해주세요.");
-      return;
-    }
-
-    // 콘솔에 답변을 출력
-    console.log("입력된 답변:", answer);
-    console.log("선택된 질문:", selectedQuestion);
-    console.log("질문 ID:", selectedQuestion.id);
-
+  const handleAnswerSubmit = async (questionId, answer) => {
+    if (!answer) return alert("답변을 입력해주세요.");
     try {
-      const response = await fetch(`${API_BASE_URL}/qna/answer`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-        body: JSON.stringify({
-          questionId: selectedQuestion.id,
-          answer,
-        }),
+      const response = await fetchData("/qna/answer", "POST", {
+        questionId,
+        answer,
       });
-
-      if (response.ok) {
+      if (response && response.success) {
         alert("답변이 제출되었습니다.");
-        setAnswerModalVisible(false);
-        setAnswer(""); // 답변 초기화
-        fetchQna(); // Q&A 목록 새로 고침
+        fetchQnaAndMembers(); // 데이터 갱신
       } else {
         alert("답변 제출에 실패했습니다.");
       }
-    } catch (err) {
-      console.error("답변 제출 오류:", err);
+    } catch {
       alert("답변 제출 중 오류가 발생했습니다.");
     }
   };
 
-  useEffect(() => {
-    if (isAuthenticated && isAdmin) {
-      fetchQna();
-    }
-  }, [isAuthenticated, isAdmin]);
-
-  const [activeTab, setActiveTab] = useState("productForm");
-
+  // 로딩 중에는 로딩 화면만 보여줍니다
   if (loading) {
     return <div className="loader">Loading...</div>;
   }
-
-  const openAnswerModal = (question) => {
-    setSelectedQuestion(question);
-    setAnswer(question.answer || "");
-    setAnswerModalVisible(true);
-  };
 
   if (isAuthenticated && isAdmin) {
     return (
       <div className="admin-dashboard">
         <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-
         <div className="content">
           {activeTab === "productForm" && (
             <div className="dashboard-section">
@@ -199,62 +162,19 @@ const AdminDashboard = () => {
                   className="filter-button"
                   onClick={() => setFilteredQna(qna)}
                 >
-                  질문 전체보기
+                  전체 보기
                 </button>
                 <button className="filter-button" onClick={filterUnanswered}>
                   미답변 보기
                 </button>
                 <button className="filter-button" onClick={sortNewestFirst}>
-                  최신 순 보기
+                  최신 순
                 </button>
                 <button className="filter-button" onClick={sortOldestFirst}>
-                  오래된 순 보기
+                  오래된 순
                 </button>
               </div>
-
-              {filteredQna.length > 0 ? (
-                <ul className="dashboard-list">
-                  {filteredQna.map((item) => (
-                    <li
-                      className="dashboard-list-item"
-                      key={item.id}
-                      onClick={() => openAnswerModal(item)} // 클릭 시 모달 열기
-                    >
-                      <div className="product-info">
-                        {item.productImage && (
-                          <img
-                            src={item.productImage}
-                            alt="Product"
-                            className="product-image"
-                          />
-                        )}
-                        <div>
-                          <p>
-                            <strong>질문:</strong> {item.question}
-                          </p>
-                          <p>
-                            <strong>유저명:</strong>{" "}
-                            {item.userName || "답변 대기 중"}
-                          </p>
-                          <p>
-                            <strong>작성일:</strong> {item.createdAt}
-                          </p>
-                          <div className="answer">
-                            <strong>답변:</strong>{" "}
-                            {item.answer ? (
-                              item.answer
-                            ) : (
-                              <span className="no-answer">답변 대기 중</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="dashboard-empty">Q&A 목록이 없습니다.</p>
-              )}
+              <QnaAdmin qna={filteredQna} onAnswerSubmit={handleAnswerSubmit} />
             </div>
           )}
 
@@ -274,59 +194,7 @@ const AdminDashboard = () => {
               )}
             </div>
           )}
-
-          {activeTab === "shippingAdmin" && (
-            <div className="dashboard-section">
-              <h2>제품 배송 상태 변경</h2>
-              <p>배송 상태 변경 기능을 구현하세요.</p>
-            </div>
-          )}
         </div>
-
-        {/* 답변 모달 */}
-        {answerModalVisible && selectedQuestion && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <h3>답변 작성</h3>
-              <div>
-                <p>
-                  <strong>제품 명:</strong> {selectedQuestion.productName}
-                </p>
-                <p>
-                  <strong>제품 이미지:</strong>
-                </p>
-                {selectedQuestion.productImage && (
-                  <img
-                    src={selectedQuestion.productImage}
-                    alt="Product"
-                    className="product-image"
-                    style={{ width: "100px", height: "auto" }}
-                  />
-                )}
-                <p>
-                  <strong>질문 작성자:</strong> {selectedQuestion.userName}
-                </p>
-                <p>
-                  <strong>질문 작성일:</strong> {selectedQuestion.createdAt}
-                </p>
-                <p>
-                  <strong>질문:</strong> {selectedQuestion.question}
-                </p>
-                <textarea
-                  value={answer}
-                  onChange={(e) => setAnswer(e.target.value)}
-                  placeholder="답변을 입력하세요..."
-                />
-                <div>
-                  <button onClick={handleAnswerSubmit}>답변 제출</button>
-                  <button onClick={() => setAnswerModalVisible(false)}>
-                    취소
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     );
   }

@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { fetchProducts } from "../models/ProductModel";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../AuthContext";
-import { getProductById } from "../models/ProductModel";
-import { fetchProductsByCategory } from "../models/ProductModel";
+import {
+  getProductById,
+  fetchProductsByCategory,
+} from "../models/ProductModel";
 
 export const useProducts = () => {
   const [products, setProducts] = useState([]);

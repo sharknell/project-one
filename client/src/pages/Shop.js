@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { CircularProgress, Typography } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import { loadProducts } from "../controllers/ProductController";
@@ -11,6 +11,8 @@ function Shop() {
   const [selectedCategory, setSelectedCategory] = useState("all"); // 카테고리 선택 상태
   const [searchQuery, setSearchQuery] = useState(""); // 검색 쿼리 상태
   const [sortOrder, setSortOrder] = useState("newest"); // 정렬 기준 상태
+  const [page, setPage] = useState(1); // 페이지 상태
+  const itemsPerPage = 20; // 페이지당 아이템 수
 
   const location = useLocation();
 
@@ -22,9 +24,20 @@ function Shop() {
   }, [location.search]);
 
   // 상품을 로드하는 useEffect (카테고리별 상품 로드)
+  const loadProductsList = useCallback(() => {
+    loadProducts(
+      selectedCategory,
+      setProducts,
+      setError,
+      setIsLoading,
+      page,
+      itemsPerPage
+    );
+  }, [selectedCategory, page]);
+
   useEffect(() => {
-    loadProducts(selectedCategory, setProducts, setError, setIsLoading); // 상품 로드
-  }, [selectedCategory]);
+    loadProductsList();
+  }, [loadProductsList]);
 
   // 검색 쿼리 및 정렬 기준에 따라 필터링과 정렬 수행
   const filteredProducts = products
@@ -52,6 +65,7 @@ function Shop() {
 
   const handleCategoryChange = (event) => {
     setSelectedCategory(event.target.value);
+    setPage(1); // 카테고리 변경 시 페이지 1로 리셋
   };
 
   const handleSearchChange = (event) => {
@@ -60,6 +74,10 @@ function Shop() {
 
   const handleSortOrderChange = (event) => {
     setSortOrder(event.target.value);
+  };
+
+  const loadMore = () => {
+    setPage((prevPage) => prevPage + 1); // 페이지 증가
   };
 
   return (
@@ -146,6 +164,11 @@ function Shop() {
           </div>
         ))}
       </div>
+
+      {/* 더 보기 버튼 */}
+      <button onClick={loadMore} className="load-more">
+        더 보기
+      </button>
     </div>
   );
 }

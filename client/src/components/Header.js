@@ -42,6 +42,10 @@ function Header() {
             <Link to="/cart" className="header-nav-item" onClick={closeMenu}>
               장바구니
             </Link>
+
+            <Link to="/shop" className="header-nav-item" onClick={closeMenu}>
+              쇼핑
+            </Link>
             {isAuthenticated ? (
               <>
                 <Link
