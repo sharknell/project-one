@@ -4,22 +4,23 @@ import "../styles/QnAList.css";
 
 const QnaList = ({ qnaData }) => {
   const [answers, setAnswers] = useState({});
-
-  // 각 QnA에 대한 답변을 가져오는 함수
+  axios.defaults.baseURL = "http://localhost:5001";
   const fetchAnswers = async (qnaId) => {
     try {
-      const response = await axios.get(`/qna/${qnaId}/answers`);
+      const response = await axios.get(`/qna/qna/${qnaId}/answers`);
+      console.log("답변 데이터:", response.data.data);
+
       setAnswers((prev) => ({
         ...prev,
-        [qnaId]: response.data.data,
+        [qnaId]: response.data.data.length > 0 ? response.data.data[0] : null,
       }));
     } catch (error) {
-      console.error("답변을 불러오는 데 실패했습니다:", error);
+      console.error(`답변 조회 실패 (QnA ID: ${qnaId}):`, error);
+      setAnswers((prev) => ({ ...prev, [qnaId]: null }));
     }
   };
 
   useEffect(() => {
-    // 모든 QnA에 대해 답변을 가져옴
     qnaData.forEach((qna) => {
       fetchAnswers(qna.id);
     });
@@ -34,7 +35,7 @@ const QnaList = ({ qnaData }) => {
       {qnaData.map((qna) => (
         <li key={qna.id}>
           <img
-            src={qna.productImage || "/default-product-image.jpg"}
+            src={qna.productImage || "/default-product.jpg"}
             alt="Product"
             className="product-image"
           />
@@ -46,23 +47,18 @@ const QnaList = ({ qnaData }) => {
                 작성일: {new Date(qna.createdAt).toLocaleString()}
               </div>
             </div>
-
-            {/* 답변이 없으면 "아직 답변이 달리지 않았습니다." 메시지 표시 */}
-            {answers[qna.id] && answers[qna.id].length > 0 ? (
+            {answers[qna.id] ? (
               <div className="answers">
                 <h4>답변:</h4>
-                {answers[qna.id].map((answer) => (
-                  <div key={answer.id} className="answer">
-                    <div className="answer-user">답변자: {answer.userName}</div>
-                    <div className="answer-text">{answer.answer}</div>
-                    <div className="answer-date">
-                      {new Date(answer.createdAt).toLocaleString()}
-                    </div>
+                <div className="answer">
+                  <div className="answer-text">{answers[qna.id].answer}</div>
+                  <div className="answer-date">
+                    {new Date(answers[qna.id].answerCreatedAt).toLocaleString()}
                   </div>
-                ))}
+                </div>
               </div>
             ) : (
-              <div className="no-answer">아직 답변이 달리지 않았습니다.</div>
+              <div className="no-answer">아직 답변이 없습니다.</div>
             )}
           </div>
         </li>

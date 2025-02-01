@@ -119,7 +119,7 @@ const AdminDashboard = () => {
   const handleAnswerSubmit = async (questionId, answer) => {
     if (!answer) return alert("답변을 입력해주세요.");
     try {
-      const response = await fetchData("/qna/answer", "POST", {
+      const response = await fetchData("/qna/qna/answer", "POST", {
         questionId,
         answer,
       });
