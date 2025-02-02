@@ -73,9 +73,10 @@ const AdminDashboard = () => {
       });
 
       const data = await response.json();
-
+      console.log(data);
       if (data.success) {
         alert("상품이 성공적으로 등록되었습니다.");
+        console.log("상품 등록 성공:", data);
         setNewProduct({
           // 폼 리셋
           name: "",
@@ -91,6 +92,7 @@ const AdminDashboard = () => {
           artOfPerfuming: "",
           detailedInfo: "",
         });
+        console.log(data);
       } else {
         alert("상품 등록에 실패했습니다.");
       }

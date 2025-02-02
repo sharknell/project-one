@@ -133,7 +133,7 @@ router.post("/products", async (req, res) => {
     art_of_perfuming,
     shipping_time,
     return_policy,
-    images = [],
+    images = [], // 이미지 배열
   } = req.body;
 
   console.log("상품 등록 요청:", req.body);
@@ -173,14 +173,24 @@ router.post("/products", async (req, res) => {
 
     const productId = productResult.insertId;
 
-    // 2️⃣ `product_images` 테이블에 이미지 경로 저장
-    if (Array.isArray(images) && images.length > 0) {
-      const imageInsertPromises = images.map((imageUrl) =>
-        dbPromise.query(
-          "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)",
-          [productId, imageUrl]
-        )
+    // 2️⃣ 대표 이미지 처리: `products` 테이블의 `image_url` 컬럼에 저장
+    if (images.length > 0) {
+      const [updateProductResult] = await dbPromise.query(
+        "UPDATE products SET image_url = ? WHERE id = ?",
+        [images[0], productId]
       );
+    }
+
+    // 3️⃣ `product_images` 테이블에 추가 이미지 경로 저장
+    if (Array.isArray(images) && images.length > 1) {
+      const imageInsertPromises = images
+        .slice(1)
+        .map((imageUrl) =>
+          dbPromise.query(
+            "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)",
+            [productId, imageUrl]
+          )
+        );
       await Promise.all(imageInsertPromises);
     }
 
@@ -216,17 +226,15 @@ router.put("/product/:id", async (req, res) => {
       return res.status(404).json({ message: "해당 상품을 찾을 수 없습니다." });
     }
 
-    // 기존 이미지 삭제 및 새 이미지 추가
-    if (Array.isArray(image_urls)) {
-      await dbPromise.query("DELETE FROM product_images WHERE product_id = ?", [
-        id,
-      ]);
-      const imageInsertPromises = image_urls.map((url) =>
-        dbPromise.query(
+    // 2️⃣ `product_images` 테이블에 이미지 경로 저장
+    if (Array.isArray(images) && images.length > 0) {
+      const imageInsertPromises = images.map((imageUrl) => {
+        console.log(`Inserting image URL: ${imageUrl}`); // 이미지 경로 확인
+        return dbPromise.query(
           "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)",
-          [id, url]
-        )
-      );
+          [productId, imageUrl]
+        );
+      });
       await Promise.all(imageInsertPromises);
     }
 
