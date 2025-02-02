@@ -1,33 +1,50 @@
-import React, { useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useProducts } from "../controllers/ProductController";
 import "../styles/Home.css";
 import bpicture1 from "../banner/shoppingmallbanner.jpg";
 import bpicture2 from "../banner/shoppingmallbannerSub.jpg";
 import bpicture3 from "../banner/shoppingmallbannerSub2.jpg";
+import c1 from "../banner/c1.jpg";
+import c2 from "../banner/c2.jpg";
+import c3 from "../banner/c3.jpg";
 
 function Home() {
   const { products, isLoading, error } = useProducts(null); // 모든 상품 가져오기
-  const scrollWrapperRef = useRef(null);
 
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const bannerImages = [c1, c2, c3];
+
+  // 캐러셀 자동 이동
   useEffect(() => {
-    const scrollWrapper = scrollWrapperRef.current;
-    if (scrollWrapper) {
-      let scrollAmount = 0;
-      const scrollSpeed = 1;
-      const scrollInterval = setInterval(() => {
-        scrollWrapper.scrollLeft = scrollAmount;
-        scrollAmount += scrollSpeed;
-        if (scrollAmount >= scrollWrapper.scrollWidth / 2) {
-          scrollAmount = 0;
-        }
-      }, 16);
-      return () => clearInterval(scrollInterval);
-    }
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % bannerImages.length);
+    }, 3000); // 3초마다 변경
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="home-container">
+      {/* 캐러셀 추가 부분 */}
+      <div className="carousel">
+        <div
+          className="carousel-images"
+          style={{
+            transform: `translateX(-${currentIndex * 100}%)`, // 이미지가 좌측으로 이동
+          }}
+        >
+          {bannerImages.map((image, index) => (
+            <img
+              key={index}
+              src={image}
+              alt="Banner"
+              className="carousel-image"
+            />
+          ))}
+        </div>
+      </div>
+
       <header className="home-header">
         <h1 className="home-title">Welcome to Perfume Shop</h1>
         <p className="home-subtitle">
@@ -85,7 +102,7 @@ function Home() {
         <h2 className="section-title">Our Bestsellers</h2>
         {isLoading && <div className="loading">로딩 중...</div>}
         {error && <div className="error">{error}</div>}
-        <div className="products" ref={scrollWrapperRef}>
+        <div className="products">
           <div className="products-wrapper">
             {products &&
               [...products, ...products].map((product) => (

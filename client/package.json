@@ -26,8 +26,10 @@
     "react-kakao-login": "^2.1.1",
     "react-router-dom": "^7.1.1",
     "react-scripts": "5.0.1",
+    "react-slick": "^0.30.3",
     "react-stripe-checkout": "^2.6.3",
     "react-toastify": "^11.0.2",
+    "slick-carousel": "^1.8.1",
     "web-vitals": "^4.2.4"
   },
   "scripts": {
