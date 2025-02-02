@@ -5,30 +5,39 @@
   list-style-type: none;
   padding: 0;
   margin: 0;
+  font-family: "Roboto", sans-serif; /* 모던한 폰트 */
 }
 
 .qna-list li {
   display: flex;
   flex-direction: column;
-  padding: 16px;
-  border-radius: 12px;
-  background-color: #f7f8f9;
-  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-  transition: transform 0.2s ease-in-out;
+  padding: 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f7f8f9, #ffffff);
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .qna-list li:hover {
-  transform: translateY(-4px); /* 마우스를 올렸을 때 부드러운 업 애니메이션 */
+  transform: translateY(-6px); /* 부드럽고 현대적인 애니메이션 */
+  box-shadow: 0px 12px 32px rgba(0, 0, 0, 0.15); /* 마우스를 올렸을 때 그림자 효과 */
 }
 
 .product-image {
-  width: 48px;
-  height: 48px;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
   border-radius: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   align-self: center;
+  transition: transform 0.3s ease;
+}
+
+.product-image:hover {
+  transform: scale(1.05); /* 이미지 확대 효과 */
 }
 
 .qna-content {
@@ -39,81 +48,131 @@
 
 .question {
   font-weight: 600;
-  font-size: 16px;
+  font-size: 18px;
   color: #333;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
+  text-align: center;
 }
 
 .productId {
   font-size: 14px;
   color: #888;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .qna-footer {
-  font-size: 12px;
+  font-size: 13px;
   color: #ccc;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .qna-footer .createdAt {
   color: #bbb;
 }
 
+/* 답변 섹션 */
 .answers {
   width: 100%;
-  margin-top: 20px;
-  padding-left: 20px;
+  margin-top: 24px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px;
+  padding-left: 24px;
 }
 
 .answer {
   background-color: #ffffff;
-  border-radius: 8px;
-  padding: 12px;
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.3s ease;
+}
+
+.answer:hover {
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); /* 답변에 마우스를 올렸을 때 그림자 효과 */
 }
 
 .answer-user {
   font-weight: 600;
-  font-size: 14px;
-  color: #333;
-  margin-bottom: 6px;
+  font-size: 15px;
+  color: #2a2a2a;
+  margin-bottom: 8px;
 }
 
 .answer-text {
-  font-size: 14px;
+  font-size: 15px;
   color: #333;
-  line-height: 1.4;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  letter-spacing: 0.5px; /* 텍스트 간격을 조금 늘려서 읽기 쉬운 느낌 */
 }
 
 .answer-date {
-  font-size: 12px;
-  color: #bbb;
-  margin-top: 6px;
+  font-size: 13px;
+  color: #aaa;
+  margin-top: 8px;
 }
 
 .no-answer {
   font-style: italic;
   color: #bbb;
-  margin-top: 16px;
+  margin-top: 20px;
   text-align: center;
+  font-size: 14px;
 }
 
 /* 버튼 스타일 */
 button {
   background-color: #4c68f5;
   color: #fff;
-  padding: 10px 16px;
-  border-radius: 8px;
+  padding: 12px 18px;
+  border-radius: 24px;
   font-size: 14px;
   border: none;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
 button:hover {
   background-color: #3a56d7;
+  transform: scale(1.05); /* 버튼에 마우스를 올렸을 때 살짝 커지는 효과 */
+}
+
+button:focus {
+  outline: none; /* 버튼에 포커스 되었을 때 외곽선 제거 */
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .qna-list li {
+    padding: 15px;
+    margin-bottom: 16px;
+  }
+
+  .product-image {
+    width: 50px;
+    height: 50px;
+  }
+
+  .question {
+    font-size: 16px;
+  }
+
+  .productId {
+    font-size: 12px;
+  }
+
+  .answer-text {
+    font-size: 14px;
+  }
+
+  .answer-user {
+    font-size: 14px;
+  }
+
+  .answer-date {
+    font-size: 12px;
+  }
 }

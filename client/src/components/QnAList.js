@@ -2,14 +2,21 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../styles/QnAList.css";
 
+const Answer = ({ answer, createdAt }) => (
+  <div className="answer">
+    <div className="answer-text">{answer}</div>
+    <div className="answer-date">{new Date(createdAt).toLocaleString()}</div>
+  </div>
+);
+
 const QnaList = ({ qnaData }) => {
   const [answers, setAnswers] = useState({});
+
   axios.defaults.baseURL = "http://localhost:5001";
+
   const fetchAnswers = async (qnaId) => {
     try {
       const response = await axios.get(`/qna/qna/${qnaId}/answers`);
-      console.log("답변 데이터:", response.data.data);
-
       setAnswers((prev) => ({
         ...prev,
         [qnaId]: response.data.data.length > 0 ? response.data.data[0] : null,
@@ -50,12 +57,10 @@ const QnaList = ({ qnaData }) => {
             {answers[qna.id] ? (
               <div className="answers">
                 <h4>답변:</h4>
-                <div className="answer">
-                  <div className="answer-text">{answers[qna.id].answer}</div>
-                  <div className="answer-date">
-                    {new Date(answers[qna.id].answerCreatedAt).toLocaleString()}
-                  </div>
-                </div>
+                <Answer
+                  answer={answers[qna.id].answer}
+                  createdAt={answers[qna.id].answerCreatedAt}
+                />
               </div>
             ) : (
               <div className="no-answer">아직 답변이 없습니다.</div>

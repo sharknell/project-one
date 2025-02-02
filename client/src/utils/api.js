@@ -139,4 +139,14 @@ export const getReviews = async (token) => {
   }
 };
 
+export const submitQna = async (qnaData) => {
+  const response = await fetch(`${API_BASE_URL}/qna`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(qnaData),
+  });
+  if (!response.ok) throw new Error("QnA 제출 실패");
+  return response.json();
+};
+
 export default api;

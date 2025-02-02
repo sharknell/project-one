@@ -164,9 +164,6 @@ const AdminDashboard = () => {
                 >
                   전체 보기
                 </button>
-                <button className="filter-button" onClick={filterUnanswered}>
-                  미답변 보기
-                </button>
                 <button className="filter-button" onClick={sortNewestFirst}>
                   최신 순
                 </button>
