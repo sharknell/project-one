@@ -1,11 +1,45 @@
 const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 const { dbPromise } = require("../config/db");
 const router = express.Router();
-
 // 유효성 검사 함수
 const validateId = (id) => !isNaN(id) && id > 0;
+const productImagesDir = path.join(__dirname, "../uploads/productImages");
+// 폴더가 없으면 생성
+if (!fs.existsSync(productImagesDir)) {
+  fs.mkdirSync(productImagesDir, { recursive: true });
+}
 
-// 카테고리별 상품 조회
+// multer 설정
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, productImagesDir); // 이미지 파일을 productImages 폴더에 저장
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9); // 고유 파일 이름
+    cb(null, uniqueSuffix + path.extname(file.originalname)); // 확장자 유지
+  },
+});
+
+const upload = multer({ storage: storage });
+
+// 이미지 업로드 API
+router.post("/upload", upload.array("images", 10), (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res
+      .status(400)
+      .json({ success: false, message: "이미지를 업로드 해주세요." });
+  }
+
+  const imageUrls = req.files.map((file) => file.filename); // 업로드된 파일 이름을 배열로
+  res.json({
+    success: true,
+    imageUrls: imageUrls,
+  });
+});
+
 router.get("/category/:category", async (req, res) => {
   const { category } = req.params;
   try {
@@ -85,30 +119,66 @@ router.get("/product/:id", async (req, res) => {
   }
 });
 
-// 상품 추가
-router.post("/", async (req, res) => {
-  const { name, description, price, image_urls = [] } = req.body;
+// 상품 등록 API
+router.post("/products", async (req, res) => {
+  const {
+    name,
+    price,
+    category,
+    effect,
+    size,
+    stock,
+    description,
+    detailed_info,
+    art_of_perfuming,
+    shipping_time,
+    return_policy,
+    images = [],
+  } = req.body;
 
-  if (!name || !price || isNaN(price) || price <= 0) {
+  console.log("상품 등록 요청:", req.body);
+  // 필수 필드 유효성 검사
+  if (!name || !price || !category || !description) {
+    return res.status(400).json({ message: "필수 정보를 입력해주세요." });
+  }
+  if (isNaN(price) || price <= 0) {
+    return res.status(400).json({ message: "유효한 가격을 입력해주세요." });
+  }
+  if (isNaN(stock) || stock < 0) {
     return res
       .status(400)
-      .json({ message: "상품명과 유효한 가격은 필수입니다." });
+      .json({ message: "유효한 재고 수량을 입력해주세요." });
   }
 
   try {
-    const [result] = await dbPromise.query(
-      "INSERT INTO products (name, description, price) VALUES (?, ?, ?)",
-      [name, description, price]
+    // 1️⃣ `products` 테이블에 새 상품 추가
+    const [productResult] = await dbPromise.query(
+      `INSERT INTO products 
+       (name, price, category, effect, size, stock, description, detailed_info, art_of_perfuming, shipping_time, return_policy) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        name,
+        price,
+        category,
+        effect,
+        size,
+        stock,
+        description,
+        detailed_info,
+        art_of_perfuming,
+        shipping_time,
+        return_policy,
+      ]
     );
 
-    const productId = result.insertId;
+    const productId = productResult.insertId;
 
-    // 이미지 URL 저장
-    if (Array.isArray(image_urls) && image_urls.length > 0) {
-      const imageInsertPromises = image_urls.map((url) =>
+    // 2️⃣ `product_images` 테이블에 이미지 경로 저장
+    if (Array.isArray(images) && images.length > 0) {
+      const imageInsertPromises = images.map((imageUrl) =>
         dbPromise.query(
           "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)",
-          [productId, url]
+          [productId, imageUrl]
         )
       );
       await Promise.all(imageInsertPromises);
@@ -116,7 +186,7 @@ router.post("/", async (req, res) => {
 
     res.status(201).json({
       message: "상품이 성공적으로 추가되었습니다.",
-      data: { id: productId, name, description, price, image_urls },
+      productId,
     });
   } catch (err) {
     console.error("상품 추가 오류:", err);

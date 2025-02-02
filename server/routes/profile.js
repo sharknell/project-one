@@ -191,6 +191,21 @@ router.post("/reviews", verifyToken, async (req, res) => {
     res.status(500).json({ message: "리뷰 저장 중 오류가 발생했습니다." });
   }
 });
+// 모든 결제 내역 조회
+router.get("/all-orders", verifyToken, async (req, res) => {
+  try {
+    const query = `
+      SELECT order_id, user_id, amount, order_name, address, cart_items, status, created_at, delivery_status
+      FROM payment
+    `;
+    const [orders] = await dbPromise.query(query);
+
+    res.status(200).json({ orders });
+  } catch (err) {
+    console.error("All Orders Error:", err);
+    res.status(500).json({ message: "Error fetching all orders." });
+  }
+});
 
 // 내 아이디로 작성한 리뷰 조회
 router.get("/reviews", verifyToken, async (req, res) => {

@@ -1,127 +1,205 @@
 import React, { useState } from "react";
 import "./ProductForm.css";
 
-const ProductForm = ({
-  newProduct,
-  setNewProduct,
-  handleAddProduct,
-  handleImageUpload,
-}) => {
-  const [mainImage, setMainImage] = useState(null); // 메인 이미지 파일
-  const [subImages, setSubImages] = useState([]); // 서브 이미지 파일 목록
-  const categories = ["perfume", "skincare", "makeup"]; // 고정된 카테고리 목록
+const ProductForm = ({ setNewProduct, handleSubmit }) => {
+  const [uploading, setUploading] = useState(false);
+  const [imageUrls, setImageUrls] = useState([]);
+  const [newProduct, setProduct] = useState({
+    name: "",
+    price: "",
+    category: "",
+    effect: "",
+    size: "",
+    stock: "",
+    description: "",
+    detailed_info: "",
+    art_of_perfuming: "",
+    shipping_time: "",
+    return_policy: "",
+    images: [],
+  });
 
-  const handleMainImageChange = (e) => {
-    const file = e.target.files[0];
-    setMainImage(file);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setProduct((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubImagesChange = (e) => {
+  const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
-    setSubImages([...subImages, ...files]);
-  };
+    if (files.length === 0) return;
 
-  const handleCategoryChange = (e) => {
-    setNewProduct({ ...newProduct, category: e.target.value });
-  };
+    const formData = new FormData();
+    files.forEach((file) => formData.append("images", file));
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // 이미지 업로드 처리
-    const uploadedMainImageUrl = await handleImageUpload(mainImage, "main");
-    const uploadedSubImageUrls = await handleImageUpload(subImages, "sub");
+    setUploading(true);
+    try {
+      const response = await fetch("http://localhost:5001/shop/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-    // mainImage와 subImages URL을 newProduct에 반영
-    setNewProduct({
-      ...newProduct,
-      image_url: uploadedMainImageUrl,
-      sub_images: uploadedSubImageUrls,
-    });
-
-    handleAddProduct(); // 상품 등록
+      const data = await response.json();
+      if (data.success) {
+        setImageUrls((prev) => [...prev, ...data.imageUrls]);
+        setProduct((prev) => ({
+          ...prev,
+          images: [...prev.images, ...data.imageUrls],
+        }));
+      } else {
+        alert("이미지 업로드 실패");
+      }
+    } catch (error) {
+      console.error("이미지 업로드 오류:", error);
+      alert("이미지 업로드 중 오류가 발생했습니다.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="form-container">
+    <div className="product-form">
       <h2>상품 등록</h2>
-      {Object.keys(newProduct).map((key) => {
-        if (key === "category") {
-          return (
-            <div key={key} className="input-group">
-              <label htmlFor={key}>카테고리</label>
-              <select
-                id={key}
-                value={newProduct[key]}
-                onChange={handleCategoryChange}
-                required
-              >
-                <option value="">카테고리를 선택하세요</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </div>
-          );
-        }
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit(newProduct); // 여기서 handleSubmit 호출
+        }}
+      >
+        <label>
+          상품명:
+          <input
+            type="text"
+            name="name"
+            value={newProduct.name}
+            onChange={handleChange}
+            required
+          />
+        </label>
 
-        return (
-          <div key={key} className="input-group">
-            <label htmlFor={key}>{key}</label>
-            {key === "description" ||
-            key === "effect" ||
-            key === "return_policy" ||
-            key === "art_of_perfuming" ||
-            key === "detailed_info" ? (
-              <textarea
-                id={key}
-                value={newProduct[key]}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, [key]: e.target.value })
-                }
-                required={key !== "size"}
-              />
-            ) : (
-              <input
-                id={key}
-                type={key === "price" || key === "stock" ? "number" : "text"}
-                value={newProduct[key]}
-                onChange={(e) =>
-                  setNewProduct({ ...newProduct, [key]: e.target.value })
-                }
-                required={key !== "size"}
-              />
-            )}
-          </div>
-        );
-      })}
+        <label>
+          가격:
+          <input
+            type="number"
+            name="price"
+            value={newProduct.price}
+            onChange={handleChange}
+            required
+          />
+        </label>
 
-      <div className="input-group">
-        <label htmlFor="mainImage">메인 이미지</label>
-        <input
-          type="file"
-          id="mainImage"
-          accept="image/*"
-          onChange={handleMainImageChange}
-        />
-      </div>
+        <label>
+          카테고리:
+          <input
+            type="text"
+            name="category"
+            value={newProduct.category}
+            onChange={handleChange}
+            required
+          />
+        </label>
 
-      <div className="input-group">
-        <label htmlFor="subImages">서브 이미지</label>
-        <input
-          type="file"
-          id="subImages"
-          accept="image/*"
-          multiple
-          onChange={handleSubImagesChange}
-        />
-      </div>
+        <label>
+          효과:
+          <input
+            type="text"
+            name="effect"
+            value={newProduct.effect}
+            onChange={handleChange}
+          />
+        </label>
 
-      <button type="submit" className="submit-btn">
-        상품 등록
-      </button>
-    </form>
+        <label>
+          사이즈:
+          <input
+            type="text"
+            name="size"
+            value={newProduct.size}
+            onChange={handleChange}
+          />
+        </label>
+
+        <label>
+          재고:
+          <input
+            type="number"
+            name="stock"
+            value={newProduct.stock}
+            onChange={handleChange}
+          />
+        </label>
+
+        <label>
+          설명:
+          <textarea
+            name="description"
+            value={newProduct.description}
+            onChange={handleChange}
+            required
+          />
+        </label>
+
+        <label>
+          상세 정보:
+          <textarea
+            name="detailed_info"
+            value={newProduct.detailed_info}
+            onChange={handleChange}
+          />
+        </label>
+
+        <label>
+          향수 사용법:
+          <textarea
+            name="art_of_perfuming"
+            value={newProduct.art_of_perfuming}
+            onChange={handleChange}
+          />
+        </label>
+
+        <label>
+          배송 기간:
+          <input
+            type="text"
+            name="shipping_time"
+            value={newProduct.shipping_time}
+            onChange={handleChange}
+          />
+        </label>
+
+        <label>
+          반품 정책:
+          <textarea
+            name="return_policy"
+            value={newProduct.return_policy}
+            onChange={handleChange}
+          />
+        </label>
+
+        <label>
+          이미지 업로드:
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageUpload}
+          />
+        </label>
+
+        {uploading && <p>이미지 업로드 중...</p>}
+        <div className="image-preview">
+          {imageUrls.map((url, index) => (
+            <img
+              key={index}
+              src={`http://localhost:5001/product/${url}`}
+              alt="업로드된 이미지"
+              width="100"
+            />
+          ))}
+        </div>
+
+        <button type="submit">상품 등록</button>
+      </form>
+    </div>
   );
 };
 
