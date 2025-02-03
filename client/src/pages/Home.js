@@ -108,7 +108,7 @@ function Home() {
         <div className="products">
           <div className="products-wrapper">
             {products &&
-              [...products, ...products].map((product) => (
+              products.map((product) => (
                 <div key={product.id} className="product">
                   <img
                     src={`http://localhost:5001/uploads/productImages/${product.image_url}`} // 서버 URL과 결합하여 전체 경로로 이미지 로드

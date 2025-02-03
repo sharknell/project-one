@@ -144,7 +144,9 @@ function Shop() {
         {filteredProducts.map((product) => (
           <div className="product-card" key={product.id}>
             <img
-              src={product.image_url || "/default-image.jpg"}
+              src={`http://localhost:5001/uploads/productImages/${
+                product.image_url || "default-image.jpg"
+              }`}
               alt={product.name || "상품명 없음"}
               className="product-image"
             />

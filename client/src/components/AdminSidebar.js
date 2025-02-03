@@ -21,6 +21,12 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
           회원 조회
         </li>
         <li
+          onClick={() => setActiveTab("productList")}
+          className={activeTab === "productList" ? "active" : ""}
+        >
+          상품 조회 및 수정
+        </li>
+        <li
           onClick={() => setActiveTab("shippingAdmin")}
           className={activeTab === "shippingAdmin" ? "active" : ""}
         >

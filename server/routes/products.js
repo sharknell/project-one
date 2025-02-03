@@ -12,32 +12,17 @@ if (!fs.existsSync(productImagesDir)) {
   fs.mkdirSync(productImagesDir, { recursive: true });
 }
 
-// multer 설정 (단일 파일 업로드)
+// ✅ storage 설정 (대표 이미지 & 서브 이미지 저장용)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, productImagesDir); // 이미지 파일을 productImages 폴더에 저장
+    cb(null, productImagesDir);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9); // 고유 파일 이름
-    cb(null, uniqueSuffix + path.extname(file.originalname)); // 확장자 유지
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
 const upload = multer({ storage: storage });
-
-// 이미지 업로드 API (단일 파일만 처리)
-router.post("/upload", upload.single("image"), (req, res) => {
-  if (!req.file) {
-    return res
-      .status(400)
-      .json({ success: false, message: "이미지를 업로드 해주세요." });
-  }
-
-  res.json({
-    success: true,
-    imageUrl: req.file.filename, // 업로드된 파일의 이름을 클라이언트로 반환
-  });
-});
 
 router.get("/category/:category", async (req, res) => {
   const { category } = req.params;
@@ -66,6 +51,95 @@ router.get("/category/:category", async (req, res) => {
     return res
       .status(500)
       .json({ message: "카테고리 상품 조회에 실패했습니다." });
+  }
+});
+
+// ✅ [이미지 업로드] - 대표 이미지 업로드 (단일 파일)
+router.post("/upload", upload.single("image"), (req, res) => {
+  if (!req.file) {
+    return res
+      .status(400)
+      .json({ success: false, message: "이미지를 업로드 해주세요." });
+  }
+
+  res.json({ success: true, imageUrl: req.file.filename });
+});
+// ✅ [서브 이미지 업로드] - 여러 개 업로드 처리
+router.post("/upload/multiple", upload.array("images", 5), (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res
+      .status(400)
+      .json({ success: false, message: "서브 이미지를 업로드 해주세요." });
+  }
+
+  const imageUrls = req.files.map((file) => file.filename);
+
+  res.json({ success: true, imageUrls });
+});
+router.post("/products", async (req, res) => {
+  console.log("[요청 본문] req.body:", req.body);
+
+  const {
+    name,
+    price,
+    category,
+    effect,
+    size,
+    description,
+    detailed_info,
+    art_of_perfuming,
+    shipping_time,
+    return_policy,
+    image_url, // 대표 이미지 URL
+    additionalImages, // 서브 이미지 URL 목록
+  } = req.body;
+
+  if (!name || !price || !category || !description) {
+    console.error(
+      "[필수 항목 누락] name, price, category, description 확인 필요"
+    );
+    return res.status(400).json({ message: "필수 정보를 입력해주세요." });
+  }
+
+  try {
+    // ✅ 상품 추가
+    const [productResult] = await dbPromise.query(
+      `INSERT INTO products (name, price, category, effect, size, description, detailed_info, art_of_perfuming, shipping_time, return_policy, image_url) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        name,
+        price,
+        category,
+        effect,
+        size,
+        description,
+        detailed_info,
+        art_of_perfuming,
+        shipping_time,
+        return_policy,
+        image_url,
+      ]
+    );
+
+    const productId = productResult.insertId;
+
+    // ✅ 서브 이미지 저장
+    if (Array.isArray(additionalImages) && additionalImages.length > 0) {
+      console.log("[서브 이미지 저장] 이미지 URL 목록:", additionalImages);
+      const imageQueries = additionalImages.map((img) =>
+        dbPromise.query(
+          "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)",
+          [productId, img]
+        )
+      );
+      await Promise.all(imageQueries);
+    }
+
+    console.log("[상품 등록 성공] 등록된 상품 ID:", productId);
+    res.status(201).json({ message: "상품이 등록되었습니다.", productId });
+  } catch (err) {
+    console.error("[상품 등록 오류]:", err);
+    res.status(500).json({ message: "상품 등록에 실패했습니다." });
   }
 });
 
@@ -115,91 +189,6 @@ router.get("/product/:id", async (req, res) => {
     return res
       .status(500)
       .json({ message: "상품 정보를 가져오는 데 실패했습니다." });
-  }
-});
-
-// 상품 등록 API
-router.post("/products", async (req, res) => {
-  const {
-    name,
-    price,
-    category,
-    effect,
-    size,
-    stock,
-    description,
-    detailed_info,
-    art_of_perfuming,
-    shipping_time,
-    return_policy,
-    images = [], // 이미지 배열
-  } = req.body;
-
-  console.log("상품 등록 요청:", req.body);
-  // 필수 필드 유효성 검사
-  if (!name || !price || !category || !description) {
-    return res.status(400).json({ message: "필수 정보를 입력해주세요." });
-  }
-  if (isNaN(price) || price <= 0) {
-    return res.status(400).json({ message: "유효한 가격을 입력해주세요." });
-  }
-  if (isNaN(stock) || stock < 0) {
-    return res
-      .status(400)
-      .json({ message: "유효한 재고 수량을 입력해주세요." });
-  }
-
-  try {
-    // 1️⃣ `products` 테이블에 새 상품 추가
-    const [productResult] = await dbPromise.query(
-      `INSERT INTO products 
-       (name, price, category, effect, size, stock, description, detailed_info, art_of_perfuming, shipping_time, return_policy) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        name,
-        price,
-        category,
-        effect,
-        size,
-        stock,
-        description,
-        detailed_info,
-        art_of_perfuming,
-        shipping_time,
-        return_policy,
-      ]
-    );
-
-    const productId = productResult.insertId;
-
-    // 2️⃣ 대표 이미지 처리: `products` 테이블의 `image_url` 컬럼에 저장
-    if (images.length > 0) {
-      const [updateProductResult] = await dbPromise.query(
-        "UPDATE products SET image_url = ? WHERE id = ?",
-        [images[0], productId]
-      );
-    }
-
-    // 3️⃣ `product_images` 테이블에 추가 이미지 경로 저장
-    if (Array.isArray(images) && images.length > 1) {
-      const imageInsertPromises = images
-        .slice(1)
-        .map((imageUrl) =>
-          dbPromise.query(
-            "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)",
-            [productId, imageUrl]
-          )
-        );
-      await Promise.all(imageInsertPromises);
-    }
-
-    res.status(201).json({
-      message: "상품이 성공적으로 추가되었습니다.",
-      productId,
-    });
-  } catch (err) {
-    console.error("상품 추가 오류:", err);
-    return res.status(500).json({ message: "상품 추가에 실패했습니다." });
   }
 });
 

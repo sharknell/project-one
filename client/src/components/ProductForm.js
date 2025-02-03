@@ -1,204 +1,183 @@
 import React, { useState } from "react";
+import axios from "axios";
 import "./ProductForm.css";
 
-const ProductForm = ({ setNewProduct, handleSubmit }) => {
-  const [uploading, setUploading] = useState(false);
-  const [imageUrls, setImageUrls] = useState([]);
-  const [newProduct, setProduct] = useState({
+axios.defaults.baseURL = "http://localhost:5001/shop";
+
+const ProductForm = () => {
+  const [formData, setFormData] = useState({
     name: "",
     price: "",
     category: "",
     effect: "",
     size: "",
-    stock: "",
     description: "",
-    detailed_info: "",
-    art_of_perfuming: "",
-    shipping_time: "",
-    return_policy: "",
-    images: [],
+    detailedInfo: "",
+    artOfPerfuming: "",
+    shippingTime: "",
+    returnPolicy: "",
+    image: null, // 대표 이미지
+    subImages: [], // 서브 이미지 리스트
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProduct((prev) => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0]; // 첫 번째 파일만 선택
-    if (!file) return;
+  const handleImageChange = (e) => {
+    setFormData({ ...formData, image: e.target.files[0] });
+  };
 
-    const formData = new FormData();
-    formData.append("image", file); // 단일 이미지만 업로드
+  const handleSubImagesChange = (e) => {
+    setFormData({ ...formData, subImages: [...e.target.files] });
+  };
 
-    setUploading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     try {
-      const response = await fetch("http://localhost:5001/shop/upload", {
-        method: "POST",
-        body: formData,
-      });
+      let mainImageUrl = "";
+      let subImageUrls = [];
 
-      const data = await response.json();
-      if (data.success) {
-        setImageUrls([data.imageUrl]); // 이미지 URL 하나만 설정
-        setProduct((prev) => ({
-          ...prev,
-          images: [data.imageUrl], // 단일 이미지 URL 저장
-        }));
-      } else {
-        alert("이미지 업로드 실패");
+      // ✅ 대표 이미지 업로드
+      if (formData.image) {
+        const imageFormData = new FormData();
+        imageFormData.append("image", formData.image);
+
+        console.log("[대표 이미지 업로드 요청] FormData:", formData.image);
+
+        const mainImageRes = await axios.post("/upload", imageFormData);
+        mainImageUrl = mainImageRes.data.imageUrl;
+
+        console.log("[대표 이미지 업로드 성공] 이미지 URL:", mainImageUrl);
       }
+
+      // ✅ 서브 이미지 업로드
+      if (formData.subImages.length > 0) {
+        const subImageFormData = new FormData();
+        formData.subImages.forEach((img) =>
+          subImageFormData.append("images", img)
+        );
+
+        console.log(
+          "[서브 이미지 업로드 요청] FormData:",
+          subImageFormData.getAll("images")
+        );
+
+        const subImageRes = await axios.post(
+          "/upload/multiple",
+          subImageFormData
+        );
+        subImageUrls = subImageRes.data.imageUrls;
+
+        console.log(
+          "[서브 이미지 업로드 성공] 서브 이미지 URL 목록:",
+          subImageUrls
+        );
+      }
+
+      // ✅ 상품 정보 전송
+      const productData = {
+        name: formData.name,
+        price: formData.price,
+        category: formData.category,
+        effect: formData.effect,
+        size: formData.size,
+        description: formData.description,
+        detailed_info: formData.detailedInfo,
+        art_of_perfuming: formData.artOfPerfuming,
+        shipping_time: formData.shippingTime,
+        return_policy: formData.returnPolicy,
+        image_url: mainImageUrl, // 대표 이미지 URL
+        additionalImages: subImageUrls, // 서브 이미지 URL 목록
+      };
+
+      console.log(
+        "[상품 등록 요청 데이터]:",
+        JSON.stringify(productData, null, 2)
+      );
+
+      const productRes = await axios.post("/products", productData);
+      console.log("[상품 등록 성공] 응답 데이터:", productRes.data);
+
+      alert("상품 등록 성공!");
     } catch (error) {
-      console.error("이미지 업로드 오류:", error);
-      alert("이미지 업로드 중 오류가 발생했습니다.");
-    } finally {
-      setUploading(false);
+      console.error("[상품 등록 오류]:", error.response?.data || error.message);
+      alert("상품 등록 실패!");
     }
   };
 
   return (
-    <div className="product-form">
-      <h2>상품 등록</h2>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmit(newProduct); // 여기서 handleSubmit 호출
-        }}
-      >
-        <label>
-          상품명:
-          <input
-            type="text"
-            name="name"
-            value={newProduct.name}
-            onChange={handleChange}
-            required
-          />
-        </label>
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        name="name"
+        placeholder="상품명"
+        onChange={handleChange}
+        required
+      />
+      <input
+        type="number"
+        name="price"
+        placeholder="가격"
+        onChange={handleChange}
+        required
+      />
+      <input
+        type="text"
+        name="category"
+        placeholder="카테고리"
+        onChange={handleChange}
+        required
+      />
+      <input
+        type="text"
+        name="effect"
+        placeholder="효과"
+        onChange={handleChange}
+      />
+      <input
+        type="text"
+        name="size"
+        placeholder="사이즈"
+        onChange={handleChange}
+      />
+      <textarea
+        name="description"
+        placeholder="설명"
+        onChange={handleChange}
+        required
+      />
+      <textarea
+        name="detailedInfo"
+        placeholder="상세 정보"
+        onChange={handleChange}
+      />
+      <textarea
+        name="artOfPerfuming"
+        placeholder="퍼퓨밍 아트"
+        onChange={handleChange}
+      />
+      <input
+        type="text"
+        name="shippingTime"
+        placeholder="배송 기간"
+        onChange={handleChange}
+      />
+      <textarea
+        name="returnPolicy"
+        placeholder="반품 정책"
+        onChange={handleChange}
+      />
 
-        <label>
-          가격:
-          <input
-            type="number"
-            name="price"
-            value={newProduct.price}
-            onChange={handleChange}
-            required
-          />
-        </label>
+      <label>대표 이미지:</label>
+      <input type="file" onChange={handleImageChange} required />
 
-        <label>
-          카테고리:
-          <input
-            type="text"
-            name="category"
-            value={newProduct.category}
-            onChange={handleChange}
-            required
-          />
-        </label>
+      <label>서브 이미지:</label>
+      <input type="file" multiple onChange={handleSubImagesChange} />
 
-        <label>
-          효과:
-          <input
-            type="text"
-            name="effect"
-            value={newProduct.effect}
-            onChange={handleChange}
-          />
-        </label>
-
-        <label>
-          사이즈:
-          <input
-            type="text"
-            name="size"
-            value={newProduct.size}
-            onChange={handleChange}
-          />
-        </label>
-
-        <label>
-          재고:
-          <input
-            type="number"
-            name="stock"
-            value={newProduct.stock}
-            onChange={handleChange}
-          />
-        </label>
-
-        <label>
-          설명:
-          <textarea
-            name="description"
-            value={newProduct.description}
-            onChange={handleChange}
-            required
-          />
-        </label>
-
-        <label>
-          상세 정보:
-          <textarea
-            name="detailed_info"
-            value={newProduct.detailed_info}
-            onChange={handleChange}
-          />
-        </label>
-
-        <label>
-          향수 사용법:
-          <textarea
-            name="art_of_perfuming"
-            value={newProduct.art_of_perfuming}
-            onChange={handleChange}
-          />
-        </label>
-
-        <label>
-          배송 기간:
-          <input
-            type="text"
-            name="shipping_time"
-            value={newProduct.shipping_time}
-            onChange={handleChange}
-          />
-        </label>
-
-        <label>
-          반품 정책:
-          <textarea
-            name="return_policy"
-            value={newProduct.return_policy}
-            onChange={handleChange}
-          />
-        </label>
-
-        <label>
-          이미지 업로드:
-          <input
-            type="file"
-            name="image" // Multer에서 기대하는 필드 이름
-            accept="image/*"
-            onChange={handleImageUpload} // 파일 한 개만 선택 가능
-          />
-        </label>
-
-        {uploading && <p>이미지 업로드 중...</p>}
-        <div className="image-preview">
-          {imageUrls.length > 0 && (
-            <img
-              src={`http://localhost:5001/product/${imageUrls[0]}`}
-              alt="업로드된 이미지"
-              width="100"
-            />
-          )}
-        </div>
-
-        <button type="submit">상품 등록</button>
-      </form>
-    </div>
+      <button type="submit">상품 등록</button>
+    </form>
   );
 };
 

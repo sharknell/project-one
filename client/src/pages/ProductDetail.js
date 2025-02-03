@@ -16,6 +16,7 @@ function ProductDetail() {
   const [error, setError] = useState(null); // 오류 상태 추가
   const { mainImage, openDropdown, handleThumbnailClick, toggleDropdown } =
     useProductController(id);
+  console.log(mainImage);
 
   // 제품 정보 가져오기
   useEffect(() => {
@@ -149,30 +150,32 @@ function ProductDetail() {
         <p>{product.tagline}</p>
       </div>
       <div className="product-detail-content">
-        <div className="product-detail-main">
-          <div className="product-detail-main-image">
-            {mainImage ? (
-              <img src={mainImage} alt={product.name} />
-            ) : (
-              <p>메인 이미지가 없습니다.</p>
-            )}
-          </div>
-          <div className="product-detail-thumbnails">
-            {product.images && product.images.length > 0 ? (
-              product.images.map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`썸네일 ${index + 1}`}
-                  onClick={() => handleThumbnailClick(image)}
-                  className="thumbnail-image"
-                />
-              ))
-            ) : (
-              <p>썸네일 이미지가 없습니다.</p>
-            )}
-          </div>
+        <div className="product-detail-main-image">
+          {product.image_url ? (
+            <img
+              src={`http://localhost:5001/uploads/productImages/${product.image_url}`} // image_url을 메인 이미지로 사용
+              alt={product.name}
+            />
+          ) : (
+            <p>메인 이미지가 없습니다.</p>
+          )}
         </div>
+
+        <div className="product-detail-thumbnails">
+          {product.images && product.images.length > 0 ? (
+            product.images.map((image, index) => (
+              <img
+                key={index}
+                src={`http://localhost:5001/uploads/productImages/${image}`} // 서브 이미지는 images 배열에서 가져옴
+                alt={`${product.name} 서브 이미지 ${index + 1}`}
+                className="product-thumbnail" // 썸네일 이미지 클래스 추가
+              />
+            ))
+          ) : (
+            <p>서브 이미지가 없습니다.</p>
+          )}
+        </div>
+
         <div className="product-detail-info">
           <h1>{product.name}</h1>
           <hr />
