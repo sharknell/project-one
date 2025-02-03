@@ -24,12 +24,9 @@ const ProductForm = ({ setNewProduct, handleSubmit }) => {
     setProduct((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = async (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length === 0) return;
-
+  const handleImageUpload = async (file) => {
     const formData = new FormData();
-    files.forEach((file) => formData.append("images", file));
+    formData.append("image", file); // 단일 이미지만 업로드
 
     setUploading(true);
     try {
@@ -40,10 +37,10 @@ const ProductForm = ({ setNewProduct, handleSubmit }) => {
 
       const data = await response.json();
       if (data.success) {
-        setImageUrls((prev) => [...prev, ...data.imageUrls]);
+        setImageUrls([data.imageUrl]); // 이미지 URL 하나만 설정
         setProduct((prev) => ({
           ...prev,
-          images: [...prev.images, ...data.imageUrls],
+          images: [data.imageUrl], // 단일 이미지 URL 저장
         }));
       } else {
         alert("이미지 업로드 실패");
@@ -56,148 +53,185 @@ const ProductForm = ({ setNewProduct, handleSubmit }) => {
     }
   };
 
+  const handleProductSubmit = async (e) => {
+    e.preventDefault();
+
+    if (newProduct.images.length === 0) {
+      alert("상품 이미지가 필요합니다.");
+      return;
+    }
+
+    // 이미지 업로드 먼저 진행
+    const file = document.querySelector('input[type="file"]').files[0]; // 선택된 파일
+    if (file) {
+      await handleImageUpload(file);
+    }
+
+    // 상품 등록 정보 서버에 전송
+    handleSubmit(newProduct); // 서버에 등록
+  };
+
   return (
     <div className="product-form">
       <h2>상품 등록</h2>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmit(newProduct); // 여기서 handleSubmit 호출
-        }}
-      >
-        <label>
-          상품명:
-          <input
-            type="text"
-            name="name"
-            value={newProduct.name}
-            onChange={handleChange}
-            required
-          />
-        </label>
+      <form onSubmit={handleProductSubmit}>
+        <div className="input-group">
+          <label>
+            상품명:
+            <input
+              type="text"
+              name="name"
+              value={newProduct.name}
+              onChange={handleChange}
+              required
+            />
+          </label>
+        </div>
 
-        <label>
-          가격:
-          <input
-            type="number"
-            name="price"
-            value={newProduct.price}
-            onChange={handleChange}
-            required
-          />
-        </label>
+        <div className="input-group">
+          <label>
+            가격:
+            <input
+              type="number"
+              name="price"
+              value={newProduct.price}
+              onChange={handleChange}
+              required
+            />
+          </label>
+        </div>
 
-        <label>
-          카테고리:
-          <input
-            type="text"
-            name="category"
-            value={newProduct.category}
-            onChange={handleChange}
-            required
-          />
-        </label>
+        <div className="input-group">
+          <label>
+            카테고리:
+            <input
+              type="text"
+              name="category"
+              value={newProduct.category}
+              onChange={handleChange}
+              required
+            />
+          </label>
+        </div>
 
-        <label>
-          효과:
-          <input
-            type="text"
-            name="effect"
-            value={newProduct.effect}
-            onChange={handleChange}
-          />
-        </label>
+        <div className="input-group">
+          <label>
+            효과:
+            <input
+              type="text"
+              name="effect"
+              value={newProduct.effect}
+              onChange={handleChange}
+            />
+          </label>
+        </div>
 
-        <label>
-          사이즈:
-          <input
-            type="text"
-            name="size"
-            value={newProduct.size}
-            onChange={handleChange}
-          />
-        </label>
+        <div className="input-group">
+          <label>
+            사이즈:
+            <input
+              type="text"
+              name="size"
+              value={newProduct.size}
+              onChange={handleChange}
+            />
+          </label>
+        </div>
 
-        <label>
-          재고:
-          <input
-            type="number"
-            name="stock"
-            value={newProduct.stock}
-            onChange={handleChange}
-          />
-        </label>
+        <div className="input-group">
+          <label>
+            재고:
+            <input
+              type="number"
+              name="stock"
+              value={newProduct.stock}
+              onChange={handleChange}
+            />
+          </label>
+        </div>
 
-        <label>
-          설명:
-          <textarea
-            name="description"
-            value={newProduct.description}
-            onChange={handleChange}
-            required
-          />
-        </label>
+        <div className="input-group">
+          <label>
+            설명:
+            <textarea
+              name="description"
+              value={newProduct.description}
+              onChange={handleChange}
+              required
+            />
+          </label>
+        </div>
 
-        <label>
-          상세 정보:
-          <textarea
-            name="detailed_info"
-            value={newProduct.detailed_info}
-            onChange={handleChange}
-          />
-        </label>
+        <div className="input-group">
+          <label>
+            상세 정보:
+            <textarea
+              name="detailed_info"
+              value={newProduct.detailed_info}
+              onChange={handleChange}
+            />
+          </label>
+        </div>
 
-        <label>
-          향수 사용법:
-          <textarea
-            name="art_of_perfuming"
-            value={newProduct.art_of_perfuming}
-            onChange={handleChange}
-          />
-        </label>
+        <div className="input-group">
+          <label>
+            향수 사용법:
+            <textarea
+              name="art_of_perfuming"
+              value={newProduct.art_of_perfuming}
+              onChange={handleChange}
+            />
+          </label>
+        </div>
 
-        <label>
-          배송 기간:
-          <input
-            type="text"
-            name="shipping_time"
-            value={newProduct.shipping_time}
-            onChange={handleChange}
-          />
-        </label>
+        <div className="input-group">
+          <label>
+            배송 기간:
+            <input
+              type="text"
+              name="shipping_time"
+              value={newProduct.shipping_time}
+              onChange={handleChange}
+            />
+          </label>
+        </div>
 
-        <label>
-          반품 정책:
-          <textarea
-            name="return_policy"
-            value={newProduct.return_policy}
-            onChange={handleChange}
-          />
-        </label>
+        <div className="input-group">
+          <label>
+            반품 정책:
+            <textarea
+              name="return_policy"
+              value={newProduct.return_policy}
+              onChange={handleChange}
+            />
+          </label>
+        </div>
 
-        <label>
-          이미지 업로드:
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageUpload}
-          />
-        </label>
+        <div className="input-group">
+          <label>
+            이미지 업로드:
+            <input
+              type="file"
+              name="image" // Multer에서 기대하는 필드 이름
+              accept="image/*"
+            />
+          </label>
+        </div>
 
         {uploading && <p>이미지 업로드 중...</p>}
         <div className="image-preview">
-          {imageUrls.map((url, index) => (
+          {imageUrls.length > 0 && (
             <img
-              key={index}
-              src={`http://localhost:5001/product/${url}`}
+              src={`http://localhost:5001/product/${imageUrls[0]}`}
               alt="업로드된 이미지"
               width="100"
             />
-          ))}
+          )}
         </div>
 
-        <button type="submit">상품 등록</button>
+        <button className="submit-btn" type="submit">
+          상품 등록
+        </button>
       </form>
     </div>
   );

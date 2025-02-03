@@ -1,4 +1,4 @@
-.form-container {
+.product-form {
   max-width: 480px;
   margin: 0 auto;
   padding: 24px;
@@ -7,18 +7,18 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.form-container h2 {
+.product-form h2 {
   text-align: center;
   margin-bottom: 24px;
   font-weight: 600;
   color: #222;
 }
 
-.input-group {
+.product-form .input-group {
   margin-bottom: 16px;
 }
 
-.input-group label {
+.product-form .input-group label {
   display: block;
   margin-bottom: 8px;
   font-size: 14px;
@@ -26,8 +26,8 @@
   font-weight: 500;
 }
 
-.input-group input,
-.input-group textarea {
+.product-form .input-group input,
+.product-form .input-group textarea {
   width: 100%;
   padding: 12px;
   font-size: 16px;
@@ -38,17 +38,17 @@
   transition: border-color 0.3s;
 }
 
-.input-group input:focus,
-.input-group textarea:focus {
+.product-form .input-group input:focus,
+.product-form .input-group textarea:focus {
   border-color: #0066ff;
   background-color: #fff;
 }
 
-.input-group textarea {
+.product-form .input-group textarea {
   height: 120px;
 }
 
-.submit-btn {
+.product-form .submit-btn {
   width: 100%;
   padding: 14px;
   font-size: 16px;
@@ -61,6 +61,11 @@
   transition: background-color 0.3s;
 }
 
-.submit-btn:hover {
+.product-form .submit-btn:hover {
   background-color: #0050d4;
+}
+
+.product-form .image-preview img {
+  width: 100px;
+  margin-top: 12px;
 }

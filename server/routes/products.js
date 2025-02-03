@@ -12,7 +12,7 @@ if (!fs.existsSync(productImagesDir)) {
   fs.mkdirSync(productImagesDir, { recursive: true });
 }
 
-// multer 설정
+// multer 설정 (단일 파일 업로드)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, productImagesDir); // 이미지 파일을 productImages 폴더에 저장
@@ -25,18 +25,17 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// 이미지 업로드 API
-router.post("/upload", upload.array("images", 10), (req, res) => {
-  if (!req.files || req.files.length === 0) {
+// 이미지 업로드 API (단일 파일만 처리)
+router.post("/upload", upload.single("image"), (req, res) => {
+  if (!req.file) {
     return res
       .status(400)
       .json({ success: false, message: "이미지를 업로드 해주세요." });
   }
 
-  const imageUrls = req.files.map((file) => file.filename); // 업로드된 파일 이름을 배열로
   res.json({
     success: true,
-    imageUrls: imageUrls,
+    imageUrl: req.file.filename, // 업로드된 파일의 이름을 클라이언트로 반환
   });
 });
 

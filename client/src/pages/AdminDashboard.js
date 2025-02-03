@@ -62,7 +62,6 @@ const AdminDashboard = () => {
   );
   const handleSubmit = async (product) => {
     try {
-      // 상품 데이터 전송
       const response = await fetch(`${API_BASE_URL}/shop/products`, {
         method: "POST",
         headers: {
@@ -73,12 +72,11 @@ const AdminDashboard = () => {
       });
 
       const data = await response.json();
-      console.log(data);
-      if (data.success) {
+      console.log(data); // 응답 데이터 확인
+
+      if (response.ok && data.message === "상품이 성공적으로 추가되었습니다.") {
         alert("상품이 성공적으로 등록되었습니다.");
-        console.log("상품 등록 성공:", data);
         setNewProduct({
-          // 폼 리셋
           name: "",
           price: "",
           description: "",
@@ -92,8 +90,8 @@ const AdminDashboard = () => {
           artOfPerfuming: "",
           detailedInfo: "",
         });
-        console.log(data);
       } else {
+        console.log("서버 응답 실패:", data);
         alert("상품 등록에 실패했습니다.");
       }
     } catch (error) {
