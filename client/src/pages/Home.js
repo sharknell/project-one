@@ -24,6 +24,9 @@ function Home() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    console.log(products); // products 배열의 데이터 구조를 확인
+  }, [products]);
   return (
     <div className="home-container">
       {/* 캐러셀 추가 부분 */}
@@ -108,10 +111,11 @@ function Home() {
               [...products, ...products].map((product) => (
                 <div key={product.id} className="product">
                   <img
-                    src={product.image_url || "/default-image.jpg"}
+                    src={`http://localhost:5001/uploads/productImages/${product.image_url}`} // 서버 URL과 결합하여 전체 경로로 이미지 로드
                     alt={product.name || "상품명 없음"}
                     className="product-image"
                   />
+
                   <h3 className="product-name">
                     {product.name || "상품명 없음"}
                   </h3>

@@ -1,6 +1,7 @@
 // 환경 변수 설정 및 모듈 불러오기
 require("dotenv").config(); // 환경 변수 로드
 const express = require("express");
+const path = require("path");
 const cors = require("cors");
 const { dbPromise } = require("./config/db");
 const jwt = require("jsonwebtoken"); // JWT 패키지 추가
@@ -18,13 +19,13 @@ const app = express();
 // 미들웨어 설정
 app.use(cors());
 app.use(express.json());
-
 // 라우터 설정
 app.use("/auth", authRoutes);
 app.use("/profile", profileRoutes);
 app.use("/shop", productRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/cart", cartRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/qna", qnaRoutes); // QnA 라우터 연결
 app.get("/shop/product/:productId/qna", async (req, res) => {
   const { productId } = req.params;
