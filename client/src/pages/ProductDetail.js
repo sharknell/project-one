@@ -151,9 +151,9 @@ function ProductDetail() {
       </div>
       <div className="product-detail-content">
         <div className="product-detail-main-image">
-          {product.image_url ? (
+          {mainImage ? (
             <img
-              src={`http://localhost:5001/uploads/productImages/${product.image_url}`} // image_url을 메인 이미지로 사용
+              src={`http://localhost:5001/uploads/productImages/${mainImage}`} // 메인 이미지를 상태로 설정된 mainImage로 변경
               alt={product.name}
             />
           ) : (
@@ -169,6 +169,7 @@ function ProductDetail() {
                 src={`http://localhost:5001/uploads/productImages/${image}`} // 서브 이미지는 images 배열에서 가져옴
                 alt={`${product.name} 서브 이미지 ${index + 1}`}
                 className="product-thumbnail" // 썸네일 이미지 클래스 추가
+                onClick={() => handleThumbnailClick(image)} // 썸네일 클릭 시 메인 이미지로 변경
               />
             ))
           ) : (
