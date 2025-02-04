@@ -149,4 +149,15 @@ export const submitQna = async (qnaData) => {
   return response.json();
 };
 
+// 답변 조회 함수
+export const fetchAnswers = async (qnaId) => {
+  try {
+    const response = await axios.get(`/qna/qna/${qnaId}/answers`);
+    return response.data.data.length > 0 ? response.data.data[0] : null;
+  } catch (error) {
+    console.error(`답변 조회 실패 (QnA ID: ${qnaId}):`, error);
+    return null;
+  }
+};
+
 export default api;

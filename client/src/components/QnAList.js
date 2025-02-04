@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { fetchAnswers } from "../utils/api";
 import "../styles/QnAList.css";
 
 const Answer = ({ answer, createdAt }) => (
@@ -12,25 +12,19 @@ const Answer = ({ answer, createdAt }) => (
 const QnaList = ({ qnaData }) => {
   const [answers, setAnswers] = useState({});
 
-  axios.defaults.baseURL = "http://localhost:5001";
-
-  const fetchAnswers = async (qnaId) => {
-    try {
-      const response = await axios.get(`/qna/qna/${qnaId}/answers`);
-      setAnswers((prev) => ({
-        ...prev,
-        [qnaId]: response.data.data.length > 0 ? response.data.data[0] : null,
-      }));
-    } catch (error) {
-      console.error(`답변 조회 실패 (QnA ID: ${qnaId}):`, error);
-      setAnswers((prev) => ({ ...prev, [qnaId]: null }));
-    }
-  };
-
   useEffect(() => {
-    qnaData.forEach((qna) => {
-      fetchAnswers(qna.id);
-    });
+    const getAnswers = async () => {
+      const answersObj = {};
+      for (const qna of qnaData) {
+        const answer = await fetchAnswers(qna.id);
+        answersObj[qna.id] = answer;
+      }
+      setAnswers(answersObj);
+    };
+
+    if (qnaData.length > 0) {
+      getAnswers();
+    }
   }, [qnaData]);
 
   if (!Array.isArray(qnaData) || qnaData.length === 0) {

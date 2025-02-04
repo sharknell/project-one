@@ -18,7 +18,9 @@ const storage = multer.diskStorage({
     cb(null, productImagesDir);
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
+    // 파일 이름에 Date.now()를 추가하여 중복 방지
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
 
