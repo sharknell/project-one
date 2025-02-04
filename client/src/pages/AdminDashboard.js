@@ -6,6 +6,7 @@ import ProductForm from "../components/ProductForm";
 import AdminSidebar from "../components/AdminSidebar";
 import QnaAdmin from "../components/QnaAdmin";
 import MemberList from "../components/MemberList";
+import ProductList from "../components/ProductList"; // Import ProductList 컴포넌트
 import "./AdminDashboard.css";
 
 const AdminDashboard = () => {
@@ -17,6 +18,7 @@ const AdminDashboard = () => {
   const [filteredQna, setFilteredQna] = useState([]);
   const [activeTab, setActiveTab] = useState("productForm");
   const [credentials, setCredentials] = useState({ email: "", password: "" });
+  const [editingProduct, setEditingProduct] = useState(null);
   const [newProduct, setNewProduct] = useState({
     name: "",
     price: "",
@@ -31,11 +33,13 @@ const AdminDashboard = () => {
     artOfPerfuming: "",
     detailedInfo: "",
   });
+  const [products, setProducts] = useState([]);
 
   const navigate = useNavigate();
   const API_BASE_URL =
     process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
 
+  // 데이터 가져오기 (fetchData)
   const fetchData = useCallback(
     async (url, method = "GET", body = null) => {
       setLoading(true);
@@ -60,6 +64,20 @@ const AdminDashboard = () => {
     },
     [API_BASE_URL]
   );
+
+  const fetchProducts = useCallback(async () => {
+    const data = await fetchData("/shop");
+    console.log("상품 데이터:", data); // 데이터 확인
+    setProducts(data?.data || []); // data?.data로 상품 목록을 업데이트
+  }, [fetchData]);
+
+  useEffect(() => {
+    if (isAuthenticated && isAdmin) {
+      fetchProducts();
+    }
+  }, [isAuthenticated, isAdmin, fetchProducts]);
+
+  // 상품 등록 처리
   const handleSubmit = async (product) => {
     try {
       const response = await fetch(`${API_BASE_URL}/shop/products`, {
@@ -100,6 +118,16 @@ const AdminDashboard = () => {
     }
   };
 
+  // 제품 편집
+  const handleEditProduct = (product) => {
+    setEditingProduct(product);
+    setNewProduct({
+      ...product,
+      // 편집 폼에 필요한 추가 필드가 있을 경우 여기에 추가
+    });
+  };
+
+  // 로그인 처리
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -114,6 +142,7 @@ const AdminDashboard = () => {
     }
   };
 
+  // Q&A 및 회원 목록 불러오기
   const fetchQnaAndMembers = useCallback(async () => {
     const [qnaData, memberData] = await Promise.all([
       fetchData("/qna/qna"),
@@ -130,6 +159,7 @@ const AdminDashboard = () => {
     }
   }, [isAuthenticated, isAdmin, fetchQnaAndMembers]);
 
+  // Q&A 필터링
   const handleFilterChange = (filterType) => {
     const filters = {
       all: () => setFilteredQna(qna),
@@ -146,6 +176,33 @@ const AdminDashboard = () => {
     filters[filterType]?.();
   };
 
+  // 제품 삭제
+  const handleDeleteProduct = async (productId) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/shop/product/${productId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        alert("제품이 삭제되었습니다.");
+        fetchProducts(); // 삭제 후 제품 목록을 다시 가져옵니다.
+      } else {
+        alert("제품 삭제에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("삭제 오류:", error);
+      alert("제품 삭제 중 오류가 발생했습니다.");
+    }
+  };
+
+  // 답변 제출
   const handleAnswerSubmit = async (questionId, answer) => {
     if (!answer) return alert("답변을 입력해주세요.");
     const response = await fetchData("/qna/qna/answer", "POST", {
@@ -179,6 +236,14 @@ const AdminDashboard = () => {
         handleSubmit={handleSubmit}
       />
     ),
+    productList: (
+      <ProductList
+        products={products}
+        API_BASE_URL={API_BASE_URL}
+        onEdit={handleEditProduct}
+        onDelete={handleDeleteProduct}
+      />
+    ), // ProductList 컴포넌트 사용
     qnaAdmin: (
       <div className="dashboard-section">
         <h2>Q&A 목록</h2>

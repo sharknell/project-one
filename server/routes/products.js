@@ -145,11 +145,41 @@ router.post("/products", async (req, res) => {
   }
 });
 
-// 전체 상품 조회
+// 전체 상품 조회 (대표 이미지 + 서브 이미지 포함)
 router.get("/", async (req, res) => {
   try {
-    const [results] = await dbPromise.query("SELECT * FROM products");
-    res.json({ message: "상품 목록 조회 성공", data: results });
+    const [products] = await dbPromise.query("SELECT * FROM products");
+
+    if (products.length === 0) {
+      return res.json({ message: "상품이 없습니다.", data: [] });
+    }
+
+    // 모든 상품 ID 가져오기
+    const productIds = products.map((product) => product.id);
+
+    // 서브 이미지 가져오기
+    const [imageResults] = await dbPromise.query(
+      "SELECT product_id, image_url FROM product_images WHERE product_id IN (?)",
+      [productIds]
+    );
+
+    // 서브 이미지를 상품 ID별로 그룹화
+    const imageMap = {};
+    imageResults.forEach(({ product_id, image_url }) => {
+      if (!imageMap[product_id]) {
+        imageMap[product_id] = [];
+      }
+      imageMap[product_id].push(image_url);
+    });
+
+    // 상품 데이터에 서브 이미지 추가
+    const productList = products.map((product) => ({
+      ...product,
+      subImages: imageMap[product.id] || [], // 해당 상품의 서브 이미지 배열 추가
+    }));
+
+    console.log("상품 목록 조회 성공:", productList);
+    res.json({ message: "상품 목록 조회 성공", data: productList });
   } catch (err) {
     console.error("상품 목록 조회 오류:", err);
     return res.status(500).json({ message: "상품 목록 조회에 실패했습니다." });
@@ -239,11 +269,28 @@ router.put("/product/:id", async (req, res) => {
 router.delete("/product/:id", async (req, res) => {
   const { id } = req.params;
 
-  if (!validateId(id)) {
+  // 유효성 검사: ID가 숫자이고 0보다 큰지 확인
+  if (isNaN(id) || id <= 0) {
     return res.status(400).json({ message: "유효하지 않은 상품 ID입니다." });
   }
 
   try {
+    // 상품이 존재하는지 확인
+    const [productResult] = await dbPromise.query(
+      "SELECT * FROM products WHERE id = ?",
+      [id]
+    );
+
+    if (productResult.length === 0) {
+      return res.status(404).json({ message: "해당 상품을 찾을 수 없습니다." });
+    }
+
+    // 상품에 관련된 서브 이미지 삭제
+    await dbPromise.query("DELETE FROM product_images WHERE product_id = ?", [
+      id,
+    ]);
+
+    // 상품 삭제
     const [deleteResult] = await dbPromise.query(
       "DELETE FROM products WHERE id = ?",
       [id]
