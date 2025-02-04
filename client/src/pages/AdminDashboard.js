@@ -191,6 +191,7 @@ const AdminDashboard = () => {
       );
 
       if (response.ok) {
+        console.log("제품 삭제 성공:" + response);
         alert("제품이 삭제되었습니다.");
         fetchProducts(); // 삭제 후 제품 목록을 다시 가져옵니다.
       } else {

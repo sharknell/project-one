@@ -285,6 +285,9 @@ router.delete("/product/:id", async (req, res) => {
       return res.status(404).json({ message: "해당 상품을 찾을 수 없습니다." });
     }
 
+    // 해당 상품에 연결된 리뷰 삭제
+    await dbPromise.query("DELETE FROM reviews WHERE product_id = ?", [id]);
+
     // 상품에 관련된 서브 이미지 삭제
     await dbPromise.query("DELETE FROM product_images WHERE product_id = ?", [
       id,
