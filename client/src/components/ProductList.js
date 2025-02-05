@@ -1,17 +1,83 @@
 import React, { useState } from "react";
+import "../styles/ProductList.css";
 
 const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const openModal = (product) => {
-    setSelectedProduct(product);
+    setSelectedProduct({ ...product, newSubImages: [] }); // 새 보조 이미지 배열 추가
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setSelectedProduct(null);
+    setTimeout(() => setSelectedProduct(null), 300); // 애니메이션 후 초기화
+    setIsEditing(false); // 편집 모드 초기화
+  };
+
+  const handleSubImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    const newImages = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file), // 미리보기 생성
+    }));
+    setSelectedProduct((prev) => ({
+      ...prev,
+      newSubImages: [...(prev.newSubImages || []), ...newImages],
+    }));
+  };
+
+  const handleDeleteSubImage = (index) => {
+    setSelectedProduct((prev) => ({
+      ...prev,
+      newSubImages: prev.newSubImages.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setSelectedProduct((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSaveEdit = () => {
+    const updatedProduct = {
+      id: selectedProduct.id,
+      name: selectedProduct.name,
+      price: selectedProduct.price,
+      category: selectedProduct.category,
+      description: selectedProduct.description,
+      // Add any other fields to be updated, e.g. size, detailed_info, etc.
+      additionalImages: selectedProduct.newSubImages.map(
+        (image) => image.file.name
+      ), // Assuming you want to send the image filenames.
+    };
+
+    // Send a PUT request to the backend to update the product
+    fetch(`${API_BASE_URL}/shop/product/${updatedProduct.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedProduct),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message === "상품이 성공적으로 업데이트되었습니다.") {
+          onEdit(updatedProduct); // Call the parent onEdit function to update the product list
+          closeModal();
+        } else {
+          alert("상품 업데이트에 실패했습니다.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("상품 업데이트 중 오류가 발생했습니다.");
+      });
   };
 
   return (
@@ -38,7 +104,7 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
                     <img
                       src={`${API_BASE_URL}/uploads/productImages/${product.image_url}`}
                       alt={product.name}
-                      style={{ maxWidth: "50px", maxHeight: "50px" }}
+                      className="product-image"
                     />
                   ) : (
                     "이미지 없음"
@@ -60,57 +126,140 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
         <p className="product-list-empty">등록된 제품이 없습니다.</p>
       )}
 
-      {/* 팝업 모달 */}
-      {isModalOpen && selectedProduct && (
-        <div className="modal-overlay" onClick={closeModal}>
+      {/* 모달 */}
+      {selectedProduct && (
+        <div
+          className={`modal-overlay ${isModalOpen ? "open" : "close"}`}
+          onClick={closeModal}
+        >
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>{selectedProduct.name}</h2>
-            <p>상품 아이디: {selectedProduct.id}</p>
-            <p>상품 명: {selectedProduct.name}</p>
-            <p>가격: {selectedProduct.price.toLocaleString()} 원</p>
-            <p>카테고리: {selectedProduct.category}</p>
-            <p>사이즈: {selectedProduct.size}</p>
-            <p>설명: {selectedProduct.description}</p>
-            <p>상세 설명: {selectedProduct.detailed_info}</p>
-            <div>
-              <h3>대표 이미지</h3>
-              {selectedProduct.image_url ? (
-                <img
-                  src={`${API_BASE_URL}/uploads/productImages/${selectedProduct.image_url}`}
-                  alt={selectedProduct.name}
-                  style={{ width: "100%", height: "auto" }}
-                />
-              ) : (
-                "이미지 없음"
-              )}
+            <div className="modal-header">
+              <h2>{selectedProduct.name}</h2>
             </div>
-            <div>
-              <h3>보조 이미지</h3>
-              {selectedProduct.subImages && selectedProduct.subImages.length > 0
-                ? selectedProduct.subImages.map((subImage, index) => (
-                    <img
-                      key={index}
-                      src={`${API_BASE_URL}/uploads/productImages/${subImage}`}
-                      alt={`${selectedProduct.name} 보조 이미지 ${index + 1}`}
-                      style={{
-                        width: "100px",
-                        height: "100px",
-                        margin: "10px",
-                      }}
+            <div className="modal-body">
+              <p>상품 아이디: {selectedProduct.id}</p>
+
+              {isEditing ? (
+                // 편집 폼
+                <div>
+                  <label>
+                    상품명:
+                    <input
+                      type="text"
+                      name="name"
+                      value={selectedProduct.name}
+                      onChange={handleEditChange}
                     />
-                  ))
-                : "보조 이미지 없음"}
+                  </label>
+                  <label>
+                    가격:
+                    <input
+                      type="number"
+                      name="price"
+                      value={selectedProduct.price}
+                      onChange={handleEditChange}
+                    />
+                  </label>
+                  <label>
+                    카테고리:
+                    <input
+                      type="text"
+                      name="category"
+                      value={selectedProduct.category}
+                      onChange={handleEditChange}
+                    />
+                  </label>
+                  <label>
+                    설명:
+                    <textarea
+                      name="description"
+                      value={selectedProduct.description}
+                      onChange={handleEditChange}
+                    />
+                  </label>
+                </div>
+              ) : (
+                // 보기 모드
+                <div>
+                  <p>상품 명: {selectedProduct.name}</p>
+                  <p>가격: {selectedProduct.price.toLocaleString()} 원</p>
+                  <p>카테고리: {selectedProduct.category}</p>
+                  <p>설명: {selectedProduct.description}</p>
+                </div>
+              )}
+
+              <div>
+                <h3>대표 이미지</h3>
+                {selectedProduct.image_url ? (
+                  <img
+                    src={`${API_BASE_URL}/uploads/productImages/${selectedProduct.image_url}`}
+                    alt={selectedProduct.name}
+                    className="modal-main-image"
+                  />
+                ) : (
+                  "이미지 없음"
+                )}
+              </div>
+
+              {/* 보조 이미지 */}
+              <div>
+                <h3>보조 이미지</h3>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleSubImageChange}
+                />
+                <div className="sub-images-container">
+                  {selectedProduct.subImages &&
+                    selectedProduct.subImages.length > 0 && (
+                      <div>
+                        <h4>기존 보조 이미지</h4>
+                        {selectedProduct.subImages.map((subImage, index) => (
+                          <img
+                            key={index}
+                            src={`${API_BASE_URL}/uploads/productImages/${subImage}`}
+                            alt={`${selectedProduct.name} 보조 이미지 ${
+                              index + 1
+                            }`}
+                            className="modal-sub-image"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  {selectedProduct.newSubImages &&
+                    selectedProduct.newSubImages.map((image, index) => (
+                      <div key={index} className="sub-image-wrapper">
+                        <img
+                          src={image.preview}
+                          alt={`보조 이미지 ${index + 1}`}
+                          className="modal-sub-image"
+                        />
+                        <button
+                          className="delete-image-button"
+                          onClick={() => handleDeleteSubImage(index)}
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              </div>
             </div>
+
             <div className="modal-actions">
-              <button
-                className="edit-button"
-                onClick={() => {
-                  onEdit(selectedProduct);
-                  closeModal();
-                }}
-              >
-                편집
-              </button>
+              {isEditing ? (
+                <button className="save-button" onClick={handleSaveEdit}>
+                  저장
+                </button>
+              ) : (
+                <button
+                  className="edit-button"
+                  onClick={() => setIsEditing(true)}
+                >
+                  편집
+                </button>
+              )}
               <button
                 className="delete-button"
                 onClick={() => {
