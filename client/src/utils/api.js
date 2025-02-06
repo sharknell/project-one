@@ -89,6 +89,7 @@ export const getQnaData = async (token) => {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
+    console.log(response.data);
   } catch (error) {
     throw new Error(
       error.response?.data?.message || "QnA 데이터를 가져오는 데 실패했습니다."

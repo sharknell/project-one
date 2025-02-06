@@ -7,7 +7,7 @@ import AdminSidebar from "../components/AdminSidebar";
 import QnaAdmin from "../components/QnaAdmin";
 import MemberList from "../components/MemberList";
 import ProductList from "../components/ProductList"; // Import ProductList 컴포넌트
-import "./AdminDashboard.css";
+import "../styles/AdminDashboard.css";
 
 const AdminDashboard = () => {
   const { login, isAdmin, isAuthenticated } = useAuth();

@@ -157,7 +157,7 @@ const Profile = () => {
         {activeTab === "reviews" && (
           <div className="reviews-section">
             {reviews.length === 0 ? (
-              <p>작성한 리뷰가 없습니다.</p>
+              <p className="no-data">작성한 리뷰가 없습니다.</p>
             ) : (
               <MyReviewsList reviews={reviews} />
             )}

@@ -29,13 +29,6 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
     }));
   };
 
-  const handleDeleteSubImage = (index) => {
-    setSelectedProduct((prev) => ({
-      ...prev,
-      newSubImages: prev.newSubImages.filter((_, i) => i !== index),
-    }));
-  };
-
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setSelectedProduct((prev) => ({
@@ -51,7 +44,6 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
       price: selectedProduct.price,
       category: selectedProduct.category,
       description: selectedProduct.description,
-      // Add any other fields to be updated, e.g. size, detailed_info, etc.
       additionalImages: selectedProduct.newSubImages.map(
         (image) => image.file.name
       ), // Assuming you want to send the image filenames.
@@ -216,14 +208,15 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
                       <div>
                         <h4>기존 보조 이미지</h4>
                         {selectedProduct.subImages.map((subImage, index) => (
-                          <img
-                            key={index}
-                            src={`${API_BASE_URL}/uploads/productImages/${subImage}`}
-                            alt={`${selectedProduct.name} 보조 이미지 ${
-                              index + 1
-                            }`}
-                            className="modal-sub-image"
-                          />
+                          <div key={index} className="sub-image-wrapper">
+                            <img
+                              src={`${API_BASE_URL}/uploads/productImages/${subImage}`}
+                              alt={`${selectedProduct.name} 보조 이미지 ${
+                                index + 1
+                              }`}
+                              className="modal-sub-image"
+                            />
+                          </div>
                         ))}
                       </div>
                     )}
@@ -235,12 +228,6 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
                           alt={`보조 이미지 ${index + 1}`}
                           className="modal-sub-image"
                         />
-                        <button
-                          className="delete-image-button"
-                          onClick={() => handleDeleteSubImage(index)}
-                        >
-                          삭제
-                        </button>
                       </div>
                     ))}
                 </div>

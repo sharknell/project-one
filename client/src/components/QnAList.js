@@ -11,6 +11,7 @@ const Answer = ({ answer, createdAt }) => (
 
 const QnaList = ({ qnaData }) => {
   const [answers, setAnswers] = useState({});
+  console.log(qnaData);
 
   useEffect(() => {
     const getAnswers = async () => {

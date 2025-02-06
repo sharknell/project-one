@@ -115,7 +115,8 @@
   margin-top: 8px;
 }
 
-.no-answer {
+.no-answer,
+.no-data {
   font-style: italic;
   color: #bbb;
   margin-top: 20px;

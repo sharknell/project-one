@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import "./ProductForm.css";
+import "../styles/ProductForm.css";
 
 axios.defaults.baseURL = "http://localhost:5001/shop";
 
@@ -9,11 +9,9 @@ const ProductForm = () => {
     name: "",
     price: "",
     category: "",
-    effect: "",
     size: "",
     description: "",
     detailedInfo: "",
-    artOfPerfuming: "",
     shippingTime: "",
     returnPolicy: "",
     image: null, // 대표 이미지
@@ -159,16 +157,6 @@ const ProductForm = () => {
           onChange={handleChange}
         />
       </div>
-
-      <div className="form-group">
-        <label>퍼퓨밍 아트</label>
-        <textarea
-          name="artOfPerfuming"
-          placeholder="퍼퓨밍 아트"
-          onChange={handleChange}
-        />
-      </div>
-
       <div className="form-group">
         <label>배송 기간</label>
         <input

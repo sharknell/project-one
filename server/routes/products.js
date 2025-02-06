@@ -85,11 +85,9 @@ router.post("/products", async (req, res) => {
     name,
     price,
     category,
-    effect,
     size,
     description,
     detailed_info,
-    art_of_perfuming,
     shipping_time,
     return_policy,
     image_url, // 대표 이미지 URL
@@ -106,17 +104,15 @@ router.post("/products", async (req, res) => {
   try {
     // ✅ 상품 추가
     const [productResult] = await dbPromise.query(
-      `INSERT INTO products (name, price, category, effect, size, description, detailed_info, art_of_perfuming, shipping_time, return_policy, image_url) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO products (name, price, category, size, description, detailed_info, shipping_time, return_policy, image_url) 
+       VALUES (?, ?, ?,  ?, ?,  ?, ?, ?, ?)`,
       [
         name,
         price,
         category,
-        effect,
         size,
         description,
         detailed_info,
-        art_of_perfuming,
         shipping_time,
         return_policy,
         image_url,
@@ -183,6 +179,33 @@ router.get("/", async (req, res) => {
   } catch (err) {
     console.error("상품 목록 조회 오류:", err);
     return res.status(500).json({ message: "상품 목록 조회에 실패했습니다." });
+  }
+});
+router.delete("/product/image", async (req, res) => {
+  const { imageUrl } = req.body;
+  if (!imageUrl) {
+    return res.status(400).json({ success: false, message: "이미지 URL 필요" });
+  }
+
+  try {
+    const imagePath = path.join(
+      __dirname,
+      "../uploads/productImages",
+      imageUrl
+    );
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath); // Delete the image file
+    }
+
+    // Remove the image entry from the database
+    await dbPromise.query("DELETE FROM product_images WHERE image_url = ?", [
+      imageUrl,
+    ]);
+
+    res.json({ success: true, message: "이미지 삭제 완료" });
+  } catch (err) {
+    console.error("이미지 삭제 오류:", err);
+    res.status(500).json({ success: false, message: "이미지 삭제 실패" });
   }
 });
 
