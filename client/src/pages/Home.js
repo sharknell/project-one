@@ -10,7 +10,7 @@ import c2 from "../banner/c2.jpg";
 import c3 from "../banner/c3.jpg";
 
 function Home() {
-  const { products, isLoading, error } = useProducts(null); // 모든 상품 가져오기
+  const { products, isLoading, error } = useProducts(null);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const bannerImages = [c1, c2, c3];
@@ -19,22 +19,23 @@ function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % bannerImages.length);
-    }, 3000); // 3초마다 변경
+    }, 5000); // 5초마다 변경
 
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    console.log(products); // products 배열의 데이터 구조를 확인
+    console.log(products);
   }, [products]);
+
   return (
     <div className="home-container">
-      {/* 캐러셀 추가 부분 */}
+      {/* 캐러셀 */}
       <div className="carousel">
         <div
           className="carousel-images"
           style={{
-            transform: `translateX(-${currentIndex * 100}%)`, // 이미지가 좌측으로 이동
+            transform: `translateX(-${currentIndex * 100}%)`,
           }}
         >
           {bannerImages.map((image, index) => (
@@ -48,13 +49,7 @@ function Home() {
         </div>
       </div>
 
-      <header className="home-header">
-        <h1 className="home-title">Welcome to Perfume Shop</h1>
-        <p className="home-subtitle">
-          Discover luxurious fragrances to elevate your senses
-        </p>
-      </header>
-
+      {/* 메인 배너 */}
       <div className="main-banner">
         <img
           src={bpicture1}
@@ -62,14 +57,14 @@ function Home() {
           className="banner-image"
         />
         <div className="banner-overlay">
-          <h2 className="banner-text">신비로움으로 가득한</h2>
-          <h2 className="banner-text">향수를 선물하세요.</h2>
+          <h2 className="banner-title">향수의 향기를 느껴보세요</h2>
           <Link to="/shop?category=perfume" className="banner-button">
             향수 라인업 보기
           </Link>
         </div>
       </div>
 
+      {/* 서브 배너 */}
       <div className="sub-banners">
         <div className="sub-banner">
           <img
@@ -78,8 +73,8 @@ function Home() {
             className="sub-banner-image"
           />
           <div className="sub-banner-overlay">
-            <h3 className="sub-banner-title">당신의 매력을 한층 더</h3>
-            <p className="sub-banner-text">메이크업으로 완성하세요.</p>
+            <h3 className="sub-banner-title">매력적인 당신을 위한</h3>
+            <p className="sub-banner-text">메이크업으로 변화를 주다</p>
             <Link to="/shop?category=makeup" className="sub-banner-link">
               메이크업 라인업 보기
             </Link>
@@ -92,8 +87,8 @@ function Home() {
             className="sub-banner-image"
           />
           <div className="sub-banner-overlay">
-            <h3 className="sub-banner-title">맑고 깨끗한 피부의 시작</h3>
-            <p className="sub-banner-text">스킨 케어로 빛나세요.</p>
+            <h3 className="sub-banner-title">피부에 자연을 담다</h3>
+            <p className="sub-banner-text">스킨케어로 더욱 건강한 피부</p>
             <Link to="/shop?category=skincare" className="sub-banner-link">
               스킨케어 라인업 보기
             </Link>
@@ -101,8 +96,9 @@ function Home() {
         </div>
       </div>
 
+      {/* 베스트셀러 상품 */}
       <section className="products-section">
-        <h2 className="section-title">Our Bestsellers</h2>
+        <h2 className="section-title">Best Sellers</h2>
         {isLoading && <div className="loading">로딩 중...</div>}
         {error && <div className="error">{error}</div>}
         <div className="products">
@@ -111,11 +107,10 @@ function Home() {
               products.map((product) => (
                 <div key={product.id} className="product">
                   <img
-                    src={`http://localhost:5001/uploads/productImages/${product.image_url}`} // 서버 URL과 결합하여 전체 경로로 이미지 로드
+                    src={`http://localhost:5001/uploads/productImages/${product.image_url}`}
                     alt={product.name || "상품명 없음"}
                     className="product-image"
                   />
-
                   <h3 className="product-name">
                     {product.name || "상품명 없음"}
                   </h3>

@@ -1,37 +1,31 @@
 /* 전체 컨테이너 */
 .home-container {
-  font-family: "Arial", sans-serif;
+  font-family: Arial, sans-serif;
   padding: 20px;
   color: #333;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 1200px; /* 최대 너비 설정 */
+  margin: 0 auto; /* 가운데 정렬 */
 }
 
 /* 캐러셀 스타일 */
 .carousel {
   position: relative;
   width: 100%;
-  height: 500px;
+  height: 500px; /* 높이를 조금 더 늘려서 큰 이미지를 보이도록 함 */
   overflow: hidden;
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  margin-bottom: 40px;
+  border-radius: 15px; /* 모서리를 둥글게 */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* 부드러운 그림자 효과 */
 }
 
 .carousel-images {
   display: flex;
-  transition: transform 1s ease-in-out;
+  transition: transform 1s ease-in-out; /* 부드러운 전환 효과 */
 }
 
 .carousel-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-}
-
-/* 캐러셀 마우스 오버시 멈추기 */
-.carousel:hover .carousel-images {
-  animation-play-state: paused;
+  object-fit: cover; /* 비율을 유지하면서 전체 화면에 맞게 조정 */
 }
 
 /* 메인 배너 */
@@ -42,40 +36,30 @@
 
 .banner-image {
   width: 100%;
-  height: 400px;
-  object-fit: cover;
-  border-radius: 15px;
+  max-width: 1200px; /* 최대 너비 제한 */
+  height: 400px; /* 배너의 고정된 높이 설정 */
+  object-fit: contain; /* 이미지 비율을 유지하며 배경에 맞게 조정 */
+  margin: 0 auto; /* 양옆 여백을 자동으로 맞춰줌 */
 }
 
+/* 메인 배너 오버레이 */
 .banner-overlay {
   position: absolute;
-  top: 50%;
+  top: 50%; /* 중앙 정렬 */
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(
+    -50%,
+    -50%
+  ); /* 텍스트가 정확히 중앙에 오도록 위치 조정 */
   color: white;
   text-align: center;
-  padding: 20px;
-  background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 10px;
+  z-index: 10; /* 배경 이미지 위에 텍스트가 오도록 설정 */
 }
 
 .banner-text {
   font-size: 24px;
   font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.banner-button {
-  background-color: #ff6347;
-  padding: 10px 20px;
-  border-radius: 5px;
-  text-decoration: none;
-  color: white;
-  font-weight: bold;
-}
-
-.banner-button:hover {
-  background-color: #ff2e1a;
+  margin: 10px 0;
 }
 
 /* 하단 배너 */
@@ -92,66 +76,55 @@
 
 .sub-banner-image {
   width: 100%;
+  max-width: 1200px;
   height: 450px;
   object-fit: cover;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
 }
 
+/* 서브 배너 오버레이 */
 .sub-banner-overlay {
   position: absolute;
-  bottom: 10%;
+  top: 50%; /* 중앙 정렬 */
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(
+    -50%,
+    -50%
+  ); /* 텍스트가 정확히 중앙에 오도록 위치 조정 */
   color: white;
   text-align: center;
-  background-color: rgba(0, 0, 0, 0.4);
-  padding: 20px;
-  border-radius: 10px;
+  z-index: 10; /* 배경 이미지 위에 텍스트가 오도록 설정 */
 }
 
 .sub-banner-title {
   font-size: 20px;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin: 10px 0;
 }
 
 .sub-banner-text {
   font-size: 16px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .sub-banner-link {
-  color: #ff6347;
-  font-weight: bold;
   text-decoration: none;
+  background-color: #ff6347;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
 }
 
 .sub-banner-link:hover {
-  color: #ff2e1a;
-}
-
-/* 헤더 섹션 */
-.home-header {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.home-title {
-  font-size: 40px;
-  font-weight: bold;
-  color: #333;
-}
-
-.home-subtitle {
-  font-size: 18px;
-  color: #777;
+  background-color: #ff2e1a;
 }
 
 /* 상품 섹션 */
 .products-section {
   text-align: center;
   padding: 40px 20px;
+  position: relative;
 }
 
 .section-title {
@@ -159,35 +132,33 @@
   font-weight: bold;
   color: #333;
   margin-bottom: 40px;
-  text-transform: uppercase;
+  text-transform: uppercase; /* 대문자 처리 */
 }
 
-/* 상품들이 가로로 나열되게 하는 스타일 */
 .products {
   display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  gap: 20px;
+  justify-content: flex-start;
+  overflow: hidden;
   margin: 0 auto;
+  max-width: 1200px;
 }
 
 .products-wrapper {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  flex-wrap: nowrap;
+  animation: scroll-left 50s linear infinite; /* 속도 조정 */
 }
 
 .product {
-  width: 280px;
+  width: 280px; /* 카드 너비 */
   text-align: center;
   border: none;
   border-radius: 15px;
   padding: 20px;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  transition: all 0.3s ease; /* 애니메이션 효과 */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* 부드러운 그림자 효과 */
   background-color: #fff;
-  position: relative;
-  overflow: hidden;
 }
 
 .product:hover {
@@ -200,7 +171,6 @@
   height: 200px;
   object-fit: cover;
   margin-bottom: 15px;
-  border-radius: 8px;
 }
 
 .product-name {

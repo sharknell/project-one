@@ -247,38 +247,23 @@ router.get("/product/:id", async (req, res) => {
   }
 });
 
-// 상품 업데이트
-router.put("/product/:id", async (req, res) => {
+router.put("/product/:id", upload.single("newImage"), async (req, res) => {
   const { id } = req.params;
-  const { name, description, price, size, detailed_info, additionalImages } =
-    req.body;
+  const { name, description, price, size, detailed_info } = req.body;
+  const imageUrl = req.file ? req.file.filename : null; // 새 이미지가 있으면 파일명 저장
 
   if (isNaN(id) || id <= 0) {
     return res.status(400).json({ message: "유효하지 않은 상품 ID입니다." });
   }
-  if (price && (isNaN(price) || price <= 0)) {
-    return res.status(400).json({ message: "유효한 가격을 입력해주세요." });
-  }
 
   try {
     const [updateResult] = await dbPromise.query(
-      "UPDATE products SET name = ?, description = ?, price = ?, size = ?, detailed_info = ? WHERE id = ?",
-      [name, description, price, size, detailed_info, id]
+      "UPDATE products SET name = ?, description = ?, price = ?, size = ?, detailed_info = ?, image_url = COALESCE(?, image_url) WHERE id = ?",
+      [name, description, price, size, detailed_info, imageUrl, id]
     );
 
     if (updateResult.affectedRows === 0) {
       return res.status(404).json({ message: "해당 상품을 찾을 수 없습니다." });
-    }
-
-    // 2️⃣ 서브 이미지 업데이트
-    if (Array.isArray(additionalImages) && additionalImages.length > 0) {
-      const imageInsertPromises = additionalImages.map((imageUrl) => {
-        return dbPromise.query(
-          "INSERT INTO product_images (product_id, image_url) VALUES (?, ?)",
-          [id, imageUrl]
-        );
-      });
-      await Promise.all(imageInsertPromises);
     }
 
     res.json({ message: "상품이 성공적으로 업데이트되었습니다." });

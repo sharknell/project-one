@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/ProductList.css";
 
 const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
@@ -7,22 +7,35 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
   const [isEditing, setIsEditing] = useState(false);
 
   const openModal = (product) => {
-    setSelectedProduct({ ...product, newSubImages: [] }); // 새 보조 이미지 배열 추가
+    setSelectedProduct({ ...product, newSubImages: [] });
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setTimeout(() => setSelectedProduct(null), 300); // 애니메이션 후 초기화
-    setIsEditing(false); // 편집 모드 초기화
   };
+
+  useEffect(() => {
+    if (!isModalOpen) {
+      setSelectedProduct(null);
+      setIsEditing(false);
+    }
+  }, [isModalOpen]);
 
   const handleSubImageChange = (e) => {
     const files = Array.from(e.target.files);
-    const newImages = files.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file), // 미리보기 생성
-    }));
+    const newImages = files
+      .filter(
+        (file) =>
+          !selectedProduct.newSubImages.some(
+            (img) => img.file.name === file.name
+          )
+      )
+      .map((file) => ({
+        file,
+        preview: URL.createObjectURL(file),
+      }));
+
     setSelectedProduct((prev) => ({
       ...prev,
       newSubImages: [...(prev.newSubImages || []), ...newImages],
@@ -38,29 +51,37 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
   };
 
   const handleSaveEdit = () => {
-    const updatedProduct = {
-      id: selectedProduct.id,
-      name: selectedProduct.name,
-      price: selectedProduct.price,
-      category: selectedProduct.category,
-      description: selectedProduct.description,
-      additionalImages: selectedProduct.newSubImages.map(
-        (image) => image.file.name
-      ), // Assuming you want to send the image filenames.
-    };
+    if (!selectedProduct) return;
 
-    // Send a PUT request to the backend to update the product
-    fetch(`${API_BASE_URL}/shop/product/${updatedProduct.id}`, {
+    const formData = new FormData();
+    formData.append("id", selectedProduct.id);
+    formData.append("name", selectedProduct.name || ""); // 빈 문자열로 기본값 설정
+    formData.append("price", selectedProduct.price || 0);
+    formData.append("category", selectedProduct.category || "");
+    formData.append("description", selectedProduct.description || "");
+
+    // 기존 보조 이미지 유지
+    if (selectedProduct.subImages) {
+      selectedProduct.subImages.forEach((image) => {
+        formData.append("existingImages", image);
+      });
+    }
+
+    // 새로운 보조 이미지 추가
+    selectedProduct.newSubImages.forEach((image) => {
+      formData.append("newImages", image.file);
+    });
+
+    console.log("보낼 데이터:", Object.fromEntries(formData.entries())); // 디버깅 로그 추가
+
+    fetch(`${API_BASE_URL}/shop/product/${selectedProduct.id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedProduct),
+      body: formData,
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.message === "상품이 성공적으로 업데이트되었습니다.") {
-          onEdit(updatedProduct); // Call the parent onEdit function to update the product list
+          onEdit(selectedProduct);
           closeModal();
         } else {
           alert("상품 업데이트에 실패했습니다.");
@@ -132,7 +153,6 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
               <p>상품 아이디: {selectedProduct.id}</p>
 
               {isEditing ? (
-                // 편집 폼
                 <div>
                   <label>
                     상품명:
@@ -171,7 +191,6 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
                   </label>
                 </div>
               ) : (
-                // 보기 모드
                 <div>
                   <p>상품 명: {selectedProduct.name}</p>
                   <p>가격: {selectedProduct.price.toLocaleString()} 원</p>
@@ -211,9 +230,7 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
                           <div key={index} className="sub-image-wrapper">
                             <img
                               src={`${API_BASE_URL}/uploads/productImages/${subImage}`}
-                              alt={`${selectedProduct.name} 보조 이미지 ${
-                                index + 1
-                              }`}
+                              alt={`보조 이미지 ${index + 1}`}
                               className="modal-sub-image"
                             />
                           </div>
@@ -249,10 +266,7 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
               )}
               <button
                 className="delete-button"
-                onClick={() => {
-                  onDelete(selectedProduct.id);
-                  closeModal();
-                }}
+                onClick={() => onDelete(selectedProduct.id)}
               >
                 삭제
               </button>
