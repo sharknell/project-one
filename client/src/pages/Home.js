@@ -11,32 +11,22 @@ import c3 from "../banner/c3.jpg";
 
 function Home() {
   const { products, isLoading, error } = useProducts(null);
-
   const [currentIndex, setCurrentIndex] = useState(0);
   const bannerImages = [c1, c2, c3];
 
-  // 캐러셀 자동 이동
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % bannerImages.length);
-    }, 5000); // 5초마다 변경
-
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    console.log(products);
-  }, [products]);
-
   return (
     <div className="home-container">
-      {/* 캐러셀 */}
       <div className="carousel">
         <div
-          className="carousel-images"
-          style={{
-            transform: `translateX(-${currentIndex * 100}%)`,
-          }}
+          className="carousel-track"
+          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
           {bannerImages.map((image, index) => (
             <img
@@ -49,7 +39,6 @@ function Home() {
         </div>
       </div>
 
-      {/* 메인 배너 */}
       <div className="main-banner">
         <img
           src={bpicture1}
@@ -64,7 +53,6 @@ function Home() {
         </div>
       </div>
 
-      {/* 서브 배너 */}
       <div className="sub-banners">
         <div className="sub-banner">
           <img
@@ -96,38 +84,35 @@ function Home() {
         </div>
       </div>
 
-      {/* 베스트셀러 상품 */}
       <section className="products-section">
         <h2 className="section-title">Best Sellers</h2>
         {isLoading && <div className="loading">로딩 중...</div>}
         {error && <div className="error">{error}</div>}
         <div className="products">
-          <div className="products-wrapper">
-            {products &&
-              products.map((product) => (
-                <div key={product.id} className="product">
-                  <img
-                    src={`http://localhost:5001/uploads/productImages/${product.image_url}`}
-                    alt={product.name || "상품명 없음"}
-                    className="product-image"
-                  />
-                  <h3 className="product-name">
-                    {product.name || "상품명 없음"}
-                  </h3>
-                  <p className="product-price">
-                    {product.price
-                      ? `₩${product.price.toLocaleString()}`
-                      : "가격 정보 없음"}
-                  </p>
-                  <Link
-                    to={`/shop/product/${product.id}`}
-                    className="product-details"
-                  >
-                    View Details
-                  </Link>
-                </div>
-              ))}
-          </div>
+          {products &&
+            products.map((product) => (
+              <div key={product.id} className="product">
+                <img
+                  src={`http://localhost:5001/uploads/productImages/${product.image_url}`}
+                  alt={product.name || "상품명 없음"}
+                  className="product-image"
+                />
+                <h3 className="product-name">
+                  {product.name || "상품명 없음"}
+                </h3>
+                <p className="product-price">
+                  {product.price
+                    ? `₩${product.price.toLocaleString()}`
+                    : "가격 정보 없음"}
+                </p>
+                <Link
+                  to={`/shop/product/${product.id}`}
+                  className="product-details"
+                >
+                  View Details
+                </Link>
+              </div>
+            ))}
         </div>
       </section>
     </div>

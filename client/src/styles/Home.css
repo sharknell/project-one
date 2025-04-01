@@ -1,209 +1,220 @@
-/* 전체 컨테이너 */
+/* Home.css */
+
+/* 전체 페이지 스타일 */
 .home-container {
-  font-family: Arial, sans-serif;
+  width: 100%;
+  max-width: 1400px;
+  margin: auto;
   padding: 20px;
-  color: #333;
-  max-width: 1200px; /* 최대 너비 설정 */
-  margin: 0 auto; /* 가운데 정렬 */
+  font-family: "Arial", sans-serif;
 }
 
 /* 캐러셀 스타일 */
 .carousel {
   position: relative;
   width: 100%;
-  height: 500px; /* 높이를 조금 더 늘려서 큰 이미지를 보이도록 함 */
+  height: 400px;
   overflow: hidden;
-  border-radius: 15px; /* 모서리를 둥글게 */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* 부드러운 그림자 효과 */
+  border-radius: 10px;
+  margin-bottom: 30px;
 }
 
-.carousel-images {
+.carousel-track {
   display: flex;
-  transition: transform 1s ease-in-out; /* 부드러운 전환 효과 */
+  transition: transform 0.5s ease-in-out;
+}
+
+/* 캐러셀 스타일 */
+.carousel {
+  position: relative;
+  width: 100%;
+  max-width: 1400px;
+  height: auto; /* 높이 자동 조정 */
+  overflow: hidden;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
 }
 
 .carousel-image {
   width: 100%;
-  height: 100%;
-  object-fit: cover; /* 비율을 유지하면서 전체 화면에 맞게 조정 */
+  height: 400px; /* 고정 높이 설정 */
+  min-height: 400px; /* 최소 높이 보장 */
+  object-fit: contain; /* 이미지 비율 유지하며 꽉 차게 */
+  background-color: #f5f5f5; /* 이미지 여백 대비 */
 }
 
-/* 메인 배너 */
+/* 메인 배너 스타일 */
 .main-banner {
   position: relative;
-  margin-bottom: 40px;
+  width: 100%;
+  height: 500px;
+  margin-bottom: 30px;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .banner-image {
   width: 100%;
-  max-width: 1200px; /* 최대 너비 제한 */
-  height: 400px; /* 배너의 고정된 높이 설정 */
-  object-fit: contain; /* 이미지 비율을 유지하며 배경에 맞게 조정 */
-  margin: 0 auto; /* 양옆 여백을 자동으로 맞춰줌 */
+  height: 100%;
+  object-fit: cover;
 }
-
-/* 메인 배너 오버레이 */
 .banner-overlay {
   position: absolute;
-  top: 50%; /* 중앙 정렬 */
+  top: 50%;
   left: 50%;
-  transform: translate(
-    -50%,
-    -50%
-  ); /* 텍스트가 정확히 중앙에 오도록 위치 조정 */
-  color: white;
+  transform: translate(-50%, -50%);
   text-align: center;
-  z-index: 10; /* 배경 이미지 위에 텍스트가 오도록 설정 */
+  background: rgba(0, 0, 0, 0.5);
+  padding: 20px 40px;
+  border-radius: 10px;
 }
 
-.banner-text {
-  font-size: 24px;
-  font-weight: bold;
-  margin: 10px 0;
+.banner-title {
+  color: white;
+  font-size: 2rem;
+  margin-bottom: 10px;
 }
 
-/* 하단 배너 */
+.banner-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #ff6b6b;
+  color: white;
+  font-size: 1.2rem;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background 0.3s;
+}
+
+.banner-button:hover {
+  background-color: #ff3b3b;
+}
+
+/* 서브 배너 스타일 */
 .sub-banners {
   display: flex;
   gap: 20px;
-  margin-bottom: 40px;
+  justify-content: center;
 }
 
 .sub-banner {
-  flex: 1;
   position: relative;
+  width: 48%;
+  height: 350px;
+  overflow: hidden;
+  border-radius: 10px;
 }
 
 .sub-banner-image {
   width: 100%;
-  max-width: 1200px;
-  height: 450px;
+  height: 100%;
   object-fit: cover;
-  margin: 0 auto;
 }
 
-/* 서브 배너 오버레이 */
 .sub-banner-overlay {
   position: absolute;
-  top: 50%; /* 중앙 정렬 */
-  left: 50%;
-  transform: translate(
-    -50%,
-    -50%
-  ); /* 텍스트가 정확히 중앙에 오도록 위치 조정 */
-  color: white;
-  text-align: center;
-  z-index: 10; /* 배경 이미지 위에 텍스트가 오도록 설정 */
+  bottom: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 15px;
+  border-radius: 8px;
 }
 
 .sub-banner-title {
-  font-size: 20px;
-  font-weight: bold;
-  margin: 10px 0;
+  color: white;
+  font-size: 1.5rem;
+  margin-bottom: 5px;
 }
 
 .sub-banner-text {
-  font-size: 16px;
-  margin-bottom: 20px;
+  color: white;
+  font-size: 1rem;
+  margin-bottom: 10px;
 }
 
 .sub-banner-link {
-  text-decoration: none;
-  background-color: #ff6347;
+  display: inline-block;
+  padding: 8px 15px;
+  background-color: #ffa726;
   color: white;
-  padding: 10px 20px;
+  font-size: 1rem;
+  text-decoration: none;
   border-radius: 5px;
-  font-weight: bold;
+  transition: background 0.3s;
 }
 
 .sub-banner-link:hover {
-  background-color: #ff2e1a;
+  background-color: #ff9100;
 }
 
-/* 상품 섹션 */
+/* 제품 섹션 스타일 */
 .products-section {
   text-align: center;
-  padding: 40px 20px;
-  position: relative;
+  padding: 50px 0;
 }
 
 .section-title {
-  font-size: 32px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 40px;
-  text-transform: uppercase; /* 대문자 처리 */
+  font-size: 2rem;
+  margin-bottom: 20px;
 }
 
 .products {
   display: flex;
-  justify-content: flex-start;
-  overflow: hidden;
-  margin: 0 auto;
-  max-width: 1200px;
-}
-
-.products-wrapper {
-  display: flex;
-  flex-wrap: nowrap;
-  animation: scroll-left 50s linear infinite; /* 속도 조정 */
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
 }
 
 .product {
-  width: 280px; /* 카드 너비 */
+  width: 250px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  transition: transform 0.3s ease-in-out;
   text-align: center;
-  border: none;
-  border-radius: 15px;
-  padding: 20px;
-  flex-shrink: 0;
-  transition: all 0.3s ease; /* 애니메이션 효과 */
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* 부드러운 그림자 효과 */
-  background-color: #fff;
+  background: #fff;
 }
 
 .product:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
 }
 
 .product-image {
   width: 100%;
   height: 200px;
   object-fit: cover;
-  margin-bottom: 15px;
-}
-
-.product-name {
-  font-size: 18px;
-  font-weight: bold;
+  border-radius: 10px;
   margin-bottom: 10px;
 }
 
+.product-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
 .product-price {
-  font-size: 16px;
-  color: #ff6347;
-  margin-bottom: 15px;
+  font-size: 1rem;
+  color: #ff6b6b;
+  margin-bottom: 10px;
 }
 
 .product-details {
+  display: inline-block;
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: white;
+  font-size: 1rem;
   text-decoration: none;
-  background-color: #ff6347;
-  color: #fff;
-  padding: 10px 20px;
   border-radius: 5px;
-  font-weight: bold;
+  transition: background 0.3s;
 }
 
 .product-details:hover {
-  background-color: #ff2e1a;
-}
-
-/* 무한 스크롤 애니메이션 */
-@keyframes scroll-left {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+  background-color: #0056b3;
 }
