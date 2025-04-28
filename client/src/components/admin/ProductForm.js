@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import "../styles/ProductForm.css";
+import "../../styles/ProductForm.css";
 
 axios.defaults.baseURL = "http://localhost:5001/shop";
 

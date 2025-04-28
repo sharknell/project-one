@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../styles/ProductList.css";
+import "../../styles/ProductList.css";
 
 const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);

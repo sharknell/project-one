@@ -1,5 +1,5 @@
 import React from "react";
-import "../styles/BasicInfo.css";
+import "../../styles/BasicInfo.css";
 
 const BasicInfo = ({
   user,

@@ -26,6 +26,20 @@ export const getProfile = async (token) => {
   }
 };
 
+// utils/api.js
+export const updateProfile = async (token, updatedInfo) => {
+  try {
+    const response = await api.put("profile", updatedInfo, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data; // 수정된 프로필 정보 반환
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message || "프로필 수정 중 오류가 발생했습니다."
+    );
+  }
+};
+
 export const getAddresses = async (token) => {
   try {
     const response = await api.get("profile/addresses", {
@@ -140,14 +154,15 @@ export const getReviews = async (token) => {
   }
 };
 
-export const submitQna = async (qnaData) => {
-  const response = await fetch(`${API_BASE_URL}/qna`, {
+export const submitQna = async (token, qnaData) => {
+  const response = await axios.post(`http://localhost:5001/qna`, qnaData, {
     method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify(qnaData),
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
   if (!response.ok) throw new Error("QnA 제출 실패");
-  return response.json();
+  return response.data;
 };
 
 // 답변 조회 함수

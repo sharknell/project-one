@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../AuthContext";
-import "../styles/Header.css";
+import { useAuth } from "../../AuthContext";
+import "../../styles/Header.css";
 
 function Header() {
   const { isAuthenticated, logout, logoutMessage, setLogoutMessage } =

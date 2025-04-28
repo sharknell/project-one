@@ -8,16 +8,17 @@ import { loadTossPayments } from "@tosspayments/payment-sdk";
 import { jwtDecode } from "jwt-decode";
 
 function Cart() {
-  const { isAuthenticated, isLoading, authToken } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, authToken } = useAuth();
   const [cartItems, setCartItems] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [selectedAddress, setSelectedAddress] = useState("");
   const [addresses, setAddresses] = useState([]);
+  const [pageLoading, setPageLoading] = useState(true); // 페이지 전체 로딩용
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isLoading) return;
+    if (authLoading) return;
 
     if (!isAuthenticated) {
       alert("로그인 후 장바구니를 확인할 수 있습니다.");
@@ -33,10 +34,13 @@ function Cart() {
     }
 
     const userId = extractUserIdFromToken(token);
-    if (!userId) return;
+    if (!userId) {
+      navigateWithDelay("/login");
+      return;
+    }
 
     fetchData(userId, token);
-  }, [isAuthenticated, isLoading, authToken, navigate]);
+  }, [isAuthenticated, authLoading, authToken]);
 
   const navigateWithDelay = (path) => {
     setTimeout(() => navigate(path), 1000);
@@ -44,18 +48,17 @@ function Cart() {
 
   const extractUserIdFromToken = (token) => {
     try {
-      const decodedToken = jwtDecode(token);
-      return decodedToken.id;
+      const decoded = jwtDecode(token);
+      return decoded.id;
     } catch (error) {
-      alert("토큰에서 사용자 ID를 추출하는데 실패했습니다.");
-      navigateWithDelay("/login");
+      console.error("토큰 디코딩 실패:", error);
       return null;
     }
   };
 
   const fetchData = async (userId, token) => {
     try {
-      const [cartResponse, addressResponse] = await Promise.all([
+      const [cartRes, addressRes] = await Promise.all([
         axios.get(`http://localhost:5001/cart?userId=${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
@@ -64,31 +67,36 @@ function Cart() {
         }),
       ]);
 
-      setCartItems(cartResponse.data || []);
-      setTotalAmount(calculateTotalAmount(cartResponse.data));
-      setAddresses(addressResponse.data);
+      console.log("카트 데이터:", cartRes.data);
+      console.log("주소 데이터:", addressRes.data);
+
+      setCartItems(cartRes.data || []);
+      setTotalAmount(calculateTotalAmount(cartRes.data || []));
+      setAddresses(addressRes.data || []);
     } catch (error) {
+      console.error("데이터 불러오기 실패:", error);
       alert("데이터를 가져오는 중 문제가 발생했습니다.");
+    } finally {
+      setPageLoading(false);
     }
   };
 
   const handleQuantityChange = async (itemId, newQuantity) => {
     if (newQuantity < 1) return;
-
     try {
       const { data } = await axios.put(
         `http://localhost:5001/cart/updateQuantity/${itemId}`,
         { quantity: newQuantity }
       );
-
       if (data.success) {
-        const updatedCartItems = cartItems.map((item) =>
+        const updatedItems = cartItems.map((item) =>
           item.id === itemId ? { ...item, quantity: newQuantity } : item
         );
-        setCartItems(updatedCartItems);
-        setTotalAmount(calculateTotalAmount(updatedCartItems));
+        setCartItems(updatedItems);
+        setTotalAmount(calculateTotalAmount(updatedItems));
       }
     } catch (error) {
+      console.error("수량 변경 실패:", error);
       alert("장바구니 수량 변경에 실패했습니다.");
     }
   };
@@ -99,11 +107,12 @@ function Cart() {
         `http://localhost:5001/cart/remove/${itemId}`
       );
       if (data.success) {
-        const updatedCartItems = cartItems.filter((item) => item.id !== itemId);
-        setCartItems(updatedCartItems);
-        setTotalAmount(calculateTotalAmount(updatedCartItems));
+        const updatedItems = cartItems.filter((item) => item.id !== itemId);
+        setCartItems(updatedItems);
+        setTotalAmount(calculateTotalAmount(updatedItems));
       }
     } catch (error) {
+      console.error("아이템 삭제 실패:", error);
       alert("장바구니 아이템 삭제에 실패했습니다.");
     }
   };
@@ -127,7 +136,7 @@ function Cart() {
       if (!userId) return;
 
       const tossPayments = await loadTossPayments(
-        "test_ck_pP2YxJ4K87RqyvqEbgjLrRGZwXLO" // 실제 키로 변경 필요
+        "test_ck_pP2YxJ4K87RqyvqEbgjLrRGZwXLO"
       );
 
       const { data } = await axios.post(
@@ -160,14 +169,16 @@ function Cart() {
         amount: data.amount,
         orderId: data.orderId,
         orderName: data.orderName,
-        successUrl: "http://localhost:5001/api/payment/success",
-        failUrl: "http://localhost:5001/api/payment/failed",
-        cancelUrl: "http://localhost:5001/api/payment/cancel",
+        successUrl: "http://localhost:3000/payment-success",
+        failUrl: "http://localhost:3000/payment-failed",
+        cancelUrl: "http://localhost:3000/payment-cancel",
       });
 
       clearCartAfterPayment();
     } catch (error) {
+      console.error("결제 오류:", error);
       alert("결제 처리 중 오류가 발생했습니다.");
+    } finally {
       setLoading(false);
     }
   };
@@ -175,14 +186,19 @@ function Cart() {
   const clearCartAfterPayment = () => {
     setCartItems([]);
     setTotalAmount(0);
-    alert("결제가 완료되었습니다! 장바구니를 초기화합니다.");
+    alert("결제가 완료되었습니다!");
     navigate("/payment-success");
   };
+  const IMAGE_BASE_URL = "http://localhost:5001/uploads/productImages/";
+  if (pageLoading) {
+    return <div className="loading">로딩 중...</div>;
+  }
 
   return (
     <div className="cart-container">
       <h1>장바구니</h1>
 
+      {/* 배송지 선택 */}
       <div className="address-selection">
         <h2>배송지 선택</h2>
         {addresses.length === 0 ? (
@@ -194,12 +210,10 @@ function Cart() {
           </div>
         ) : (
           <select
+            value={selectedAddress}
             onChange={(e) => setSelectedAddress(e.target.value)}
-            value={selectedAddress || ""}
           >
-            <option value="" disabled>
-              배송지를 선택하세요
-            </option>
+            <option value="">배송지를 선택하세요</option>
             {addresses.map(({ id, nickname, roadAddress, detailAddress }) => (
               <option key={id} value={id}>
                 {nickname} - {roadAddress}, {detailAddress}
@@ -209,6 +223,7 @@ function Cart() {
         )}
       </div>
 
+      {/* 장바구니 아이템 리스트 */}
       <div className="cart-items">
         {cartItems.length === 0 ? (
           <p>장바구니에 아이템이 없습니다.</p>
@@ -222,44 +237,70 @@ function Cart() {
               product_size,
               quantity,
             }) => (
-              <div key={id} className="cart-item">
-                <div className="cart-item-details">
-                  <img
-                    src={thumbnail || "default_image_url"}
-                    alt={product_name || "상품 이미지"}
-                    className="cart-item-image"
-                  />
-                  <div className="cart-item-info">
-                    <p>{product_name || "상품명 없음"}</p>
-                    <p>₩{price?.toLocaleString() || "가격 정보 없음"}</p>
-                    <p>용량: {product_size || "사이즈 정보 없음"}</p>
-                    <div className="cart-item-quantity">
-                      <button
-                        onClick={() => handleQuantityChange(id, quantity - 1)}
-                      >
-                        -
-                      </button>
-                      <span>{quantity}</span>
-                      <button
-                        onClick={() => handleQuantityChange(id, quantity + 1)}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleRemove(id)}
-                  className="remove-item-button"
-                >
-                  삭제
-                </button>
+              <div className="cart-items">
+                {cartItems.length === 0 ? (
+                  <p>장바구니에 아이템이 없습니다.</p>
+                ) : (
+                  cartItems.map(
+                    ({
+                      id,
+                      thumbnail,
+                      product_name,
+                      price,
+                      product_size,
+                      quantity,
+                    }) => (
+                      <div key={id} className="cart-item">
+                        <div className="cart-item-details">
+                          <img
+                            src={
+                              thumbnail
+                                ? `${IMAGE_BASE_URL}${thumbnail}`
+                                : "https://via.placeholder.com/150"
+                            }
+                            alt={product_name || "상품 이미지"}
+                            className="cart-item-image"
+                          />
+                          <div className="cart-item-info">
+                            <p>{product_name}</p>
+                            <p>₩{price?.toLocaleString()}</p>
+                            <p>용량: {product_size}</p>
+                            <div className="cart-item-quantity">
+                              <button
+                                onClick={() =>
+                                  handleQuantityChange(id, quantity - 1)
+                                }
+                              >
+                                -
+                              </button>
+                              <span>{quantity}</span>
+                              <button
+                                onClick={() =>
+                                  handleQuantityChange(id, quantity + 1)
+                                }
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleRemove(id)}
+                          className="remove-item-button"
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    )
+                  )
+                )}
               </div>
             )
           )
         )}
       </div>
 
+      {/* 총 금액 및 결제 */}
       <div className="cart-summary">
         <p>총 금액: ₩{totalAmount.toLocaleString()}</p>
         <button onClick={handleCheckout} disabled={loading || !selectedAddress}>

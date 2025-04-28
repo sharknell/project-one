@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import "../styles/MyReviewsList.css";
+import "../../styles/MyReviewsList.css";
 
 // 다국어 메시지 상수
 const MESSAGES = {

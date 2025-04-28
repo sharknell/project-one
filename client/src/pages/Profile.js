@@ -9,14 +9,15 @@ import {
   addAddress,
   updateAddress,
   deleteAddress,
+  updateProfile,
 } from "../utils/api";
-import Sidebar from "../components/SideBar";
-import BasicInfo from "../components/BasicInfo";
-import AddressList from "../components/AddressList";
+import Sidebar from "../components/profile/SideBar";
+import BasicInfo from "../components/profile/BasicInfo";
+import AddressList from "../components/profile/AddressList";
 import QnaList from "../components/QnAList";
-import OrderList from "../components/OrderList";
-import MyReviewsList from "../components/MyReviewsList";
-import AddressForm from "../components/AddressForm";
+import OrderList from "../components/profile/OrderList";
+import MyReviewsList from "../components/profile/MyReviewsList";
+import AddressForm from "../components/profile/AddressForm";
 import "../styles/Profile.css";
 
 const Profile = () => {
@@ -72,6 +73,25 @@ const Profile = () => {
   useEffect(() => {
     fetchProfileData();
   }, []);
+
+  const handleEditInfo = async (updatedInfo) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("로그인이 필요합니다.");
+
+      // 프로필 수정 API 호출
+      const updatedProfile = await updateProfile(token, updatedInfo);
+
+      setProfile((prev) => ({
+        ...prev,
+        user: updatedProfile.user, // 수정된 프로필 정보로 업데이트
+      }));
+
+      alert("정보가 성공적으로 수정되었습니다!");
+    } catch (err) {
+      alert(err.message || "정보 수정 중 오류가 발생했습니다.");
+    }
+  };
 
   const handleReviewSubmit = async (reviewData) => {
     try {
@@ -137,7 +157,9 @@ const Profile = () => {
     <div className="profile-container">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="profile-content">
-        {activeTab === "basicInfo" && <BasicInfo user={profile?.user} />}
+        {activeTab === "basicInfo" && (
+          <BasicInfo user={profile?.user} onClick={handleEditInfo} />
+        )}
         {activeTab === "shipping" && (
           <div>
             <button className="add-address-button" onClick={handleAddAddress}>

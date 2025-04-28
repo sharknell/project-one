@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import ReviewModal from "./ReviewModal"; // 리뷰 모달 컴포넌트
-import "../styles/OrderList.css"; // 스타일 파일
-import { submitReview } from "../utils/api"; // 리뷰 제출 API 호출 함수
+import ReviewModal from "../ReviewModal";
+import "../../styles/OrderList.css"; // 스타일 파일
+import { submitReview } from "../../utils/api"; // 리뷰 제출 API 호출 함수
 
 const STATUS_LABELS = {
   pending: "결제 대기 중",

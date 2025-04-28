@@ -1,43 +1,29 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
-import axios from "axios";
 import { useProductController } from "../controllers/ProductController";
+import axios from "axios";
 import QnAForm from "../components/QnAForm";
 import "../styles/ProductDetail.css";
 
 function ProductDetail() {
-  const { id } = useParams(); // URL에서 제품 ID 추출
-  const navigate = useNavigate(); // 페이지 이동을 위한 navigate 훅 사용
-  const { isAuthenticated, userId, userName } = useAuth(); // 로그인 상태와 사용자 ID 가져오기
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { isAuthenticated, userId, userName } = useAuth();
   const [isQnAModalOpen, setIsQnAModalOpen] = useState(false);
-  const [newQuestion, setNewQuestion] = useState(""); // 새로운 질문 상태
-  const [product, setProduct] = useState(null); // 제품 상태 추가
-  const [error, setError] = useState(null); // 오류 상태 추가
-  const { mainImage, openDropdown, handleThumbnailClick, toggleDropdown } =
-    useProductController(id);
-  console.log(mainImage);
+  const [newQuestion, setNewQuestion] = useState("");
+  const {
+    product,
+    isLoading,
+    error,
+    mainImage,
+    openDropdown,
+    handleThumbnailClick,
+    toggleDropdown,
+  } = useProductController(id);
 
-  // 제품 정보 가져오기
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:5001/shop/product/${id}`
-        );
-        setProduct(response.data); // 제품 정보 업데이트
-      } catch (err) {
-        console.error("제품 정보를 가져오는 데 실패했습니다.", err);
-        setError("제품 정보를 가져오는 데 실패했습니다."); // 오류 메시지 설정
-      }
-    };
-    fetchProduct();
-  }, [id]);
-
-  // QnA 버튼 클릭 핸들러
   const handleQnAClick = () => {
     if (!isAuthenticated) {
-      // 로그인하지 않은 경우 로그인 페이지로 이동
       const confirmLogin = window.confirm(
         "로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?"
       );
@@ -45,11 +31,10 @@ function ProductDetail() {
         navigate("/login", { state: { from: window.location.pathname } });
       }
     } else {
-      setIsQnAModalOpen(true); // QnA 모달 열기
+      setIsQnAModalOpen(true);
     }
   };
 
-  // QnA 제출 핸들러
   const handleQnASubmit = async (question) => {
     if (question.trim() === "") {
       alert("질문을 입력해주세요.");
@@ -57,29 +42,22 @@ function ProductDetail() {
     }
 
     try {
-      // QnA 등록 요청에 userName을 올바르게 전송
       await axios.post(`http://localhost:5001/shop/product/${id}/qna`, {
         question,
-        userName: userName || "익명", // 인증된 사용자 이름 또는 익명
-        productId: id, // 상품 ID
+        userName: userName || "익명",
+        productId: id,
       });
-      console.log("QnA 등록 성공:", question);
-
       alert(
         `QnA가 등록되었습니다: ${question} (작성자: ${userName || "익명"})`
       );
-      setNewQuestion(""); // 질문 제출 후 초기화
-      setIsQnAModalOpen(false); // 모달 닫기
+      setNewQuestion("");
+      setIsQnAModalOpen(false);
     } catch (err) {
       console.error("QnA 등록 실패:", err);
       alert("질문 등록에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
-  // 모달 닫기
-  const closeModal = () => {
-    setIsQnAModalOpen(false);
-  };
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
       const confirmLogin = window.confirm(
@@ -95,7 +73,6 @@ function ProductDetail() {
           return;
         }
 
-        // 이미 장바구니에 해당 상품이 있는지 확인
         const response = await axios.get(
           `http://localhost:5001/cart?userId=${userId}`
         );
@@ -103,27 +80,23 @@ function ProductDetail() {
         const existingItem = cartItems.find((item) => item.product_id === id);
 
         if (existingItem) {
-          // 이미 있으면 수량을 1 증가시킴
           const updatedQuantity = existingItem.quantity + 1;
-
           await axios.put(`http://localhost:5001/cart/${existingItem.id}`, {
             quantity: updatedQuantity,
           });
-
           alert("장바구니에 품목의 수량이 추가되었습니다.");
         } else {
-          // 없으면 새로 추가
           const quantity = 1;
           const productName = product.name;
-          const productSize = product.size || "없음"; // 사이즈가 없을 경우 기본값 설정
+          const productSize = product.size || "없음";
 
           await axios.post("http://localhost:5001/cart/add", {
             productId: id,
             quantity,
             userId: userId,
-            thumbnail: product.images[0], // 썸네일 이미지 추가
-            productName, // 제품 이름 추가
-            productSize, // 제품 사이즈 추가
+            thumbnail: product.images[0],
+            productName,
+            productSize,
           });
 
           alert("장바구니에 추가되었습니다.");
@@ -135,13 +108,9 @@ function ProductDetail() {
     }
   };
 
-  // 로딩, 오류, 제품 없는 상태 처리
-  if (!product) {
-    if (error) {
-      return <div>{error}</div>; // 오류 메시지 출력
-    }
-    return <div>로딩 중...</div>;
-  }
+  if (isLoading) return <div>로딩 중...</div>;
+  if (error) return <div>{error}</div>;
+  if (!product) return <div>제품 정보가 없습니다.</div>;
 
   return (
     <div className="product-detail-container">
@@ -153,7 +122,7 @@ function ProductDetail() {
         <div className="product-detail-main-image">
           {mainImage ? (
             <img
-              src={`http://localhost:5001/uploads/productImages/${mainImage}`} // 메인 이미지를 상태로 설정된 mainImage로 변경
+              src={`http://localhost:5001/uploads/productImages/${mainImage}`}
               alt={product.name}
             />
           ) : (
@@ -166,10 +135,10 @@ function ProductDetail() {
             product.images.map((image, index) => (
               <img
                 key={index}
-                src={`http://localhost:5001/uploads/productImages/${image}`} // 서브 이미지는 images 배열에서 가져옴
+                src={`http://localhost:5001/uploads/productImages/${image}`}
                 alt={`${product.name} 서브 이미지 ${index + 1}`}
-                className="product-thumbnail" // 썸네일 이미지 클래스 추가
-                onClick={() => handleThumbnailClick(image)} // 썸네일 클릭 시 메인 이미지로 변경
+                className="product-thumbnail"
+                onClick={() => handleThumbnailClick(image)}
               />
             ))
           ) : (
@@ -198,73 +167,56 @@ function ProductDetail() {
           </div>
         </div>
       </div>
+
       <div className="product-detail-extra-info">
         <h2>제품 디테일 정보</h2>
-        <div className="dropdown">
-          <button className="dropdown-toggle" onClick={() => toggleDropdown(0)}>
-            설명
-          </button>
-          {openDropdown === 0 && (
-            <div className="dropdown-content">
-              <div>
-                <h5>{product.name}</h5>
-                <p>{product.description}</p>
-              </div>
+        {["설명", "리뷰", "상품 필수 정보", "배송과 반품"].map(
+          (title, index) => (
+            <div className="dropdown" key={index}>
+              <button
+                className="dropdown-toggle"
+                onClick={() => toggleDropdown(index)}
+              >
+                {title}
+              </button>
+              {openDropdown === index && (
+                <div className="dropdown-content">
+                  {index === 0 ? (
+                    <div>
+                      <h5>{product.name}</h5>
+                      <p>{product.description}</p>
+                    </div>
+                  ) : (
+                    <p>내용이 준비 중입니다.</p>
+                  )}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        <div className="dropdown">
-          <button className="dropdown-toggle" onClick={() => toggleDropdown(1)}>
-            리뷰
-          </button>
-          {openDropdown === 1 && (
-            <div className="dropdown-content">
-              <p>이 제품에 대한 리뷰가 아직 없습니다.</p>
-            </div>
-          )}
-        </div>
-        <div className="dropdown">
-          <button className="dropdown-toggle" onClick={() => toggleDropdown(2)}>
-            상품 필수 정보
-          </button>
-          {openDropdown === 2 && (
-            <div className="dropdown-content">
-              <p>상품의 주요 정보가 여기에 나옵니다.</p>
-            </div>
-          )}
-        </div>
-        <div className="dropdown">
-          <button className="dropdown-toggle" onClick={() => toggleDropdown(3)}>
-            배송과 반품
-          </button>
-          {openDropdown === 3 && (
-            <div className="dropdown-content">
-              <p>배송 및 반품 정책에 대한 정보입니다.</p>
-            </div>
-          )}
-        </div>
+          )
+        )}
       </div>
 
-      {/* QnA 등록 버튼 */}
       <div className="product-detail-qna">
         <button onClick={handleQnAClick} className="qna-register-button">
           QnA 등록하기
         </button>
       </div>
 
-      {/* QnA 입력 폼 모달 */}
       {isQnAModalOpen && (
         <div className="qna-modal-overlay">
           <div className="qna-modal">
-            <button className="close-modal-button" onClick={closeModal}>
+            <button
+              className="close-modal-button"
+              onClick={() => setIsQnAModalOpen(false)}
+            >
               X
             </button>
             <QnAForm
-              onSubmit={handleQnASubmit} // QnA 제출 함수
-              onCancel={closeModal}
-              question={newQuestion} // 새로운 질문 상태 전달
-              setQuestion={setNewQuestion} // 질문 업데이트 함수 전달
-              productId={id} // 현재 상품 ID 전달
+              onSubmit={handleQnASubmit}
+              onCancel={() => setIsQnAModalOpen(false)}
+              question={newQuestion}
+              setQuestion={setNewQuestion}
+              productId={id}
             />
           </div>
         </div>

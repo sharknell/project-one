@@ -1,4 +1,4 @@
-import "../styles/SideBar.css";
+import "../../styles/SideBar.css";
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
   return (

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
-import LoginForm from "../components/LoginForm";
-import ProductForm from "../components/ProductForm";
-import AdminSidebar from "../components/AdminSidebar";
-import QnaAdmin from "../components/QnaAdmin";
-import MemberList from "../components/MemberList";
-import ProductList from "../components/ProductList"; // Import ProductList 컴포넌트
+import LoginForm from "../components/admin/LoginForm";
+import ProductForm from "../components/admin/ProductForm";
+import AdminSidebar from "../components/admin/AdminSidebar";
+import QnaAdmin from "../components/admin/QnaAdmin";
+import MemberList from "../components/admin/MemberList";
+import ProductList from "../components/admin/ProductList"; // Import ProductList 컴포넌트
 import "../styles/AdminDashboard.css";
 
 const AdminDashboard = () => {

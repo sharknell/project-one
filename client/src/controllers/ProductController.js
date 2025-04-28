@@ -6,6 +6,7 @@ import {
   getProductById,
   fetchProductsByCategory,
 } from "../models/ProductModel";
+import axios from "axios";
 
 export const useProducts = () => {
   const [products, setProducts] = useState([]);
@@ -29,30 +30,40 @@ export const useProducts = () => {
 
   return { products, isLoading, error };
 };
+
 export const useProductController = (id) => {
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [mainImage, setMainImage] = useState(null);
   const [openDropdown, setOpenDropdown] = useState(null);
-  const { isAuthenticated } = useAuth(); // 로그인 상태 확인
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
   useEffect(() => {
-    setIsLoading(true);
-    setError(null);
+    const fetchProduct = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await axios.get(
+          `http://localhost:5001/shop/product/${id}`
+        );
+        setProduct(response.data);
+        if (response.data.images && response.data.images.length > 0) {
+          setMainImage(
+            `http://localhost:5001/uploads/productImages/${response.data.images[0]}`
+          );
+        }
+      } catch (err) {
+        setError(err.message || "제품 정보를 가져오는 데 실패했습니다.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    getProductById(id)
-      .then((data) => {
-        setProduct(data);
-        setMainImage(data.images && data.images[0]);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        setError(error.message);
-        setIsLoading(false);
-      });
+    if (id) {
+      fetchProduct();
+    }
   }, [id]);
 
   const handleThumbnailClick = (image) => {
@@ -100,6 +111,7 @@ export const useProductController = (id) => {
     toggleDropdown,
   };
 };
+
 export const loadProducts = async (
   category,
   setProducts,

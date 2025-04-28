@@ -38,7 +38,5 @@ export const useLoginController = () => {
 
   return {
     handleLogin,
-    handleKakaoLogin,
-    handleKakaoFailure,
   };
 };

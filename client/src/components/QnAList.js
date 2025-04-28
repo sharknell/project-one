@@ -11,7 +11,7 @@ const Answer = ({ answer, createdAt }) => (
 
 const QnaList = ({ qnaData }) => {
   const [answers, setAnswers] = useState({});
-  console.log(qnaData);
+  console.log("QnA Data:", qnaData);
 
   useEffect(() => {
     const getAnswers = async () => {
@@ -37,7 +37,11 @@ const QnaList = ({ qnaData }) => {
       {qnaData.map((qna) => (
         <li key={qna.id}>
           <img
-            src={qna.productImage || "/default-product.jpg"}
+            src={
+              qna.productImage
+                ? `http://localhost:5001/uploads/productImages/${qna.productImage}`
+                : "/default-product.jpg"
+            }
             alt="Product"
             className="product-image"
           />

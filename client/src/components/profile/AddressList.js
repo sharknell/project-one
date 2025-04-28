@@ -1,5 +1,5 @@
 import React from "react";
-import "../styles/AddressList.css";
+import "../../styles/AddressList.css";
 
 const AddressList = ({ addresses = [], setAddressToEdit }) => {
   return (
