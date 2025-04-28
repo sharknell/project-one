@@ -171,8 +171,15 @@ export const fetchAnswers = async (qnaId) => {
     const response = await axios.get(`/qna/qna/${qnaId}/answers`);
     return response.data.data.length > 0 ? response.data.data[0] : null;
   } catch (error) {
-    console.error(`답변 조회 실패 (QnA ID: ${qnaId}):`, error);
-    return null;
+    if (error.response && error.response.status === 404) {
+      // 답변이 없는 경우 (404 에러는 정상 처리)
+      console.log(`QnA ID ${qnaId}: 답변이 없습니다.`);
+      return null;
+    } else {
+      // 다른 오류는 콘솔에 표시
+      console.error(`답변 조회 실패 (QnA ID: ${qnaId}):`, error);
+      return null;
+    }
   }
 };
 
