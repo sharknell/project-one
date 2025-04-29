@@ -67,31 +67,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-// 결제 성공 처리 (POST 요청)
-router.post("/success", async (req, res) => {
-  const { orderId, paymentKey, amount, userId, cartItems } = req.body;
-
-  if (!orderId || !userId || !cartItems) {
-    return res.status(400).send({ message: "결제 성공 정보가 부족합니다." });
-  }
-
-  try {
-    // 결제 상태 업데이트
-    await updatePaymentStatus(orderId, "success");
-
-    // 장바구니에서 품목 삭제
-    await deleteCartItems(userId, cartItems);
-
-    // 결제 성공 후 리디렉션
-    res.redirect(
-      `http://localhost:3000/payment-success?orderId=${orderId}&paymentKey=${paymentKey}&amount=${amount}`
-    );
-  } catch (error) {
-    console.error("결제 성공 처리 실패:", error);
-    res.status(500).send({ message: "결제 성공 처리 중 오류가 발생했습니다." });
-  }
-});
-
 // 결제 성공 처리 (GET 요청)
 router.get("/success", async (req, res) => {
   const { orderId, paymentKey, amount } = req.query;
@@ -124,32 +99,14 @@ router.post("/success", async (req, res) => {
     // 결제 상태 업데이트
     await updatePaymentStatus(orderId, "success");
 
-    // 장바구니에서 품목 삭제 (각 품목에 대해 DELETE 쿼리 실행)
+    // cartItems 배열을 반복하면서 각 품목 삭제
     const connection = await dbPromise;
-
-    // cartItems 배열을 반복하면서 각 품목 삭제 쿼리 실행
     for (const item of cartItems) {
-      const query = `
-        DELETE FROM cart
-        WHERE user_id = ? AND product_id = ?
-      `;
+      const query = `DELETE FROM cart WHERE user_id = ? AND product_id = ?`;
       const values = [userId, item.productId];
-
-      // 쿼리 실행
-      const [result] = await connection.execute(query, values);
-
-      if (result.affectedRows > 0) {
-        console.log(
-          `장바구니에서 상품 (productId: ${item.productId})이(가) 삭제되었습니다.`
-        );
-      } else {
-        console.log(
-          `장바구니에서 상품 (productId: ${item.productId})이(가) 존재하지 않습니다.`
-        );
-      }
+      await connection.execute(query, values);
     }
 
-    // 결제 성공 후 리디렉션
     res.redirect(
       `http://localhost:3000/payment-success?orderId=${orderId}&paymentKey=${paymentKey}&amount=${amount}`
     );

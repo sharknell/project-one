@@ -135,13 +135,16 @@ const OrderList = ({ orders }) => {
               {order.cart_items.map((item) => (
                 <li key={item.productId} className="product-list__item">
                   <div className="product-info">
-                    {item.thumbnail && (
-                      <img
-                        src={item.thumbnail}
-                        alt={item.productName}
-                        className="product-thumbnail"
-                      />
-                    )}
+                    <img
+                      src={
+                        item.thumbnail
+                          ? `http://localhost:5001/uploads/productImages/${item.thumbnail}`
+                          : `http://localhost:5001/uploads/productImages/default-image.jpg`
+                      }
+                      alt={item.productName || "기본 이미지"}
+                      className="product-thumbnail"
+                    />
+
                     <div>
                       <p>{item.productName}</p>
                       <p>수량: {item.quantity}</p>
