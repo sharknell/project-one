@@ -85,16 +85,35 @@ const Profile = () => {
   }, []);
 
   const handleSave = async () => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      toast.error("토큰이 없습니다. 로그인해주세요.");
+      return;
+    }
+
     try {
-      await axios.put("http://localhost:5001/profile/update", editData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUser(editData);
+      const headers = { Authorization: `Bearer ${token}` };
+      // 서버에 프로필 정보 업데이트 요청
+      const response = await axios.put(
+        "http://localhost:5001/profile/update",
+        editData,
+        { headers }
+      );
+
+      // 서버에서 응답 받은 새로운 프로필 데이터를 상태에 반영
+      setUser(editData); // user 상태 업데이트
+      setProfile((prev) => ({
+        ...prev,
+        user: editData,
+      })); // profile의 user 정보를 업데이트
+
       setIsEditing(false);
       toast.success("프로필 정보가 성공적으로 수정되었습니다.");
     } catch (err) {
-      toast.error("프로필 정보를 수정하는 중 오류가 발생했습니다.");
+      toast.error(
+        err.response?.data?.message ||
+          "프로필 정보를 수정하는 중 오류가 발생했습니다."
+      );
     }
   };
 

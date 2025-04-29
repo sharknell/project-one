@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import ReviewModal from "./ReviewModal";
-import "../../styles/OrderList.css"; // 스타일 파일
+import "../../styles/OrderList.css";
 import { submitReview } from "../../utils/api"; // 리뷰 제출 API 호출 함수
 
 const STATUS_LABELS = {
