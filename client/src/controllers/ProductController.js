@@ -40,6 +40,7 @@ export const useProductController = (id) => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
   useEffect(() => {
     const fetchProduct = async () => {
       setIsLoading(true);
@@ -59,6 +60,9 @@ export const useProductController = (id) => {
       } finally {
         setIsLoading(false);
       }
+    };
+    const toggleDropdown = (index) => {
+      setOpenDropdown((prevIndex) => (prevIndex === index ? null : index));
     };
 
     if (id) {
@@ -106,6 +110,7 @@ export const useProductController = (id) => {
     error,
     mainImage,
     openDropdown,
+    setMainImage,
     handleThumbnailClick,
     handleButtonClick,
     toggleDropdown,

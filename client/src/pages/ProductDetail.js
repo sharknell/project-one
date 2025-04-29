@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { useProductController } from "../controllers/ProductController";
@@ -12,15 +12,24 @@ function ProductDetail() {
   const { isAuthenticated, userId, userName } = useAuth();
   const [isQnAModalOpen, setIsQnAModalOpen] = useState(false);
   const [newQuestion, setNewQuestion] = useState("");
-  const {
-    product,
-    isLoading,
-    error,
-    mainImage,
-    openDropdown,
-    handleThumbnailClick,
-    toggleDropdown,
-  } = useProductController(id);
+  const [mainImage, setMainImage] = useState(""); // 메인 이미지 상태 관리
+  const [subImages, setSubImages] = useState([]); // 서브 이미지 상태 관리
+  const { product, isLoading, error, openDropdown, toggleDropdown } =
+    useProductController(id);
+
+  useEffect(() => {
+    if (product) {
+      setMainImage(product.image_url); // 첫 번째 이미지를 메인 이미지로 설정
+      setSubImages(product.images || []); // 나머지 이미지를 서브 이미지로 설정
+    }
+  }, [product]);
+
+  const handleThumbnailClick = (image) => {
+    // 클릭한 썸네일을 메인 이미지로 설정
+    setMainImage(image);
+    // 이전 메인 이미지는 서브 이미지로 추가
+    setSubImages([mainImage, ...subImages.filter((img) => img !== image)]);
+  };
 
   const handleQnAClick = () => {
     if (!isAuthenticated) {
@@ -94,7 +103,7 @@ function ProductDetail() {
             productId: id,
             quantity,
             userId: userId,
-            thumbnail: product.images[0],
+            thumbnail: product.image_url,
             productName,
             productSize,
           });
@@ -131,14 +140,14 @@ function ProductDetail() {
         </div>
 
         <div className="product-detail-thumbnails">
-          {product.images && product.images.length > 0 ? (
-            product.images.map((image, index) => (
+          {subImages.length > 0 ? (
+            subImages.map((image, index) => (
               <img
                 key={index}
                 src={`http://localhost:5001/uploads/productImages/${image}`}
                 alt={`${product.name} 서브 이미지 ${index + 1}`}
                 className="product-thumbnail"
-                onClick={() => handleThumbnailClick(image)}
+                onClick={() => handleThumbnailClick(image)} // 썸네일 클릭 시 메인 이미지 변경
               />
             ))
           ) : (
