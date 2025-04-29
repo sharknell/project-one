@@ -200,6 +200,32 @@ router.put("/addresses/:id", verifyToken, async (req, res) => {
   }
 });
 
+router.delete("/addresses/:id", verifyToken, async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    // 해당 주소가 사용자의 것인지 확인
+    const [existingAddress] = await dbPromise.query(
+      "SELECT id FROM addresses WHERE id = ? AND user_id = ?",
+      [id, userId]
+    );
+
+    if (existingAddress.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "해당 주소를 찾을 수 없거나 권한이 없습니다." });
+    }
+
+    await dbPromise.query("DELETE FROM addresses WHERE id = ?", [id]);
+
+    res.status(200).json({ message: "주소가 성공적으로 삭제되었습니다." });
+  } catch (err) {
+    console.error("주소 삭제 오류:", err);
+    res.status(500).json({ message: "주소 삭제 중 오류가 발생했습니다." });
+  }
+});
+
 // 결제 내역 조회
 router.get("/orders", verifyToken, async (req, res) => {
   const userId = req.user.id;

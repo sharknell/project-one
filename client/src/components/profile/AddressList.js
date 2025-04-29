@@ -1,7 +1,7 @@
 import React from "react";
 import "../../styles/AddressList.css";
 
-const AddressList = ({ addresses = [], onEditAddress }) => {
+const AddressList = ({ addresses = [], onEditAddress, onDeleteAdress }) => {
   return (
     <div className="address-list-container">
       <h2 className="address-list-title">배송지 관리</h2>
@@ -27,6 +27,12 @@ const AddressList = ({ addresses = [], onEditAddress }) => {
                   onClick={() => onEditAddress(address)} // 수정 버튼 클릭 시 주소와 함께 함수 호출
                 >
                   수정
+                </button>
+                <button
+                  className="address-delete-button"
+                  onClick={() => onDeleteAdress(address.id)} // ✅ 주소 ID를 넘겨 삭제 함수 호출
+                >
+                  삭제
                 </button>
               </div>
             </li>

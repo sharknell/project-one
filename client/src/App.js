@@ -16,7 +16,7 @@ import QnAForm from "./components/QnAForm";
 import { AuthProvider, useAuth } from "./AuthContext";
 import { Navigate } from "react-router-dom";
 import AdminDashboard from "./pages/AdminDashboard";
-
+import { ToastContainer, toast } from "react-toastify";
 // ProtectedRoute 컴포넌트
 function ProtectedRoute({ children, redirectTo, requireAdmin = false }) {
   const { isAuthenticated, isLoading, isAdmin } = useAuth();
@@ -85,6 +85,7 @@ function App() {
         </main>
         <Footer />
       </Router>
+      <ToastContainer />
     </AuthProvider>
   );
 }

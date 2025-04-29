@@ -9,7 +9,6 @@ import {
   addAddress,
   updateAddress,
   deleteAddress,
-  updateProfile,
 } from "../utils/api";
 import axios from "axios";
 import Sidebar from "../components/profile/SideBar";
@@ -19,6 +18,8 @@ import QnaList from "../components/QnAList";
 import OrderList from "../components/profile/OrderList";
 import MyReviewsList from "../components/profile/MyReviewsList";
 import AddressForm from "../components/profile/AddressForm";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "../styles/Profile.css";
 
 const Profile = () => {
@@ -32,7 +33,7 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("basicInfo");
   const [isFormVisible, setFormVisible] = useState(false);
   const [addressToEdit, setAddressToEdit] = useState(null);
-  const [isEditing, setIsEditing] = useState(false); // 편집 모드 상태
+  const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     username: "",
     email: "",
@@ -72,7 +73,8 @@ const Profile = () => {
       setReviews(reviewsResponse.reviews || []);
       setQnaData(Array.isArray(qnaResponse.data) ? qnaResponse.data : []);
     } catch (err) {
-      setError(err.message || "데이터 로드 중 오류가 발생했습니다.");
+      toast.error(err.message || "데이터 로드 중 오류가 발생했습니다.");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -88,11 +90,11 @@ const Profile = () => {
       await axios.put("http://localhost:5001/profile/update", editData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUser(editData); // 저장 후 사용자 데이터 업데이트
-      setIsEditing(false); // 편집 모드 종료
+      setUser(editData);
+      setIsEditing(false);
+      toast.success("프로필 정보가 성공적으로 수정되었습니다.");
     } catch (err) {
-      console.error("Profile Update Error:", err);
-      setError("프로필 정보를 업데이트하는 중 오류가 발생했습니다.");
+      toast.error("프로필 정보를 수정하는 중 오류가 발생했습니다.");
     }
   };
 
@@ -120,9 +122,9 @@ const Profile = () => {
       const token = localStorage.getItem("authToken");
       const newReview = await submitReview(token, reviewData);
       setReviews([...reviews, newReview]);
-      alert("리뷰가 성공적으로 저장되었습니다!");
+      toast.success("리뷰가 성공적으로 저장되었습니다!");
     } catch {
-      alert("리뷰 저장 중 오류가 발생했습니다.");
+      toast.error("리뷰 저장 중 오류가 발생했습니다.");
     }
   };
 
@@ -142,16 +144,18 @@ const Profile = () => {
             addr.id === addressToEdit.id ? { ...addr, ...newAddress } : addr
           ),
         }));
+        toast.success("주소가 성공적으로 수정되었습니다.");
       } else {
         await addAddress(token, newAddress);
         setProfile((prev) => ({
           ...prev,
           addresses: [...prev.addresses, newAddress],
         }));
+        toast.success("주소가 성공적으로 추가되었습니다.");
       }
       setFormVisible(false);
     } catch {
-      alert("주소 저장 중 오류가 발생했습니다.");
+      toast.error("주소 저장 중 오류가 발생했습니다.");
     }
   };
 
@@ -163,8 +167,9 @@ const Profile = () => {
         ...prev,
         addresses: prev.addresses.filter((addr) => addr.id !== addressId),
       }));
+      toast.success("주소가 성공적으로 삭제되었습니다.");
     } catch {
-      alert("주소 삭제 중 오류가 발생했습니다.");
+      toast.error("주소 삭제 중 오류가 발생했습니다.");
     }
   };
 
@@ -184,9 +189,9 @@ const Profile = () => {
             user={profile?.user}
             isEditing={isEditing}
             handleEditToggle={handleEditToggle}
-            handleSave={handleSave} // 부모에서 handleSave를 넘겨줍니다
-            handleInputChange={handleInputChange} // input change 핸들러
-            editData={editData} // editData를 BasicInfo로 전달
+            handleSave={handleSave}
+            handleInputChange={handleInputChange}
+            editData={editData}
           />
         )}
         {activeTab === "shipping" && (
@@ -199,6 +204,9 @@ const Profile = () => {
               onEditAddress={(address) => {
                 setAddressToEdit(address);
                 setFormVisible(true);
+              }}
+              onDeleteAdress={(addressId) => {
+                handleDeleteAddress(addressId);
               }}
             />
           </div>
@@ -224,6 +232,7 @@ const Profile = () => {
           />
         )}
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };
