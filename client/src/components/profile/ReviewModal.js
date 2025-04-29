@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import "../styles/ReviewModal.css";
+import "../../styles/ReviewModal.css";
 
 const ReviewModal = ({ isOpen, onClose, onSubmit, product }) => {
   const [rating, setRating] = useState(5.0); // 평점 초기값
@@ -51,10 +51,11 @@ const ReviewModal = ({ isOpen, onClose, onSubmit, product }) => {
         <h2>리뷰 작성하기</h2>
         <p>제품명: {product.productName}</p>
         <img
-          src={product.thumbnail}
+          src={`${process.env.REACT_APP_IMAGE_BASE_URL}/${product.thumbnail}`}
           alt={`Product ${product.productId}`}
           className="product-thumbnail"
         />
+
         <div
           className="rating-container"
           ref={ratingRef}

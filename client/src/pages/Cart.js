@@ -83,11 +83,17 @@ function Cart() {
 
   const handleQuantityChange = async (itemId, newQuantity) => {
     if (newQuantity < 1) return;
+
+    console.log("수량 변경 요청:", itemId, newQuantity); // 디버깅 로그 추가
+
     try {
       const { data } = await axios.put(
         `http://localhost:5001/cart/updateQuantity/${itemId}`,
         { quantity: newQuantity }
       );
+
+      console.log("수량 변경 결과:", data); // 응답 결과 확인
+
       if (data.success) {
         const updatedItems = cartItems.map((item) =>
           item.id === itemId ? { ...item, quantity: newQuantity } : item
@@ -237,63 +243,42 @@ function Cart() {
               product_size,
               quantity,
             }) => (
-              <div className="cart-items">
-                {cartItems.length === 0 ? (
-                  <p>장바구니에 아이템이 없습니다.</p>
-                ) : (
-                  cartItems.map(
-                    ({
-                      id,
-                      thumbnail,
-                      product_name,
-                      price,
-                      product_size,
-                      quantity,
-                    }) => (
-                      <div key={id} className="cart-item">
-                        <div className="cart-item-details">
-                          <img
-                            src={
-                              thumbnail
-                                ? `${IMAGE_BASE_URL}${thumbnail}`
-                                : "https://via.placeholder.com/150"
-                            }
-                            alt={product_name || "상품 이미지"}
-                            className="cart-item-image"
-                          />
-                          <div className="cart-item-info">
-                            <p>{product_name}</p>
-                            <p>₩{price?.toLocaleString()}</p>
-                            <p>용량: {product_size}</p>
-                            <div className="cart-item-quantity">
-                              <button
-                                onClick={() =>
-                                  handleQuantityChange(id, quantity - 1)
-                                }
-                              >
-                                -
-                              </button>
-                              <span>{quantity}</span>
-                              <button
-                                onClick={() =>
-                                  handleQuantityChange(id, quantity + 1)
-                                }
-                              >
-                                +
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleRemove(id)}
-                          className="remove-item-button"
-                        >
-                          삭제
-                        </button>
-                      </div>
-                    )
-                  )
-                )}
+              <div key={id} className="cart-item">
+                <div className="cart-item-details">
+                  <img
+                    src={
+                      thumbnail
+                        ? `${IMAGE_BASE_URL}${thumbnail}`
+                        : "https://via.placeholder.com/150"
+                    }
+                    alt={product_name || "상품 이미지"}
+                    className="cart-item-image"
+                  />
+                  <div className="cart-item-info">
+                    <p>{product_name}</p>
+                    <p>₩{price?.toLocaleString()}</p>
+                    <p>용량: {product_size}</p>
+                    <div className="cart-item-quantity">
+                      <button
+                        onClick={() => handleQuantityChange(id, quantity - 1)}
+                      >
+                        -
+                      </button>
+                      <span>{quantity}</span>
+                      <button
+                        onClick={() => handleQuantityChange(id, quantity + 1)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleRemove(id)}
+                  className="remove-item-button"
+                >
+                  삭제
+                </button>
               </div>
             )
           )

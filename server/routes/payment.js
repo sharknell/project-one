@@ -88,9 +88,12 @@ router.get("/success", async (req, res) => {
     res.status(500).send({ message: "결제 처리에 실패했습니다." });
   }
 });
+
+// 결제 성공 처리 (POST 요청)
 router.post("/success", async (req, res) => {
   const { orderId, paymentKey, amount, userId, cartItems } = req.body;
 
+  // 결제 성공 정보를 검증
   if (!orderId || !userId || !cartItems) {
     return res.status(400).send({ message: "결제 성공 정보가 부족합니다." });
   }
@@ -103,7 +106,7 @@ router.post("/success", async (req, res) => {
     const connection = await dbPromise;
     for (const item of cartItems) {
       const query = `DELETE FROM cart WHERE user_id = ? AND product_id = ?`;
-      const values = [userId, item.productId];
+      const values = [userId, item.productId || null]; // undefined -> null로 처리
       await connection.execute(query, values);
     }
 

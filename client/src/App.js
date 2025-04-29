@@ -64,14 +64,7 @@ function App() {
             />
 
             {/* 결제 관련 페이지 */}
-            <Route
-              path="/payment-success"
-              element={
-                <ProtectedRoute redirectTo="/login">
-                  <PaymentSuccess />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route
               path="/payment-fail"
               element={

@@ -36,6 +36,6 @@ export const handleCheckout = (isAuthenticated, navigate, setCartItems) => {
   navigate("/"); // 홈 페이지로 리디렉션
 };
 
-export const calculateTotalAmount = (cartItems) => {
-  return calculateTotalPrice(cartItems);
+export const calculateTotalAmount = (items) => {
+  return items.reduce((total, item) => total + item.price * item.quantity, 0);
 };

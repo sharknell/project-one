@@ -13,14 +13,16 @@ const MESSAGES = {
 const ReviewCard = ({ thumbnail, product_name, review_text, rating }) => (
   <div className="my-reviews__card">
     <img
-      src={thumbnail || "/default-product-image.jpg"}
+      src={`${process.env.REACT_APP_IMAGE_BASE_URL}/${thumbnail}`}
       alt={product_name || "상품 이미지"}
       className="my-reviews__image"
     />
-    <h3 className="my-reviews__product-name">{product_name || "상품명"}</h3>
-    <p className="my-reviews__text">{review_text || MESSAGES.NO_CONTENT}</p>
-    <div className="my-reviews__footer">
-      <span className="my-reviews__rating">{rating || "0"}점</span>
+    <div className="my-reviews__card-content">
+      <h3 className="my-reviews__product-name">{product_name || "상품명"}</h3>
+      <p className="my-reviews__text">{review_text || MESSAGES.NO_CONTENT}</p>
+      <div className="my-reviews__footer">
+        <span className="my-reviews__rating">{rating || "0"}점</span>
+      </div>
     </div>
   </div>
 );

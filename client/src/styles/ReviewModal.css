@@ -4,7 +4,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -13,77 +13,120 @@
 
 .modal-content {
   background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  width: 400px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  padding: 25px;
+  border-radius: 10px;
+  width: 480px;
+  max-width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .modal-content h2 {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
+  font-size: 24px;
+  color: #333;
 }
 
-.modal-content textarea {
+.modal-content p {
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.product-thumbnail {
   width: 100%;
-  height: 100px;
-  margin-top: 10px;
+  max-height: 440px;
+  object-fit: contain;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
 }
 
-.modal-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 15px;
-}
-
-.submit-button {
-  background: #28a745;
-  color: #fff;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.cancel-button {
-  background: #dc3545;
-  color: #fff;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-} /* ReviewModal.css */
-/* 평점 컨테이너 */
 .rating-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
+  margin: 15px 0;
+  padding: 12px;
+  border: 1px dashed #ccc;
+  border-radius: 6px;
   cursor: pointer;
   user-select: none;
 }
 
 .rating {
   display: flex;
-  gap: 5px;
-  font-size: 30px;
+  gap: 6px;
+  font-size: 36px;
 }
 
 .star {
-  color: #ccc; /* 기본 색상 (회색) */
+  color: #ccc;
+  transition: color 0.2s;
 }
 
 .star.filled {
-  color: #ffcc00; /* 선택된 별 색상 (노란색) */
+  color: #ffc107;
 }
 
 .rating-indicator {
-  font-size: 18px;
-  margin-top: 10px;
+  font-size: 16px;
+  margin-top: 8px;
+  color: #555;
 }
 
-/* 마우스를 드래그할 때만 활성화 */
-.rating-container:hover {
-  border: 1px dashed #ccc;
+.modal-content textarea {
+  width: 100%;
+  height: 100px;
   padding: 10px;
-  border-radius: 5px;
+  font-size: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-top: 10px;
+  resize: vertical;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.modal-buttons button:first-child {
+  background: #007bff;
+  color: white;
+}
+
+.modal-buttons button:first-child:hover {
+  background: #0056b3;
+}
+
+.modal-buttons button:last-child {
+  background: #6c757d;
+  color: white;
+}
+
+.modal-buttons button:last-child:hover {
+  background: #495057;
 }

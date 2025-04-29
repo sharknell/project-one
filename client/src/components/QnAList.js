@@ -39,7 +39,7 @@ const QnaList = ({ qnaData }) => {
           <img
             src={
               qna.productImage
-                ? `http://localhost:5001/uploads/productImages/${qna.productImage}`
+                ? `${process.env.REACT_APP_IMAGE_BASE_URL}/${qna.productImage}`
                 : "/default-product.jpg"
             }
             alt="Product"
