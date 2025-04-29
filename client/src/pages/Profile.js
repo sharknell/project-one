@@ -11,6 +11,7 @@ import {
   deleteAddress,
   updateProfile,
 } from "../utils/api";
+import axios from "axios";
 import Sidebar from "../components/profile/SideBar";
 import BasicInfo from "../components/profile/BasicInfo";
 import AddressList from "../components/profile/AddressList";
@@ -21,6 +22,7 @@ import AddressForm from "../components/profile/AddressForm";
 import "../styles/Profile.css";
 
 const Profile = () => {
+  const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [orders, setOrders] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -30,6 +32,12 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("basicInfo");
   const [isFormVisible, setFormVisible] = useState(false);
   const [addressToEdit, setAddressToEdit] = useState(null);
+  const [isEditing, setIsEditing] = useState(false); // 편집 모드 상태
+  const [editData, setEditData] = useState({
+    username: "",
+    email: "",
+    phone: "",
+  });
 
   const fetchProfileData = async () => {
     setLoading(true);
@@ -74,23 +82,37 @@ const Profile = () => {
     fetchProfileData();
   }, []);
 
-  const handleEditInfo = async (updatedInfo) => {
+  const handleSave = async () => {
+    const token = localStorage.getItem("token");
     try {
-      const token = localStorage.getItem("authToken");
-      if (!token) throw new Error("로그인이 필요합니다.");
-
-      // 프로필 수정 API 호출
-      const updatedProfile = await updateProfile(token, updatedInfo);
-
-      setProfile((prev) => ({
-        ...prev,
-        user: updatedProfile.user, // 수정된 프로필 정보로 업데이트
-      }));
-
-      alert("정보가 성공적으로 수정되었습니다!");
+      await axios.put("http://localhost:5001/profile/update", editData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(editData); // 저장 후 사용자 데이터 업데이트
+      setIsEditing(false); // 편집 모드 종료
     } catch (err) {
-      alert(err.message || "정보 수정 중 오류가 발생했습니다.");
+      console.error("Profile Update Error:", err);
+      setError("프로필 정보를 업데이트하는 중 오류가 발생했습니다.");
     }
+  };
+
+  const handleEditToggle = () => {
+    setIsEditing(!isEditing);
+    if (!isEditing && profile) {
+      setEditData({
+        username: profile.user.username,
+        email: profile.user.email,
+        phone: profile.user.phone || "",
+      });
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   const handleReviewSubmit = async (reviewData) => {
@@ -158,7 +180,14 @@ const Profile = () => {
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="profile-content">
         {activeTab === "basicInfo" && (
-          <BasicInfo user={profile?.user} onClick={handleEditInfo} />
+          <BasicInfo
+            user={profile?.user}
+            isEditing={isEditing}
+            handleEditToggle={handleEditToggle}
+            handleSave={handleSave} // 부모에서 handleSave를 넘겨줍니다
+            handleInputChange={handleInputChange} // input change 핸들러
+            editData={editData} // editData를 BasicInfo로 전달
+          />
         )}
         {activeTab === "shipping" && (
           <div>
@@ -167,8 +196,10 @@ const Profile = () => {
             </button>
             <AddressList
               addresses={profile?.addresses || []}
-              setAddressToEdit={setAddressToEdit}
-              onDeleteAddress={handleDeleteAddress}
+              onEditAddress={(address) => {
+                setAddressToEdit(address);
+                setFormVisible(true);
+              }}
             />
           </div>
         )}

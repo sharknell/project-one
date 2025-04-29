@@ -149,6 +149,57 @@ router.post("/addresses", verifyToken, async (req, res) => {
   }
 });
 
+// 주소 수정
+router.put("/addresses/:id", verifyToken, async (req, res) => {
+  const { recipient, phone, zipcode, roadAddress, detailAddress, isDefault } =
+    req.body;
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    // 해당 주소가 사용자의 것인지 확인
+    const [existingAddress] = await dbPromise.query(
+      "SELECT id FROM addresses WHERE id = ? AND user_id = ?",
+      [id, userId]
+    );
+
+    if (existingAddress.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "해당 주소를 찾을 수 없거나 권한이 없습니다." });
+    }
+
+    // 기본 배송지 설정 시 기존 기본 주소 초기화
+    if (isDefault) {
+      await dbPromise.query(
+        "UPDATE addresses SET isDefault = 0 WHERE user_id = ?",
+        [userId]
+      );
+    }
+
+    await dbPromise.query(
+      `UPDATE addresses 
+       SET recipient = ?, phone = ?, zipcode = ?, roadAddress = ?, detailAddress = ?, isDefault = ? 
+       WHERE id = ? AND user_id = ?`,
+      [
+        recipient,
+        phone,
+        zipcode,
+        roadAddress,
+        detailAddress,
+        isDefault ? 1 : 0,
+        id,
+        userId,
+      ]
+    );
+
+    res.status(200).json({ message: "주소가 성공적으로 수정되었습니다." });
+  } catch (err) {
+    console.error("주소 수정 오류:", err);
+    res.status(500).json({ message: "주소 수정 중 오류가 발생했습니다." });
+  }
+});
+
 // 결제 내역 조회
 router.get("/orders", verifyToken, async (req, res) => {
   const userId = req.user.id;

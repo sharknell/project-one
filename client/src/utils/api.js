@@ -29,7 +29,7 @@ export const getProfile = async (token) => {
 // utils/api.js
 export const updateProfile = async (token, updatedInfo) => {
   try {
-    const response = await api.put("profile", updatedInfo, {
+    const response = await api.put("profile/update", updatedInfo, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data; // 수정된 프로필 정보 반환

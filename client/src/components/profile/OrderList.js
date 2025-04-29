@@ -149,6 +149,7 @@ const OrderList = ({ orders }) => {
                       <p>{item.productName}</p>
                       <p>수량: {item.quantity}</p>
                     </div>
+                    <hr />
                   </div>
                   {order.delivery_status === "delivered" && (
                     <button
