@@ -49,6 +49,51 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.post("/signup", async (req, res) => {
+  const { username, email, password } = req.body;
+
+  if (!username || !email || !password) {
+    return res.status(400).json({ message: "모든 필드를 입력해주세요." });
+  }
+
+  if (!/\S+@\S+\.\S+/.test(email)) {
+    return res.status(400).json({ message: "올바른 이메일 형식이 아닙니다." });
+  }
+
+  if (password.length < 6) {
+    return res
+      .status(400)
+      .json({ message: "비밀번호는 최소 6자 이상이어야 합니다." });
+  }
+
+  try {
+    const [users] = await dbPromise.query(
+      "SELECT id FROM users WHERE email = ?",
+      [email]
+    );
+
+    if (users.length > 0) {
+      return res.status(409).json({ message: "이미 사용 중인 이메일입니다." });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const [result] = await dbPromise.query(
+      "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+      [username, email, hashedPassword]
+    );
+
+    res.status(201).json({
+      message: "회원가입이 완료되었습니다!",
+      userId: result.insertId,
+    });
+  } catch (err) {
+    console.error("Signup Error:", err.message);
+    res
+      .status(500)
+      .json({ message: "서버 오류로 인해 회원가입에 실패했습니다." });
+  }
+});
+
 router.post("/refresh-token", async (req, res) => {
   const refreshToken = req.cookies?.refreshToken;
 
