@@ -128,22 +128,25 @@ function Cart() {
       alert("장바구니 수량 변경에 실패했습니다.");
     }
   };
-
   const handleRemove = async (itemId) => {
     try {
       const { data } = await axios.delete(
         `http://localhost:5001/cart/remove/${itemId}`
       );
       if (data.success) {
-        const updatedItems = cartItems.filter((item) => item.id !== itemId);
-        setCartItems(updatedItems);
-        setTotalAmount(calculateTotalAmount(updatedItems));
+        // 카트 아이템에서 삭제한 아이템 제외하고 업데이트
+        const updatedCartItems = cartItems.filter((item) => item.id !== itemId);
+        setCartItems(updatedCartItems); // 카트 아이템 갱신
       }
     } catch (error) {
-      console.error("아이템 삭제 실패:", error);
       alert("장바구니 아이템 삭제에 실패했습니다.");
     }
   };
+
+  useEffect(() => {
+    // cartItems 상태가 변경될 때마다 총 금액을 갱신
+    setTotalAmount(calculateTotalAmount(cartItems));
+  }, [cartItems]); // cartItems 상태가 변경될 때마다 실행
 
   const handleCheckout = async () => {
     if (totalAmount <= 0) {

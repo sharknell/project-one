@@ -87,7 +87,7 @@ router.delete("/remove/:id", async (req, res) => {
     ]);
 
     if (result.affectedRows > 0) {
-      res.status(200).json({ message: "장바구니에서 삭제되었습니다." });
+      res.status(200).json({ success: "장바구니에서 삭제되었습니다." });
     } else {
       res.status(404).json({ message: "장바구니 항목을 찾을 수 없습니다." });
     }
