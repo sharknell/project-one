@@ -264,8 +264,12 @@ function Cart() {
                   />
                   <div className="cart-item-info">
                     <p>{product_name}</p>
-                    <p>₩{price?.toLocaleString()}</p>
-                    <p>용량: {product_size}</p>
+                    <p>₩{Number(price || 0).toLocaleString("ko-KR")}</p>
+                    <p>
+                      용량: {Number(product_size || 0).toLocaleString("ko-KR")}{" "}
+                      ml
+                    </p>
+
                     <div className="cart-item-quantity">
                       <button
                         onClick={() => handleQuantityChange(id, quantity - 1)}

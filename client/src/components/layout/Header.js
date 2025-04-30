@@ -87,26 +87,6 @@ function Header() {
       </div>
 
       {/* 하단 바 (서비스와 연락처) */}
-      <div className="header-bottom">
-        <div className="header-container">
-          <nav className="header-bottom-nav">
-            <Link
-              to="/service"
-              className="header-bottom-nav-item"
-              onClick={closeMenu}
-            >
-              Service
-            </Link>
-            <Link
-              to="/contact"
-              className="header-bottom-nav-item"
-              onClick={closeMenu}
-            >
-              Contact
-            </Link>
-          </nav>
-        </div>
-      </div>
     </header>
   );
 }

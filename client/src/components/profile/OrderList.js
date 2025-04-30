@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import ReviewModal from "./ReviewModal";
 import "../../styles/OrderList.css";
-import { submitReview } from "../../utils/api"; // 리뷰 제출 API 호출 함수
+import { submitReview } from "../../utils/api";
 
 const STATUS_LABELS = {
   pending: "결제 대기 중",
@@ -21,8 +21,8 @@ const OrderList = ({ orders }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortOption, setSortOption] = useState("latest"); // 기본 정렬 기준
-  const itemsPerPage = 5; // 페이지당 아이템 수
+  const [sortOption, setSortOption] = useState("latest");
+  const itemsPerPage = 5;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -59,34 +59,35 @@ const OrderList = ({ orders }) => {
 
   const totalPages = useMemo(
     () => Math.ceil((orders?.length || 0) / itemsPerPage),
-    [orders, itemsPerPage]
+    [orders]
   );
 
   const sortedOrders = useMemo(() => {
-    if (sortOption === "latest") {
-      return [...orders].sort(
-        (a, b) => new Date(b.created_at) - new Date(a.created_at)
-      );
-    } else if (sortOption === "oldest") {
-      return [...orders].sort(
-        (a, b) => new Date(a.created_at) - new Date(b.created_at)
-      );
-    } else if (sortOption === "price_high") {
-      return [...orders].sort((a, b) => b.amount - a.amount); // 가격 내림차순
-    } else if (sortOption === "price_low") {
-      return [...orders].sort((a, b) => a.amount - b.amount); // 가격 오름차순
+    const sorted = [...orders];
+    switch (sortOption) {
+      case "latest":
+        return sorted.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
+      case "oldest":
+        return sorted.sort(
+          (a, b) => new Date(a.created_at) - new Date(b.created_at)
+        );
+      case "price_high":
+        return sorted.sort((a, b) => b.amount - a.amount);
+      case "price_low":
+        return sorted.sort((a, b) => a.amount - b.amount);
+      default:
+        return orders;
     }
-    return orders;
   }, [orders, sortOption]);
 
-  const paginatedOrders = useMemo(
-    () =>
-      sortedOrders.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-      ),
-    [sortedOrders, currentPage, itemsPerPage]
-  );
+  const paginatedOrders = useMemo(() => {
+    return sortedOrders.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  }, [sortedOrders, currentPage]);
 
   const getStatusLabel = (status) => STATUS_LABELS[status] || "알 수 없음";
   const getDeliveryStatusLabel = (deliveryStatus) =>
@@ -111,66 +112,74 @@ const OrderList = ({ orders }) => {
           <option value="price_low">가격 (낮은 순)</option>
         </select>
       </div>
-      <ul className="order-list">
-        {paginatedOrders.map((order) => (
-          <li key={order.order_id} className="order-list__item">
-            <div className="order-list__header">
-              <h3>주문 번호: {order.order_id}</h3>
-              <span>
-                주문 시간:{" "}
-                {new Date(order.created_at).toLocaleString("ko-KR", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                })}
-              </span>
-              <p>총 금액: ₩{order.amount.toLocaleString()}</p>
-              <p>결제 상태: {getStatusLabel(order.status)}</p>
-              <p>배송 상태: {getDeliveryStatusLabel(order.delivery_status)}</p>
-            </div>
-            <ul className="product-list">
-              {order.cart_items.map((item) => (
-                <li key={item.productId} className="product-list__item">
-                  <div className="product-info">
-                    <img
-                      src={
-                        item.thumbnail
-                          ? `http://localhost:5001/uploads/productImages/${item.thumbnail}`
-                          : `http://localhost:5001/uploads/productImages/default-image.jpg`
-                      }
-                      alt={item.productName || "기본 이미지"}
-                      className="product-thumbnail"
-                    />
 
-                    <div>
-                      <p>{item.productName}</p>
-                      <p>수량: {item.quantity}</p>
-                    </div>
-                    <hr />
-                  </div>
-                  {order.delivery_status === "delivered" && (
-                    <button
-                      className="review-submit-button"
-                      onClick={() =>
-                        openReviewModal({
-                          productId: item.productId,
-                          productName: item.productName,
-                          thumbnail: item.thumbnail,
-                        })
-                      }
-                    >
-                      리뷰 작성
-                    </button>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </li>
-        ))}
+      <ul className="order-list">
+        {paginatedOrders.map((order) => {
+          const firstItem = order.cart_items[0];
+          const otherItemsCount = order.cart_items.length - 1;
+          const totalQuantity = order.cart_items.reduce(
+            (sum, item) => sum + item.quantity,
+            0
+          );
+
+          return (
+            <li key={order.order_id} className="order-list__item">
+              <div className="order-list__header">
+                <h3>주문 번호: {order.order_id}</h3>
+                <span>
+                  주문 시간:{" "}
+                  {new Date(order.created_at).toLocaleString("ko-KR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })}
+                </span>
+                <p>총 금액: ₩{order.amount.toLocaleString()}</p>
+                <p>총 수량: {totalQuantity}개</p>
+                <p>결제 상태: {getStatusLabel(order.status)}</p>
+                <p>
+                  배송 상태: {getDeliveryStatusLabel(order.delivery_status)}
+                </p>
+              </div>
+
+              <div className="product-summary">
+                <img
+                  src={
+                    firstItem?.thumbnail
+                      ? `http://localhost:5001/uploads/productImages/${firstItem.thumbnail}`
+                      : `http://localhost:5001/uploads/productImages/default-image.jpg`
+                  }
+                  alt={firstItem?.productName || "기본 이미지"}
+                  className="product-thumbnail"
+                />
+                <div className="product-summary__info">
+                  <p>{firstItem?.productName}</p>
+                  {otherItemsCount > 0 && <p>외 {otherItemsCount}개</p>}
+                </div>
+
+                {order.delivery_status === "delivered" && (
+                  <button
+                    className="review-submit-button"
+                    onClick={() =>
+                      openReviewModal({
+                        productId: firstItem.productId,
+                        productName: firstItem.productName,
+                        thumbnail: firstItem.thumbnail,
+                      })
+                    }
+                  >
+                    리뷰 작성
+                  </button>
+                )}
+              </div>
+            </li>
+          );
+        })}
       </ul>
+
       <div className="pagination">
         {Array.from({ length: totalPages }, (_, index) => index + 1).map(
           (pageNumber) => (
@@ -186,6 +195,7 @@ const OrderList = ({ orders }) => {
           )
         )}
       </div>
+
       {isModalOpen && (
         <ReviewModal
           isOpen={isModalOpen}
