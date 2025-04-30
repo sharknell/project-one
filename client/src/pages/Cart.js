@@ -58,20 +58,43 @@ function Cart() {
 
   const fetchData = async (userId, token) => {
     try {
-      const [cartRes, addressRes] = await Promise.all([
-        axios.get(`http://localhost:5001/cart?userId=${userId}`, {
+      // 먼저 카트 데이터만 가져오기
+      const cartRes = await axios.get(
+        `http://localhost:5001/cart?userId=${userId}`,
+        {
           headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`http://localhost:5001/cart/addresses?userId=${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
+        }
+      );
+      console.log("카트 데이터:", cartRes.data); // 카트 데이터 확인
+
+      // 배송지 정보를 가져오는 API 요청을 시도
+      let addressRes = { data: [] }; // 기본값을 빈 배열로 설정
+
+      try {
+        addressRes = await axios.get(
+          `http://localhost:5001/cart/addresses?userId=${userId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        console.log("배송지 데이터:", addressRes.data); // 배송지 데이터 확인
+      } catch (addressError) {
+        console.error("배송지 정보 불러오기 실패:", addressError);
+        // 배송지 API 실패 시 빈 배열로 처리
+      }
 
       setCartItems(cartRes.data || []);
       setTotalAmount(calculateTotalAmount(cartRes.data || []));
-      setAddresses(addressRes.data || []);
+
+      // 배송지 데이터가 있을 경우만 설정
+      if (addressRes.data && addressRes.data.length > 0) {
+        setAddresses(addressRes.data);
+      }
     } catch (error) {
       console.error("데이터 불러오기 실패:", error);
+      setCartItems([]);
+      setTotalAmount(0);
+      setAddresses([]);
     } finally {
       setPageLoading(false);
     }
@@ -90,7 +113,6 @@ function Cart() {
 
       console.log("수량 변경 결과:", data);
 
-      // ✅ 성공 여부 확인 방식 보완
       if (
         data.success ||
         data.message === "장바구니 수량이 업데이트되었습니다."
@@ -129,16 +151,8 @@ function Cart() {
       return;
     }
 
-    if (!selectedAddress) {
+    if (!selectedAddress && addresses.length > 0) {
       alert("배송지를 선택해주세요.");
-      return;
-    }
-
-    const validAddress = addresses.find(
-      (addr) => addr.id === Number(selectedAddress)
-    );
-    if (!validAddress) {
-      alert("유효한 배송지를 선택해주세요.");
       return;
     }
 
@@ -214,30 +228,6 @@ function Cart() {
     <div className="cart-container">
       <h1>장바구니</h1>
 
-      <div className="address-selection">
-        <h2>배송지 선택</h2>
-        {addresses.length === 0 ? (
-          <div>
-            <p>배송지가 없습니다. 배송지를 추가해주세요.</p>
-            <button onClick={() => navigate("/profile")}>
-              배송지 추가하기
-            </button>
-          </div>
-        ) : (
-          <select
-            value={selectedAddress}
-            onChange={(e) => setSelectedAddress(e.target.value)}
-          >
-            <option value="">배송지를 선택하세요</option>
-            {addresses.map(({ id, nickname, roadAddress, detailAddress }) => (
-              <option key={id} value={id}>
-                {nickname} - {roadAddress}, {detailAddress}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
-
       <div className="cart-items">
         {cartItems.length === 0 ? (
           <p>장바구니에 아이템이 없습니다.</p>
@@ -294,6 +284,30 @@ function Cart() {
               </div>
             )
           )
+        )}
+      </div>
+
+      <div className="address-selection">
+        <h2>배송지 선택</h2>
+        {addresses.length === 0 ? (
+          <div>
+            <p>배송지가 없습니다. 배송지를 추가해주세요.</p>
+            <button onClick={() => navigate("/profile")}>
+              배송지 추가하기
+            </button>
+          </div>
+        ) : (
+          <select
+            value={selectedAddress}
+            onChange={(e) => setSelectedAddress(e.target.value)}
+          >
+            <option value="">배송지를 선택하세요</option>
+            {addresses.map(({ id, nickname, roadAddress, detailAddress }) => (
+              <option key={id} value={id}>
+                {nickname} - {roadAddress}, {detailAddress}
+              </option>
+            ))}
+          </select>
         )}
       </div>
 

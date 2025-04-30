@@ -28,15 +28,6 @@ const AddressFormModal = ({ address, onSave, onCancel }) => {
     }));
   };
 
-  const handlePostcodeComplete = (data) => {
-    setFormData((prev) => ({
-      ...prev,
-      zipcode: data.zonecode,
-      roadAddress: data.roadAddress,
-    }));
-    setPostcodeVisible(false);
-  };
-
   const validateForm = () => {
     const newErrors = {};
     if (!formData.recipient) newErrors.recipient = "받는 사람을 입력해주세요.";
@@ -104,13 +95,6 @@ const AddressFormModal = ({ address, onSave, onCancel }) => {
                 onChange={handleChange}
                 placeholder="우편번호"
               />
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={() => setPostcodeVisible(true)}
-              >
-                검색
-              </button>
             </div>
             {errors.zipcode && <p className="error-text">{errors.zipcode}</p>}
           </div>
