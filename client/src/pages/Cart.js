@@ -14,7 +14,7 @@ function Cart() {
   const [loading, setLoading] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState("");
   const [addresses, setAddresses] = useState([]);
-  const [pageLoading, setPageLoading] = useState(true); // 페이지 전체 로딩용
+  const [pageLoading, setPageLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,15 +67,11 @@ function Cart() {
         }),
       ]);
 
-      console.log("카트 데이터:", cartRes.data);
-      console.log("주소 데이터:", addressRes.data);
-
       setCartItems(cartRes.data || []);
       setTotalAmount(calculateTotalAmount(cartRes.data || []));
       setAddresses(addressRes.data || []);
     } catch (error) {
       console.error("데이터 불러오기 실패:", error);
-      alert("데이터를 가져오는 중 문제가 발생했습니다.");
     } finally {
       setPageLoading(false);
     }
@@ -84,7 +80,7 @@ function Cart() {
   const handleQuantityChange = async (itemId, newQuantity) => {
     if (newQuantity < 1) return;
 
-    console.log("수량 변경 요청:", itemId, newQuantity); // 디버깅 로그 추가
+    console.log("수량 변경 요청:", itemId, newQuantity);
 
     try {
       const { data } = await axios.put(
@@ -92,9 +88,13 @@ function Cart() {
         { quantity: newQuantity }
       );
 
-      console.log("수량 변경 결과:", data); // 응답 결과 확인
+      console.log("수량 변경 결과:", data);
 
-      if (data.success) {
+      // ✅ 성공 여부 확인 방식 보완
+      if (
+        data.success ||
+        data.message === "장바구니 수량이 업데이트되었습니다."
+      ) {
         const updatedItems = cartItems.map((item) =>
           item.id === itemId ? { ...item, quantity: newQuantity } : item
         );
@@ -131,6 +131,14 @@ function Cart() {
 
     if (!selectedAddress) {
       alert("배송지를 선택해주세요.");
+      return;
+    }
+
+    const validAddress = addresses.find(
+      (addr) => addr.id === Number(selectedAddress)
+    );
+    if (!validAddress) {
+      alert("유효한 배송지를 선택해주세요.");
       return;
     }
 
@@ -195,7 +203,9 @@ function Cart() {
     alert("결제가 완료되었습니다!");
     navigate("/payment-success");
   };
+
   const IMAGE_BASE_URL = "http://localhost:5001/uploads/productImages/";
+
   if (pageLoading) {
     return <div className="loading">로딩 중...</div>;
   }
@@ -204,7 +214,6 @@ function Cart() {
     <div className="cart-container">
       <h1>장바구니</h1>
 
-      {/* 배송지 선택 */}
       <div className="address-selection">
         <h2>배송지 선택</h2>
         {addresses.length === 0 ? (
@@ -229,7 +238,6 @@ function Cart() {
         )}
       </div>
 
-      {/* 장바구니 아이템 리스트 */}
       <div className="cart-items">
         {cartItems.length === 0 ? (
           <p>장바구니에 아이템이 없습니다.</p>
@@ -285,7 +293,6 @@ function Cart() {
         )}
       </div>
 
-      {/* 총 금액 및 결제 */}
       <div className="cart-summary">
         <p>총 금액: ₩{totalAmount.toLocaleString()}</p>
         <button onClick={handleCheckout} disabled={loading || !selectedAddress}>

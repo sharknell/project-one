@@ -76,12 +76,11 @@ router.get("/success", async (req, res) => {
   }
 
   try {
-    // 결제 상태 업데이트
     await updatePaymentStatus(orderId, "success");
 
-    // 클라이언트에 결제 성공 데이터를 보내며 리디렉션
+    // 🔄 변경된 부분: #/ 사용하여 HashRouter 호환되도록
     res.redirect(
-      `http://localhost:3000/payment-success?orderId=${orderId}&paymentKey=${paymentKey}&amount=${amount}`
+      `http://localhost:3000/#/payment-success?orderId=${orderId}&paymentKey=${paymentKey}&amount=${amount}`
     );
   } catch (error) {
     console.error("결제 성공 처리 실패:", error);
@@ -93,32 +92,29 @@ router.get("/success", async (req, res) => {
 router.post("/success", async (req, res) => {
   const { orderId, paymentKey, amount, userId, cartItems } = req.body;
 
-  // 결제 성공 정보를 검증
   if (!orderId || !userId || !cartItems) {
     return res.status(400).send({ message: "결제 성공 정보가 부족합니다." });
   }
 
   try {
-    // 결제 상태 업데이트
     await updatePaymentStatus(orderId, "success");
 
-    // cartItems 배열을 반복하면서 각 품목 삭제
     const connection = await dbPromise;
     for (const item of cartItems) {
       const query = `DELETE FROM cart WHERE user_id = ? AND product_id = ?`;
-      const values = [userId, item.productId || null]; // undefined -> null로 처리
+      const values = [userId, item.productId || null];
       await connection.execute(query, values);
     }
 
+    // 🔄 변경된 부분: #/ 사용
     res.redirect(
-      `http://localhost:3000/payment-success?orderId=${orderId}&paymentKey=${paymentKey}&amount=${amount}`
+      `http://localhost:3000/#/payment-success?orderId=${orderId}&paymentKey=${paymentKey}&amount=${amount}`
     );
   } catch (error) {
     console.error("결제 성공 처리 실패:", error);
     res.status(500).send({ message: "결제 성공 처리 중 오류가 발생했습니다." });
   }
 });
-
 // 결제 실패 처리 (POST 요청)
 router.post("/failed", async (req, res) => {
   const { orderId } = req.body;
