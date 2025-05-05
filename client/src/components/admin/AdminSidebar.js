@@ -1,6 +1,7 @@
+import "../../styles/AdminSidebar.css";
 const AdminSidebar = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="sidebar">
+    <div className="admin-sidebar">
       <ul>
         <li
           onClick={() => setActiveTab("productForm")}

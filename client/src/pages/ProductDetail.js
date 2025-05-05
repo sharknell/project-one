@@ -165,11 +165,7 @@ function ProductDetail() {
             <strong>카테고리:</strong> {product.category}
           </p>
           <p className="product-detail-size">
-            <strong>사이즈:</strong> {product.size || "없음"}
-          </p>
-          <p className="product-detail-stock">
-            <strong>재고:</strong>{" "}
-            {product.stock > 0 ? `${product.stock}개 남음` : "품절"}
+            <strong>사이즈:</strong> {product.size + "ml" || "없음"}
           </p>
           <div className="product-detail-buttons">
             <button onClick={handleAddToCart}>장바구니 담기</button>
@@ -179,30 +175,28 @@ function ProductDetail() {
 
       <div className="product-detail-extra-info">
         <h2>제품 디테일 정보</h2>
-        {["설명", "리뷰", "상품 필수 정보", "배송과 반품"].map(
-          (title, index) => (
-            <div className="dropdown" key={index}>
-              <button
-                className="dropdown-toggle"
-                onClick={() => toggleDropdown(index)}
-              >
-                {title}
-              </button>
-              {openDropdown === index && (
-                <div className="dropdown-content">
-                  {index === 0 ? (
-                    <div>
-                      <h5>{product.name}</h5>
-                      <p>{product.description}</p>
-                    </div>
-                  ) : (
-                    <p>내용이 준비 중입니다.</p>
-                  )}
-                </div>
-              )}
-            </div>
-          )
-        )}
+        {["설명", "상품 필수 정보", "배송과 반품"].map((title, index) => (
+          <div className="dropdown" key={index}>
+            <button
+              className="dropdown-toggle"
+              onClick={() => toggleDropdown(index)}
+            >
+              {title}
+            </button>
+            {openDropdown === index && (
+              <div className="dropdown-content">
+                {index === 0 ? (
+                  <div>
+                    <h5>{product.name}</h5>
+                    <p>{product.description}</p>
+                  </div>
+                ) : (
+                  <p>내용이 준비 중입니다.</p>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
 
       <div className="product-detail-qna">

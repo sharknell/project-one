@@ -3,7 +3,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  min-height: 80vh;
   background-color: #f9fafc;
 }
 
@@ -43,7 +43,7 @@
 }
 
 .input-group input {
-  width: 100%;
+  width: 80%;
   padding: 12px 16px;
   border: 1px solid #dddfe2;
   border-radius: 8px;
@@ -86,4 +86,64 @@
 
 .signup-prompt a:hover {
   text-decoration: underline;
+}
+/* 반응형: 태블릿 (768px 이하) */
+@media (max-width: 768px) {
+  .login-box {
+    padding: 20px;
+    max-width: 90%;
+  }
+
+  .login-title {
+    font-size: 1.4rem;
+  }
+
+  .login-description {
+    font-size: 0.85rem;
+  }
+
+  .input-group input {
+    width: 100%;
+    font-size: 0.9rem;
+    padding: 12px;
+  }
+
+  .login-button {
+    font-size: 0.95rem;
+    padding: 12px;
+  }
+}
+
+/* 반응형: 모바일 (480px 이하) */
+@media (max-width: 480px) {
+  .login-box {
+    padding: 16px;
+    max-width: 95%;
+  }
+
+  .login-title {
+    font-size: 1.3rem;
+  }
+
+  .login-description {
+    font-size: 0.8rem;
+  }
+
+  .input-group label {
+    font-size: 0.8rem;
+  }
+
+  .input-group input {
+    font-size: 0.85rem;
+    padding: 10px;
+  }
+
+  .login-button {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+
+  .signup-prompt {
+    font-size: 0.8rem;
+  }
 }

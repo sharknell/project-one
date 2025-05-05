@@ -7,7 +7,11 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
   const [isEditing, setIsEditing] = useState(false);
 
   const openModal = (product) => {
-    setSelectedProduct({ ...product, newSubImages: [] });
+    setSelectedProduct({
+      ...product,
+      newSubImages: [], // 새로 추가된 보조 이미지는 빈 배열로 초기화
+      removedSubImages: [], // 삭제된 보조 이미지는 빈 배열로 초기화
+    });
     setIsModalOpen(true);
   };
 
@@ -22,6 +26,7 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
     }
   }, [isModalOpen]);
 
+  // 보조 이미지 선택 처리
   const handleSubImageChange = (e) => {
     const files = Array.from(e.target.files);
     const newImages = files
@@ -42,6 +47,25 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
     }));
   };
 
+  // 기존 보조 이미지 삭제
+  const handleRemoveExistingSubImage = (index) => {
+    const imageToRemove = selectedProduct.subImages[index];
+    setSelectedProduct((prev) => ({
+      ...prev,
+      subImages: prev.subImages.filter((_, i) => i !== index),
+      removedSubImages: [...prev.removedSubImages, imageToRemove],
+    }));
+  };
+
+  // 새로 추가된 보조 이미지 삭제
+  const handleRemoveNewSubImage = (index) => {
+    setSelectedProduct((prev) => ({
+      ...prev,
+      newSubImages: prev.newSubImages.filter((_, i) => i !== index),
+    }));
+  };
+
+  // 입력된 값 수정 처리
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setSelectedProduct((prev) => ({
@@ -50,29 +74,36 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
     }));
   };
 
+  // 상품 수정 저장 처리
   const handleSaveEdit = () => {
     if (!selectedProduct) return;
 
     const formData = new FormData();
     formData.append("id", selectedProduct.id);
-    formData.append("name", selectedProduct.name || ""); // 빈 문자열로 기본값 설정
+    formData.append("name", selectedProduct.name || "");
     formData.append("price", selectedProduct.price || 0);
     formData.append("category", selectedProduct.category || "");
     formData.append("description", selectedProduct.description || "");
 
-    // 기존 보조 이미지 유지
+    // 유지할 기존 보조 이미지
     if (selectedProduct.subImages) {
       selectedProduct.subImages.forEach((image) => {
         formData.append("existingImages", image);
       });
     }
 
-    // 새로운 보조 이미지 추가
-    selectedProduct.newSubImages.forEach((image) => {
-      formData.append("newImages", image.file);
-    });
+    // 삭제할 기존 보조 이미지
+    if (selectedProduct.removedSubImages) {
+      selectedProduct.removedSubImages.forEach((image) => {
+        formData.append("removedImages", image);
+      });
+    }
 
-    console.log("보낼 데이터:", Object.fromEntries(formData.entries())); // 디버깅 로그 추가
+    // 새로 추가된 보조 이미지
+    selectedProduct.newSubImages.forEach((image) => {
+      formData.append("addimages", image.file);
+      console.log(selectedProduct.newSubImages);
+    });
 
     fetch(`${API_BASE_URL}/shop/product/${selectedProduct.id}`, {
       method: "PUT",
@@ -139,7 +170,6 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
         <p className="product-list-empty">등록된 제품이 없습니다.</p>
       )}
 
-      {/* 모달 */}
       {selectedProduct && (
         <div
           className={`modal-overlay ${isModalOpen ? "open" : "close"}`}
@@ -212,7 +242,6 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
                 )}
               </div>
 
-              {/* 보조 이미지 */}
               <div>
                 <h3>보조 이미지</h3>
                 <input
@@ -221,32 +250,49 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
                   multiple
                   onChange={handleSubImageChange}
                 />
+
                 <div className="sub-images-container">
-                  {selectedProduct.subImages &&
-                    selectedProduct.subImages.length > 0 && (
-                      <div>
-                        <h4>기존 보조 이미지</h4>
-                        {selectedProduct.subImages.map((subImage, index) => (
-                          <div key={index} className="sub-image-wrapper">
-                            <img
-                              src={`${API_BASE_URL}/uploads/productImages/${subImage}`}
-                              alt={`보조 이미지 ${index + 1}`}
-                              className="modal-sub-image"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  {selectedProduct.newSubImages &&
-                    selectedProduct.newSubImages.map((image, index) => (
-                      <div key={index} className="sub-image-wrapper">
-                        <img
-                          src={image.preview}
-                          alt={`보조 이미지 ${index + 1}`}
-                          className="modal-sub-image"
-                        />
-                      </div>
-                    ))}
+                  {/* 기존 보조 이미지 */}
+                  {selectedProduct.subImages?.length > 0 && (
+                    <div>
+                      <h4>기존 보조 이미지</h4>
+                      {selectedProduct.subImages.map((subImage, index) => (
+                        <div key={index} className="sub-image-wrapper">
+                          <img
+                            src={`${API_BASE_URL}/uploads/productImages/${subImage}`}
+                            alt={`보조 이미지 ${index + 1}`}
+                            className="modal-sub-image"
+                          />
+                          <button
+                            onClick={() => handleRemoveExistingSubImage(index)}
+                          >
+                            ❌
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* 새로 추가된 이미지 */}
+                  {selectedProduct.newSubImages?.length > 0 && (
+                    <div>
+                      <h4>새로 추가된 보조 이미지</h4>
+                      {selectedProduct.newSubImages.map((image, index) => (
+                        <div key={index} className="sub-image-wrapper">
+                          <img
+                            src={image.preview}
+                            alt={`새 이미지 ${index + 1}`}
+                            className="modal-sub-image"
+                          />
+                          <button
+                            onClick={() => handleRemoveNewSubImage(index)}
+                          >
+                            ❌
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

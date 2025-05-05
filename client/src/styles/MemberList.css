@@ -1,0 +1,42 @@
+.member-list-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.member-list-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #333;
+}
+
+.member-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.member-item {
+  padding: 16px 20px;
+  background-color: #f9f9f9;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  border: 1px solid #e5e5e5;
+}
+
+.member-item:hover {
+  background-color: #f0f0f0;
+}
+
+.member-empty {
+  text-align: center;
+  color: #777;
+  font-size: 1rem;
+  margin-top: 20px;
+}

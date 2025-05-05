@@ -1,0 +1,61 @@
+.sidebar {
+  background-color: #1e1e2f;
+  color: white;
+  padding: 1rem;
+  width: 250px;
+  min-height: 100vh;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sidebar li {
+  cursor: pointer;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background-color: #2d2d44;
+  text-align: center;
+  transition: background-color 0.2s;
+}
+
+.sidebar li:hover {
+  background-color: #3a3a5c;
+}
+
+.sidebar li.active {
+  background-color: #5656a4;
+}
+
+/* 반응형: 모바일에서는 가로 메뉴로 변환 */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    min-height: auto;
+  }
+
+  .sidebar ul {
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 0;
+  }
+
+  .sidebar li {
+    flex-grow: 1;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    border-radius: 0;
+    background-color: #1e1e2f;
+    border-bottom: 2px solid transparent;
+  }
+
+  .sidebar li.active {
+    background-color: transparent;
+    border-bottom: 2px solid #5656a4;
+  }
+}

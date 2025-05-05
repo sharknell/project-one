@@ -1,221 +1,78 @@
-/* AdminDashboard 기본 스타일 */
 .admin-dashboard {
   display: flex;
-  height: 100vh;
-  background-color: #f5f5f5;
+  flex-direction: row;
+  min-height: 100vh;
+  background-color: #f9f9f9;
 }
 
-.content {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
-  background-color: white;
-}
-
-.dashboard-section {
-  margin-bottom: 40px;
-}
-
-h2 {
-  font-size: 24px;
-  color: #333;
-  margin-bottom: 10px;
-}
-
-/* Sidebar 스타일 */
+/* 사이드바 영역 */
 .admin-sidebar {
   width: 250px;
-  background-color: #2f3d4e;
+  background-color: #1e1e2f;
   color: white;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100vh;
+  padding: 1rem;
+  flex-shrink: 0;
 }
 
-.admin-sidebar .sidebar-item {
-  margin: 20px 0;
-  padding: 10px;
-  cursor: pointer;
-  width: 100%;
-  text-align: center;
-  background-color: #3c4b5c;
-  border-radius: 5px;
-  transition: background-color 0.3s;
+/* 콘텐츠 영역 */
+.content {
+  flex-grow: 1;
+  padding: 2rem;
+  overflow-y: auto;
 }
 
-.admin-sidebar .sidebar-item:hover {
-  background-color: #4d5f70;
+/* Q&A 섹션 */
+.dashboard-section {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* 버튼 스타일 */
 .filter-buttons {
-  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .filter-button {
-  padding: 10px 20px;
-  margin: 0 10px 10px 0;
-  background-color: #4caf50;
+  padding: 0.5rem 1rem;
+  background-color: #ececec;
   border: none;
-  border-radius: 5px;
-  color: white;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s;
 }
 
 .filter-button:hover {
-  background-color: #45a049;
+  background-color: #dcdcdc;
 }
 
-.dashboard-list {
-  list-style: none;
-  padding: 0;
-}
-
-.dashboard-list-item {
-  display: flex;
-  flex-direction: column;
-  background-color: #f1f1f1;
-  padding: 20px;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.dashboard-list-item .product-info {
-  display: flex;
-  flex-direction: row;
-}
-
-.product-image {
-  max-width: 100px;
-  margin-right: 20px;
-  border-radius: 5px;
-}
-
-.no-answer {
-  color: red;
-  font-style: italic;
-}
-
-.dashboard-empty {
-  text-align: center;
-  color: #888;
-}
-
-/* 로딩 화면 스타일 */
+/* 로딩 스타일 */
 .loader {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 24px;
-  color: #333;
-}
-
-/* 로그인 화면 스타일 */
-.login-form {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: white;
-  border-radius: 5px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.login-form input {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.login-form button {
-  width: 100%;
-  padding: 12px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.login-form button:hover {
-  background-color: #45a049;
-}
-
-.login-form .error-message {
-  color: red;
-  font-size: 14px;
-  margin-top: 10px;
-}
-/* QnaAdmin 모달용 CSS */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  max-width: 500px;
-  width: 90%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-textarea {
-  width: 100%;
-  min-height: 100px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  padding: 10px;
-  resize: vertical;
-  font-size: 1rem;
-}
-
-/* 대시보드 리스트 약간 다듬기 */
-.dashboard-list {
-  list-style: none;
-  padding: 0;
-}
-
-.dashboard-list-item {
-  border: 1px solid #ddd;
-  padding: 16px;
-  margin-bottom: 8px;
-  cursor: pointer;
-}
-
-.product-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.product-image {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-}
-
-.no-answer {
-  color: gray;
-  font-style: italic;
-}
-
-.dashboard-empty {
+  font-size: 1.2rem;
   text-align: center;
-  color: gray;
-  padding: 20px;
+  margin-top: 2rem;
+}
+
+/* 미디어 쿼리 – 모바일 대응 */
+@media (max-width: 768px) {
+  .admin-dashboard {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    width: 100%;
+    text-align: center;
+    padding: 1rem 0;
+  }
+
+  .content {
+    padding: 1rem;
+  }
+
+  .filter-buttons {
+    justify-content: center;
+  }
 }

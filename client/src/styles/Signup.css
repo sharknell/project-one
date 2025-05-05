@@ -1,94 +1,133 @@
-/* 전체 컨테이너 스타일 */
+/* 기본 스타일 */
 .signup-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f9f9f9;
-  padding: 20px;
+  background-color: #f9fafc;
 }
 
-/* 폼 박스 스타일 */
 .signup-box {
-  background: #fff;
-  padding: 40px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 400px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 24px;
   text-align: center;
 }
 
-/* 제목 스타일 */
 .signup-box h1 {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: bold;
-  margin-bottom: 20px;
-  color: #333;
+  margin-bottom: 16px;
+  color: #333333;
 }
 
-/* 입력 필드 스타일 */
-.signup-box input {
-  width: 100%;
-  padding: 12px 15px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
+.signup-box input[type="text"],
+.signup-box input[type="email"],
+.signup-box input[type="password"] {
+  width: 80%;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border: 1px solid #dddfe2;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #333333;
 }
 
-/* 입력 필드 포커스 스타일 */
 .signup-box input:focus {
-  border-color: #3498db;
   outline: none;
-  box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+  border-color: #007aff;
+  box-shadow: 0 0 4px rgba(0, 122, 255, 0.3);
 }
 
-/* 버튼 스타일 */
-.signup-box button {
+.agreement-section {
+  text-align: left;
+  margin: 12px 0;
+  font-size: 0.85rem;
+  color: #555555;
+}
+
+.agreement-section input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+button[type="submit"] {
   width: 100%;
-  padding: 12px 15px;
-  background-color: #3498db;
-  color: white;
+  padding: 12px 16px;
+  background-color: #007aff;
+  border: none;
+  border-radius: 8px;
   font-size: 1rem;
   font-weight: bold;
-  border: none;
-  border-radius: 5px;
+  color: #ffffff;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
-/* 버튼 호버 스타일 */
-.signup-box button:hover {
-  background-color: #2980b9;
-}
-/* 개인정보 보호 동의 섹션 스타일 */
-.agreement-section {
-  margin-top: 20px;
-  font-size: 14px;
+button[type="submit"]:hover {
+  background-color: #005ecb;
 }
 
-.agreement-section label {
-  color: #7f8c8d;
-}
-
-button:disabled {
-  background-color: #bdc3c7;
+button[type="submit"]:disabled {
+  background-color: #a7c9e8;
   cursor: not-allowed;
 }
 
-button {
-  background-color: #3498db;
-  color: white;
-  padding: 12px 30px;
-  font-size: 16px;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s;
+.error-message {
+  color: red;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
 }
 
-button:hover {
-  background-color: #2980b9;
+/* 반응형: 태블릿 이하 */
+@media (max-width: 768px) {
+  .signup-box {
+    padding: 20px;
+    max-width: 90%;
+  }
+
+  .signup-box h1 {
+    font-size: 1.4rem;
+  }
+
+  .signup-box input {
+    font-size: 0.9rem;
+    padding: 12px;
+  }
+
+  .agreement-section {
+    font-size: 0.8rem;
+  }
+
+  button[type="submit"] {
+    font-size: 0.95rem;
+  }
+}
+
+/* 반응형: 모바일 이하 */
+@media (max-width: 480px) {
+  .signup-box {
+    padding: 16px;
+    max-width: 95%;
+  }
+
+  .signup-box h1 {
+    font-size: 1.3rem;
+  }
+
+  .signup-box input {
+    font-size: 0.85rem;
+    padding: 10px;
+  }
+
+  .agreement-section {
+    font-size: 0.75rem;
+  }
+
+  button[type="submit"] {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
 }

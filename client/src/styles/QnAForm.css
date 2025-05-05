@@ -1,6 +1,5 @@
 /* QnAForm.css */
 
-/* 폼 전체 컨테이너 */
 .qna-form-container {
   background-color: #fff;
   padding: 30px;
@@ -8,7 +7,7 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 500px;
-  margin: 0 auto;
+  margin: 20px auto;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
 }
@@ -95,4 +94,37 @@
   background-color: #a7c9e8;
   color: #666;
   cursor: not-allowed;
+}
+/* 반응형 디자인 추가 */
+
+/* 태블릿 이하 화면 (max-width: 768px) */
+@media (max-width: 768px) {
+  .qna-form-container {
+    padding: 20px;
+    max-width: 90%;
+  }
+
+  .qna-textarea {
+    font-size: 15px;
+    padding: 10px;
+  }
+
+  .cancel-button,
+  .submit-button {
+    font-size: 15px;
+    padding: 10px;
+  }
+}
+
+/* 모바일 화면 (max-width: 480px) */
+@media (max-width: 480px) {
+  .qna-form-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cancel-button,
+  .submit-button {
+    width: 100%;
+  }
 }
