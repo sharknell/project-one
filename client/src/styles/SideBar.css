@@ -6,7 +6,7 @@
 }
 
 /* 사이드바 컨테이너 */
-.sidebar {
+.profile-sidebar {
   width: 260px;
   background-color: #ffffff;
   color: #2c3e50;
@@ -21,14 +21,14 @@
 }
 
 /* 메뉴 항목 목록 */
-.sidebar ul {
+.profile-sidebar ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
 /* 각 메뉴 항목 */
-.sidebar li {
+.profile-sidebar li {
   padding: 16px 24px;
   font-size: 15px;
   cursor: pointer;
@@ -38,7 +38,7 @@
 }
 
 /* 메뉴 항목이 활성화 되었을 때 */
-.sidebar li.active {
+.profile-sidebar li.active {
   background-color: #2980b9;
   color: #ffffff;
   font-weight: 600;
@@ -46,13 +46,13 @@
 }
 
 /* 메뉴 항목에 마우스를 올렸을 때 */
-.sidebar li:hover {
+.profile-sidebar li:hover {
   background-color: #ecf0f1;
   color: #2980b9;
 }
 
 /* 사이드바 제목 스타일 */
-.sidebar h2 {
+.profile-sidebar h2 {
   color: #34495e;
   text-align: center;
   font-size: 20px;
@@ -64,14 +64,14 @@
 
 /* 모바일 화면에서는 사이드바를 숨기기 */
 @media (max-width: 768px) {
-  .sidebar {
+  .profile-sidebar {
     width: 240px;
     padding: 15px;
   }
-  .sidebar li {
+  .profile-sidebar li {
     padding: 14px 20px;
   }
-  .sidebar h2 {
+  .profile-sidebar h2 {
     font-size: 18px;
   }
 }

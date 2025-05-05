@@ -17,6 +17,7 @@ import { AuthProvider, useAuth } from "./AuthContext";
 import { Navigate } from "react-router-dom";
 import AdminDashboard from "./pages/AdminDashboard";
 import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 // ProtectedRoute 컴포넌트
 function ProtectedRoute({ children, redirectTo, requireAdmin = false }) {
   const { isAuthenticated, isLoading, isAdmin } = useAuth();

@@ -2,7 +2,7 @@ import "../../styles/SideBar.css";
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="sidebar">
+    <div className="profile-sidebar">
       <ul>
         <li
           onClick={() => setActiveTab("basicInfo")}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../../styles/ProductList.css";
+import { toast } from "react-toastify";
 
 const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -114,6 +115,7 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
         if (data.message === "상품이 성공적으로 업데이트되었습니다.") {
           onEdit(selectedProduct);
           closeModal();
+          toast.success("상품이 성공적으로 수정되었습니다!");
         } else {
           alert("상품 업데이트에 실패했습니다.");
         }
@@ -121,6 +123,7 @@ const ProductList = ({ products, API_BASE_URL, onDelete, onEdit }) => {
       .catch((error) => {
         console.error("Error:", error);
         alert("상품 업데이트 중 오류가 발생했습니다.");
+        toast.error("상품 업데이트 중 오류가 발생했습니다.");
       });
   };
 
