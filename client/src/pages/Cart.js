@@ -196,6 +196,9 @@ function Cart() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
+      // 결제 전에 cartItems를 localStorage에 저장
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+
       await tossPayments.requestPayment("카드", {
         amount: data.amount,
         orderId: data.orderId,
