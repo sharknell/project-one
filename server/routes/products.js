@@ -29,32 +29,35 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// 카테고리별 상품 조회
 router.get("/category/:category", async (req, res) => {
   const { category } = req.params;
   try {
-    if (category === "all") {
-      const [results] = await dbPromise.query("SELECT * FROM products");
-      return res.json({ message: "전체 상품 목록 조회 성공", data: results });
+    let query = "SELECT * FROM products";
+    let queryParams = [];
+
+    if (category && category !== "all") {
+      query += " WHERE category = ?";
+      queryParams.push(category);
     }
 
-    const [results] = await dbPromise.query(
-      "SELECT * FROM products WHERE category = ?",
-      [category]
-    );
+    const [results] = await dbPromise.query(query, queryParams);
+
+    console.log("Server response:", results); // 반환되는 데이터 확인
 
     if (results.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "해당 카테고리의 상품이 없습니다." });
+      return res.json({
+        message: "해당 카테고리의 상품이 없습니다.",
+        data: [],
+      });
     }
 
-    res.json({ message: "상품 목록 조회 성공", data: results });
-  } catch (err) {
-    console.error("카테고리별 상품 조회 오류:", err);
-    return res
-      .status(500)
-      .json({ message: "카테고리 상품 조회에 실패했습니다." });
+    return res.json({
+      message: "상품 목록 조회 성공",
+      data: results,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "서버 오류 발생" });
   }
 });
 
@@ -172,7 +175,6 @@ router.get("/", async (req, res) => {
       subImages: imageMap[product.id] || [],
     }));
 
-    console.log("상품 목록 조회 성공:", productList);
     res.json({ message: "상품 목록 조회 성공", data: productList });
   } catch (err) {
     console.error("상품 목록 조회 오류:", err);

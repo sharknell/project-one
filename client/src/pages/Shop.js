@@ -78,6 +78,7 @@ function Shop() {
   };
 
   const hasMoreProducts = filteredProducts.length >= itemsPerPage * page;
+
   return (
     <div className="shop-container">
       <Typography variant="h4" className="category-title" align="center">
@@ -131,6 +132,7 @@ function Shop() {
             현재 판매 중인 상품이 없습니다.
           </Typography>
         )}
+
         {filteredProducts.map((product) => (
           <Grid item xs={12} sm={6} md={4} key={product.id}>
             <div className="product-card">

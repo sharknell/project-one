@@ -128,31 +128,34 @@ function ProductDetail() {
         <p>{product.tagline}</p>
       </div>
       <div className="product-detail-content">
-        <div className="product-detail-main-image">
-          {mainImage ? (
-            <img
-              src={`http://localhost:5001/uploads/productImages/${mainImage}`}
-              alt={product.name}
-            />
-          ) : (
-            <p>메인 이미지가 없습니다.</p>
-          )}
-        </div>
-
-        <div className="product-detail-thumbnails">
-          {subImages.length > 0 ? (
-            subImages.map((image, index) => (
+        <div className="product-detail-images">
+          <div className="product-detail-main-image">
+            {mainImage ? (
               <img
-                key={index}
-                src={`http://localhost:5001/uploads/productImages/${image}`}
-                alt={`${product.name} 서브 이미지 ${index + 1}`}
-                className="product-thumbnail"
-                onClick={() => handleThumbnailClick(image)} // 썸네일 클릭 시 메인 이미지 변경
+                src={`http://localhost:5001/uploads/productImages/${mainImage}`}
+                alt={product.name}
+                className="main-image"
               />
-            ))
-          ) : (
-            <p>서브 이미지가 없습니다.</p>
-          )}
+            ) : (
+              <p>메인 이미지가 없습니다.</p>
+            )}
+          </div>
+
+          <div className="product-detail-thumbnails">
+            {subImages.length > 0 ? (
+              subImages.map((image, index) => (
+                <img
+                  key={index}
+                  src={`http://localhost:5001/uploads/productImages/${image}`}
+                  alt={`${product.name} 서브 이미지 ${index + 1}`}
+                  className="product-thumbnail"
+                  onClick={() => handleThumbnailClick(image)} // 썸네일 클릭 시 메인 이미지 변경
+                />
+              ))
+            ) : (
+              <p>서브 이미지가 없습니다.</p>
+            )}
+          </div>
         </div>
 
         <div className="product-detail-info">
@@ -165,7 +168,7 @@ function ProductDetail() {
             <strong>카테고리:</strong> {product.category}
           </p>
           <p className="product-detail-size">
-            <strong>사이즈:</strong> {product.size + "ml" || "없음"}
+            <strong>사이즈:</strong> {product.size || "없음"}
           </p>
           <div className="product-detail-buttons">
             <button onClick={handleAddToCart}>장바구니 담기</button>

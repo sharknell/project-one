@@ -121,7 +121,9 @@ export const loadProducts = async (
   category,
   setProducts,
   setError,
-  setIsLoading
+  setIsLoading,
+  page,
+  itemsPerPage
 ) => {
   setIsLoading(true);
   setError(null);
@@ -133,9 +135,20 @@ export const loadProducts = async (
   }
 
   try {
-    const data = await fetchProductsByCategory(category);
+    const data = await fetchProductsByCategory(category, page, itemsPerPage);
+    console.log("Response from server:", data); // 서버 응답 확인
+
     if (data.message === "상품 목록 조회 성공" && Array.isArray(data.data)) {
-      setProducts(data.data);
+      if (data.data.length === 0) {
+        setError("해당 카테고리의 상품이 없습니다.");
+        setProducts([]); // 빈 배열 상태로 설정
+      } else {
+        setProducts(data.data);
+      }
+    } else if (data.message) {
+      // `data.message`가 존재하면 그 메시지를 표시
+      setError(data.message);
+      setProducts([]); // 빈 배열 상태로 설정
     } else {
       setError("서버에서 잘못된 데이터 형식을 반환했습니다.");
     }

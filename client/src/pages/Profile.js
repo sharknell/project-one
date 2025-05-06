@@ -11,6 +11,9 @@ import {
   deleteAddress,
 } from "../utils/api";
 import axios from "axios";
+
+import { useSearchParams } from "react-router-dom";
+
 import Sidebar from "../components/profile/SideBar";
 import BasicInfo from "../components/profile/BasicInfo";
 import AddressList from "../components/profile/AddressList";
@@ -39,7 +42,11 @@ const Profile = () => {
     email: "",
     phone: "",
   });
-
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam) setActiveTab(tabParam);
+  }, [searchParams]);
   const fetchProfileData = async () => {
     setLoading(true);
     try {
