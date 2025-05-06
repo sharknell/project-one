@@ -40,6 +40,35 @@ app.get("/shop/product/:productId/qna", async (req, res) => {
       .json({ success: false, message: "QnA 데이터를 가져오지 못했습니다." });
   }
 });
+// QnA 등록 API
+app.post("/qna/shop/product/:productId/qna", (req, res) => {
+  const { question, userId, userName, productId } = req.body;
+
+  // 필수값 체크
+  if (!question || !productId) {
+    return res.status(400).json({ message: "질문과 상품 ID는 필수입니다." });
+  }
+
+  const query = `
+    INSERT INTO qna (question, user_id, user_name, product_id)
+    VALUES (?, ?, ?, ?)
+  `;
+
+  db.query(
+    query,
+    [question, userId || null, userName || "익명", productId],
+    (err, result) => {
+      if (err) {
+        console.error("QnA 등록 오류:", err);
+        return res.status(500).json({ message: "QnA 등록에 실패했습니다." });
+      }
+
+      return res
+        .status(201)
+        .json({ message: "QnA가 등록되었습니다.", qnaId: result.insertId });
+    }
+  );
+});
 
 // 서버 시작 전에 DB 연결 확인
 async function checkDbConnection() {

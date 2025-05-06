@@ -1,9 +1,9 @@
 const jwt = require("jsonwebtoken");
 
 const authenticateUser = (req, res, next) => {
-  const token = req.headers["authorization"]?.split(" ")[1]; // Bearer token 확인
+  const token = req.header("Authorization")?.replace("Bearer ", "");
   if (!token) {
-    return res.status(403).json({ message: "Token is required" });
+    return res.status(403).json({ message: "토큰이 없습니다." });
   }
 
   try {

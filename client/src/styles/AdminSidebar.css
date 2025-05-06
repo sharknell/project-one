@@ -1,3 +1,4 @@
+/* 기본 사이드바 스타일 */
 .sidebar {
   background-color: #1e1e2f;
   color: white;
@@ -37,11 +38,13 @@
   .sidebar {
     width: 100%;
     min-height: auto;
+    padding: 0.5rem 0; /* 모바일에서는 padding을 줄여서 공간을 확보 */
+    display: flex;
   }
 
   .sidebar ul {
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: space-evenly; /* 메뉴 항목을 균등하게 배치 */
     gap: 0;
   }
 
@@ -52,6 +55,7 @@
     border-radius: 0;
     background-color: #1e1e2f;
     border-bottom: 2px solid transparent;
+    text-align: center;
   }
 
   .sidebar li.active {

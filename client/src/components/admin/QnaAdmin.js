@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 
-const QnaAdmin = ({ qna, onAnswerSubmit }) => {
+const QnaAdmin = ({ qna, onAnswerSubmit, onAnswerDelete }) => {
   console.log("QnaAdmin props:", qna);
 
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
   const [answer, setAnswer] = useState("");
+  const [editingAnswerId, setEditingAnswerId] = useState(null); // 수정 중인 답변의 id
 
   const handleAnswerChange = (e) => {
     setAnswer(e.target.value);
@@ -20,6 +21,17 @@ const QnaAdmin = ({ qna, onAnswerSubmit }) => {
 
     setAnswer(""); // 답변 초기화
     setSelectedQuestionId(null); // 질문 선택 초기화
+  };
+
+  const handleEditAnswer = (answerId, currentAnswer) => {
+    setEditingAnswerId(answerId); // 수정할 답변 id 설정
+    setAnswer(currentAnswer); // 기존 답변을 수정 폼에 로드
+  };
+
+  const handleDeleteAnswer = (answerId) => {
+    if (window.confirm("이 답변을 삭제하시겠습니까?")) {
+      onAnswerDelete(answerId); // 답변 삭제 처리
+    }
   };
 
   return (
@@ -53,7 +65,7 @@ const QnaAdmin = ({ qna, onAnswerSubmit }) => {
                   <div className="answer">
                     <strong>답변:</strong>{" "}
                     {item.answer ? (
-                      item.answer
+                      <span>{item.answer}</span>
                     ) : (
                       <span className="no-answer">답변 대기 중</span>
                     )}
@@ -61,7 +73,7 @@ const QnaAdmin = ({ qna, onAnswerSubmit }) => {
                 </div>
               </div>
 
-              {/* 답변 작성 영역 */}
+              {/* 답변 작성 또는 수정 영역 */}
               {selectedQuestionId === item.id && (
                 <div className="answer-form">
                   <textarea
@@ -77,6 +89,44 @@ const QnaAdmin = ({ qna, onAnswerSubmit }) => {
                       취소
                     </button>
                   </div>
+                </div>
+              )}
+
+              {/* 답변 수정 영역 */}
+              {editingAnswerId === item.id && (
+                <div className="answer-form">
+                  <textarea
+                    value={answer}
+                    onChange={handleAnswerChange}
+                    placeholder="답변을 수정하세요..."
+                  />
+                  <div>
+                    <button onClick={() => handleSubmitAnswer(item.id)}>
+                      수정 제출
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingAnswerId(null);
+                        setAnswer(""); // 수정 취소
+                      }}
+                    >
+                      취소
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* 답변 수정 및 삭제 버튼 */}
+              {item.answer && editingAnswerId !== item.id && (
+                <div>
+                  <button
+                    onClick={() => handleEditAnswer(item.id, item.answer)}
+                  >
+                    답변 수정
+                  </button>
+                  <button onClick={() => handleDeleteAnswer(item.id)}>
+                    답변 삭제
+                  </button>
                 </div>
               )}
 

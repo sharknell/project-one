@@ -34,12 +34,18 @@ const AdminDashboard = () => {
     detailedInfo: "",
   });
   const [products, setProducts] = useState([]);
+  const [editingMember, setEditingMember] = useState(null);
+  const [editedMemberInfo, setEditedMemberInfo] = useState({
+    username: "",
+    email: "",
+    // 필요한 다른 필드 추가
+  });
 
   const navigate = useNavigate();
   const API_BASE_URL =
     process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
 
-  // 데이터 가져오기 (fetchData)
+  // 데이터 가져오기 (fetchData)ㅋ
   const fetchData = useCallback(
     async (url, method = "GET", body = null) => {
       setLoading(true);
@@ -76,6 +82,80 @@ const AdminDashboard = () => {
       fetchProducts();
     }
   }, [isAuthenticated, isAdmin, fetchProducts]);
+
+  const handleUpdateMember = async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/auth/users/${editingMember}`, // 경로 수정
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+          body: JSON.stringify(editedMemberInfo),
+        }
+      );
+
+      if (response.ok) {
+        alert("회원 정보가 수정되었습니다.");
+        fetchQnaAndMembers(); // 수정 후 목록을 갱신합니다.
+        setEditingMember(null); // 수정 모드 종료
+      } else {
+        alert("회원 수정에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("회원 수정 오류:", error);
+      alert("회원 수정 중 오류가 발생했습니다.");
+    }
+  };
+
+  // 회원 정보 수정 처리
+  const handleEditMember = async (memberId, updatedInfo) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/user/${memberId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        body: JSON.stringify(updatedInfo),
+      });
+
+      if (response.ok) {
+        alert("회원 정보가 수정되었습니다.");
+        fetchQnaAndMembers(); // 수정 후 목록을 갱신합니다.
+      } else {
+        alert("회원 수정에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("회원 수정 오류:", error);
+      alert("회원 수정 중 오류가 발생했습니다.");
+    }
+  };
+
+  // 회원 삭제 처리
+  const handleDeleteMember = async (memberId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/users/${memberId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
+
+      if (response.ok) {
+        alert("회원이 삭제되었습니다.");
+        fetchQnaAndMembers(); // 삭제 후 목록을 갱신합니다.
+      } else {
+        alert("회원 삭제에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("회원 삭제 오류:", error);
+      alert("회원 삭제 중 오류가 발생했습니다.");
+    }
+  };
 
   // 상품 등록 처리
   const handleSubmit = async (product) => {
@@ -115,6 +195,31 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error("상품 등록 오류:", error);
       alert("상품 등록 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleDeleteAnswer = async (answerId) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/qna/qna/answer/${answerId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        alert("답변이 삭제되었습니다.");
+        fetchQnaAndMembers(); // 삭제 후 목록을 갱신합니다.
+      } else {
+        alert("답변 삭제에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("답변 삭제 오류:", error);
+      alert("답변 삭제 중 오류가 발생했습니다.");
     }
   };
 
@@ -265,10 +370,25 @@ const AdminDashboard = () => {
             </button>
           ))}
         </div>
-        <QnaAdmin qna={filteredQna} onAnswerSubmit={handleAnswerSubmit} />
+        <QnaAdmin
+          qna={filteredQna}
+          onAnswerSubmit={handleAnswerSubmit}
+          onAnswerDelete={handleDeleteAnswer} // <-- 여기서 onAnswerDelete 함수가 전달됩니다.
+        />
       </div>
     ),
-    members: <MemberList members={members} />,
+    members: (
+      <MemberList
+        members={members}
+        onDelete={handleDeleteMember}
+        onEdit={(memberId) => setEditingMember(memberId)} // This is correct
+        editingMember={editingMember}
+        editedMemberInfo={editedMemberInfo}
+        setEditedMemberInfo={setEditedMemberInfo}
+        onUpdate={handleUpdateMember}
+        setEditingMember={setEditingMember} // Make sure this is passed
+      />
+    ),
   };
 
   return (

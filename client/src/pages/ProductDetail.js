@@ -45,27 +45,20 @@ function ProductDetail() {
   };
 
   const handleQnASubmit = async (question) => {
-    if (question.trim() === "") {
-      alert("질문을 입력해주세요.");
-      return;
-    }
-
     try {
-      await axios.post(`http://localhost:5001/shop/product/${id}/qna`, {
-        question,
-        userName: userName || "익명",
-        productId: id,
-      });
-      alert(
-        `QnA가 등록되었습니다: ${question} (작성자: ${userName || "익명"})`
+      const token = localStorage.getItem("authToken"); // 인증 토큰 가져오기
+      await axios.post(
+        `http://localhost:5001/qna/shop/product/${id}/qna`,
+        { question, userName: userName || "익명", productId: id },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      setNewQuestion("");
-      setIsQnAModalOpen(false);
+      alert(`QnA가 등록되었습니다: ${question}`);
     } catch (err) {
       console.error("QnA 등록 실패:", err);
       alert("질문 등록에 실패했습니다. 다시 시도해주세요.");
     }
   };
+
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
       const confirmLogin = window.confirm(
@@ -81,26 +74,17 @@ function ProductDetail() {
           return;
         }
 
-        // 장바구니 아이템 조회
         const response = await axios.get(
           `http://localhost:5001/cart?userId=${userId}`
         );
         const cartItems = response.data;
-
-        // 콘솔 로그로 cartItems 확인
-        console.log("현재 장바구니 아이템들:", cartItems);
-
         const existingItem = cartItems.find((item) => item.product_id === id);
 
-        // 장바구니에 기존 항목이 있으면 수량 업데이트
         if (existingItem) {
           const updatedQuantity = existingItem.quantity + 1;
-          console.log("기존 아이템 수량 업데이트:", updatedQuantity);
-
           await axios.put(`http://localhost:5001/cart/${existingItem.id}`, {
             quantity: updatedQuantity,
           });
-
           alert("장바구니에 품목의 수량이 추가되었습니다.");
         } else {
           const quantity = 1;
@@ -118,13 +102,6 @@ function ProductDetail() {
 
           alert("장바구니에 추가되었습니다.");
         }
-
-        // 장바구니 데이터 로컬 스토리지에 저장
-        localStorage.setItem("cartItems", JSON.stringify(cartItems));
-        console.log(
-          "로컬 스토리지에 저장된 장바구니:",
-          localStorage.getItem("cartItems")
-        );
       } catch (err) {
         console.error("장바구니 추가 실패:", err);
         alert("장바구니에 추가하는 데 실패했습니다.");
