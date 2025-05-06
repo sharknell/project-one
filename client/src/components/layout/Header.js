@@ -24,20 +24,16 @@ function Header() {
 
   return (
     <header className="header">
-      {/* 상단바 */}
       <div className="header-top">
         <div className="header-container">
-          {/* 로고 */}
           <Link to="/" className="header-logo">
             PerfumeShop
           </Link>
 
-          {/* 모바일 메뉴 버튼 */}
           <button className="menu-toggle" onClick={toggleMenu}>
             ☰
           </button>
 
-          {/* 네비게이션 메뉴 */}
           <nav className={`header-nav ${isMenuOpen ? "active" : ""}`}>
             <Link to="/cart" className="header-nav-item" onClick={closeMenu}>
               장바구니
@@ -85,8 +81,6 @@ function Header() {
           </nav>
         </div>
       </div>
-
-      {/* 하단 바 (서비스와 연락처) */}
     </header>
   );
 }

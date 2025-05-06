@@ -275,6 +275,13 @@
 
 /* 더 작은 화면(모바일) 반응형 스타일 */
 @media (max-width: 480px) {
+  /* 기본 제품 상세 페이지 스타일 */
+  .product-detail-container {
+    width: 100%;
+    padding: 20px;
+    font-family: "Apple SD Gothic Neo", sans-serif;
+    color: #333;
+  }
   .product-detail-header h1 {
     font-size: 24px; /* 제목 크기 축소 */
   }
