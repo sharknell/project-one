@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { loginWithCredentials } from "../models/AuthModel";
-import "../styles/Login.css";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -10,15 +9,15 @@ function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from || "/"; // 로그인 후 돌아갈 경로, 없으면 홈으로
+  const from = location.state?.from || "/";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { token, userName } = await loginWithCredentials(email, password); // 사용자 이름을 포함한 응답 받음
+      const { token, userName } = await loginWithCredentials(email, password);
       alert("환영합니다!");
-      login(token, userName); // 로그인 후 사용자 이름도 전달
-      navigate(from, { replace: true }); // 로그인 후 이전 페이지로 리디렉션
+      login(token, userName);
+      navigate(from, { replace: true });
     } catch (error) {
       console.error("Login Error:", error);
       alert("계정 오류");
@@ -26,13 +25,20 @@ function Login() {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-box">
-        <h1 className="login-title">로그인</h1>
-        <p className="login-description">계정 정보를 입력해 주세요.</p>
-        <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <label htmlFor="email">이메일</label>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
+        <h1 className="text-2xl font-bold text-center mb-2">로그인</h1>
+        <p className="text-center text-gray-600 mb-6">
+          계정 정보를 입력해 주세요.
+        </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              이메일
+            </label>
             <input
               id="email"
               type="email"
@@ -40,10 +46,16 @@ function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <div className="input-group">
-            <label htmlFor="password">비밀번호</label>
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              비밀번호
+            </label>
             <input
               id="password"
               type="password"
@@ -51,14 +63,24 @@ function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <button type="submit" className="login-button">
+          <button
+            type="submit"
+            className="w-full py-2 bg-blue-500 text-white rounded-md font-semibold hover:bg-blue-600"
+          >
             로그인
           </button>
         </form>
-        <p className="signup-prompt">
-          계정이 없으신가요? <a href="/signup">회원가입</a>
+        <p className="mt-4 text-center text-sm text-gray-600">
+          계정이 없으신가요?{" "}
+          <a
+            href="/signup"
+            className="text-blue-500 hover:underline font-medium"
+          >
+            회원가입
+          </a>
         </p>
       </div>
     </div>
