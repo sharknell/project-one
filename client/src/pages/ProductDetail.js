@@ -4,7 +4,6 @@ import { useAuth } from "../AuthContext";
 import { useProductController } from "../controllers/ProductController";
 import axios from "axios";
 import QnAForm from "../components/QnAForm";
-import "../styles/ProductDetail.css";
 
 function ProductDetail() {
   const { id } = useParams();
@@ -12,22 +11,20 @@ function ProductDetail() {
   const { isAuthenticated, userId, userName } = useAuth();
   const [isQnAModalOpen, setIsQnAModalOpen] = useState(false);
   const [newQuestion, setNewQuestion] = useState("");
-  const [mainImage, setMainImage] = useState(""); // 메인 이미지 상태 관리
-  const [subImages, setSubImages] = useState([]); // 서브 이미지 상태 관리
+  const [mainImage, setMainImage] = useState("");
+  const [subImages, setSubImages] = useState([]);
   const { product, isLoading, error, openDropdown, toggleDropdown } =
     useProductController(id);
 
   useEffect(() => {
     if (product) {
-      setMainImage(product.image_url); // 첫 번째 이미지를 메인 이미지로 설정
-      setSubImages(product.images || []); // 나머지 이미지를 서브 이미지로 설정
+      setMainImage(product.image_url);
+      setSubImages(product.images || []);
     }
   }, [product]);
 
   const handleThumbnailClick = (image) => {
-    // 클릭한 썸네일을 메인 이미지로 설정
     setMainImage(image);
-    // 이전 메인 이미지는 서브 이미지로 추가
     setSubImages([mainImage, ...subImages.filter((img) => img !== image)]);
   };
 
@@ -46,7 +43,7 @@ function ProductDetail() {
 
   const handleQnASubmit = async (question) => {
     try {
-      const token = localStorage.getItem("authToken"); // 인증 토큰 가져오기
+      const token = localStorage.getItem("authToken");
       await axios.post(
         `http://localhost:5001/qna/shop/product/${id}/qna`,
         { question, userName: userName || "익명", productId: id },
@@ -73,7 +70,6 @@ function ProductDetail() {
           alert("사용자 정보가 유효하지 않습니다.");
           return;
         }
-
         const response = await axios.get(
           `http://localhost:5001/cart?userId=${userId}`
         );
@@ -90,7 +86,6 @@ function ProductDetail() {
           const quantity = 1;
           const productName = product.name;
           const productSize = product.size || "없음";
-
           await axios.post("http://localhost:5001/cart/add", {
             productId: id,
             quantity,
@@ -99,7 +94,6 @@ function ProductDetail() {
             productName,
             productSize,
           });
-
           alert("장바구니에 추가되었습니다.");
         }
       } catch (err) {
@@ -109,82 +103,100 @@ function ProductDetail() {
     }
   };
 
-  if (isLoading) return <div>로딩 중...</div>;
-  if (error) return <div>{error}</div>;
-  if (!product) return <div>제품 정보가 없습니다.</div>;
+  if (isLoading) return <div className="text-center py-10">로딩 중...</div>;
+  if (error) return <div className="text-center text-red-500">{error}</div>;
+  if (!product) return <div className="text-center py-10">제품 정보가 없습니다.</div>;
 
   return (
-    <div className="product-detail-container">
-      <div className="product-detail-header">
-        <h1>{product.name}</h1>
-        <p>{product.tagline}</p>
+    <div className="max-w-6xl mx-auto px-4 py-10 space-y-10">
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold">{product.name}</h1>
+        <p className="text-gray-600">{product.tagline}</p>
       </div>
-      <div className="product-detail-content">
-        <div className="product-detail-images">
-          <div className="product-detail-main-image">
+
+      {/* Images and Info */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Images */}
+        <div className="space-y-4">
+          <div className="border rounded-lg overflow-hidden">
             {mainImage ? (
               <img
                 src={`http://localhost:5001/uploads/productImages/${mainImage}`}
                 alt={product.name}
-                className="main-image"
+                className="w-full h-96 object-cover"
               />
             ) : (
-              <p>메인 이미지가 없습니다.</p>
+              <div className="flex items-center justify-center h-96 text-gray-400">
+                메인 이미지가 없습니다.
+              </div>
             )}
           </div>
-
-          <div className="product-detail-thumbnails">
-            {subImages.length > 0 ? (
-              subImages.map((image, index) => (
+          {subImages.length > 0 && (
+            <div className="grid grid-cols-4 gap-2">
+              {subImages.map((img, idx) => (
                 <img
-                  key={index}
-                  src={`http://localhost:5001/uploads/productImages/${image}`}
-                  alt={`${product.name} 서브 이미지 ${index + 1}`}
-                  className="product-thumbnail"
-                  onClick={() => handleThumbnailClick(image)} // 썸네일 클릭 시 메인 이미지 변경
+                  key={idx}
+                  src={`http://localhost:5001/uploads/productImages/${img}`}
+                  alt={`서브 이미지 ${idx + 1}`}
+                  className="h-24 w-full object-cover cursor-pointer rounded border hover:scale-105 transition"
+                  onClick={() => handleThumbnailClick(img)}
                 />
-              ))
-            ) : (
-              <p>서브 이미지가 없습니다.</p>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        <div className="product-detail-info">
-          <h1>{product.name}</h1>
+        {/* Info */}
+        <div className="space-y-4">
+          <h2 className="text-2xl font-semibold">{product.name}</h2>
           <hr />
-          <p className="product-detail-price">
+          <p className="text-xl font-bold text-blue-600">
             ₩{product.price.toLocaleString()}
           </p>
-          <p className="product-detail-category">
-            <strong>카테고리:</strong> {product.category}
+          <p>
+            <span className="font-medium">카테고리:</span> {product.category}
           </p>
-          <p className="product-detail-size">
-            <strong>사이즈:</strong> {product.size || "없음"}
+          <p>
+            <span className="font-medium">사이즈:</span>{" "}
+            {product.size || "없음"}
           </p>
-          <div className="product-detail-buttons">
-            <button onClick={handleAddToCart}>장바구니 담기</button>
+          <div className="space-y-2">
+            <button
+              onClick={handleAddToCart}
+              className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+            >
+              장바구니 담기
+            </button>
+            <button
+              onClick={handleQnAClick}
+              className="w-full py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
+            >
+              QnA 등록하기
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="product-detail-extra-info">
-        <h2>제품 디테일 정보</h2>
-        {["설명", "상품 필수 정보", "배송과 반품"].map((title, index) => (
-          <div className="dropdown" key={index}>
+      {/* 상세정보 */}
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold">제품 상세 정보</h3>
+        {["설명", "상품 필수 정보", "배송과 반품"].map((title, idx) => (
+          <div key={idx} className="border-b">
             <button
-              className="dropdown-toggle"
-              onClick={() => toggleDropdown(index)}
+              onClick={() => toggleDropdown(idx)}
+              className="flex justify-between w-full py-3 text-left font-medium"
             >
               {title}
+              <span>{openDropdown === idx ? "▲" : "▼"}</span>
             </button>
-            {openDropdown === index && (
-              <div className="dropdown-content">
-                {index === 0 ? (
-                  <div>
-                    <h5>{product.name}</h5>
+            {openDropdown === idx && (
+              <div className="py-2 text-gray-700 text-sm">
+                {idx === 0 ? (
+                  <>
+                    <h4 className="font-semibold">{product.name}</h4>
                     <p>{product.description}</p>
-                  </div>
+                  </>
                 ) : (
                   <p>내용이 준비 중입니다.</p>
                 )}
@@ -194,20 +206,15 @@ function ProductDetail() {
         ))}
       </div>
 
-      <div className="product-detail-qna">
-        <button onClick={handleQnAClick} className="qna-register-button">
-          QnA 등록하기
-        </button>
-      </div>
-
+      {/* QnA Modal */}
       {isQnAModalOpen && (
-        <div className="qna-modal-overlay">
-          <div className="qna-modal">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-lg p-6 rounded shadow">
             <button
-              className="close-modal-button"
               onClick={() => setIsQnAModalOpen(false)}
+              className="ml-auto mb-4 block text-gray-500 hover:text-gray-700"
             >
-              X
+              ✕
             </button>
             <QnAForm
               onSubmit={handleQnASubmit}
